@@ -68,6 +68,12 @@ td{padding:10px;border-bottom:1px solid #EEECF6;vertical-align:middle}
 details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff}summary{cursor:pointer;min-height:32px;display:flex;align-items:center;font-weight:500}
 .checks{display:flex;flex-wrap:wrap;gap:6px 16px}.checks label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
 .pin{background:#FFF8E1}
+.cal{min-width:760px}.calh,.calw{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.calh{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px}.calw{margin-bottom:6px}
+.cell{min-height:110px;border:1px solid #E3E0F2;border-radius:8px;padding:6px;background:#fff;font-size:12px}.cell.vacia{background:var(--bg);border-style:dashed}.cell.hoy{border:2px solid var(--acc)}.cell.fest{background:#F3F2F8}
+.cell .n{font-weight:700;font-size:13px;margin-bottom:4px}
+.evc{display:block;border-radius:5px;padding:3px 5px;margin-top:3px;line-height:1.25;color:#fff;font-weight:500}.evc:hover{text-decoration:none;filter:brightness(1.12)}
+.evf{display:block;border-radius:5px;padding:3px 5px;margin-top:3px;background:#ECEBF2;color:#3A3752;font-style:italic}
+.leyenda{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;margin-bottom:14px}.leyenda span{padding:4px 10px;border-radius:5px;color:#fff;font-weight:500}
 .loading{padding:60px 20px;text-align:center;color:var(--ink2)}
 </style>
 </head>
@@ -79,7 +85,7 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbwQsXDwxd6g0mUWqQoMNzAz-1oP4qZaqDP8HWIl_-gz7SvTxZ0u3QrVYB7THE3i7HHQ/exec';
 
 /* ---------- estado ---------- */
-const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '' };
+const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '', mesCal: '' };
 try { S.token = sessionStorage.getItem('ec_token') || ''; } catch (e) { S.token = ''; }
 
 /* ---------- utilidades ---------- */
@@ -91,7 +97,9 @@ const ETQ = {
   'Requerimientos comunicacion': 'Requerimientos comunicación', 'Cafe y agua': 'Café y agua',
   'Envio de requerimientos y seguridad': 'Envío de requerimientos y seguridad', 'Condicion': 'Condición', 'Observacion': 'Observación',
   'Coordinacion': 'Coordinación', 'No alcanzo el punto de equilibrio': 'No alcanzó el punto de equilibrio', 'Sin negociacion': 'Sin negociación',
-  'Equipo de Educacion continua': 'Equipo de Educación continua', 'Asistente de Extension': 'Asistente de Extensión'
+  'Equipo de Educacion continua': 'Equipo de Educación continua', 'Asistente de Extension': 'Asistente de Extensión',
+  'Ano Nuevo': 'Año Nuevo', 'San Jose': 'San José', 'Dia del Trabajo': 'Día del Trabajo', 'Ascension del Senor': 'Ascensión del Señor', 'Sagrado Corazon': 'Sagrado Corazón',
+  'Batalla de Boyaca': 'Batalla de Boyacá', 'Asuncion de la Virgen': 'Asunción de la Virgen', 'Dia de la Raza': 'Día de la Raza', 'Inmaculada Concepcion': 'Inmaculada Concepción'
 };
 const t = (x) => ETQ[x] || x;
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -141,7 +149,7 @@ function cerrarLocal() {
 
 /* ---------- vistas ---------- */
 function shell(activo, cuerpo) {
-  const tabs = [['inicio', 'Inicio'], ['mis', 'Mis ofertas'], ['nueva', 'Nueva oferta']];
+  const tabs = [['inicio', 'Inicio'], ['mis', 'Mis ofertas'], ['calendario', 'Calendario'], ['nueva', 'Nueva oferta']];
   const fl = S.flash ? '<div class="flash ' + S.flash.tipo + '" role="status">' + esc(S.flash.msg) + '</div>' : '';
   return '<header class="top"><div class="brand"><span class="dot"></span><span>Extensión FCS · <b>Educación continua</b></span></div><nav class="nav">' +
     tabs.map((x) => '<a class="tab' + (x[0] === activo ? ' on' : '') + '" href="#/' + x[0] + '">' + x[1] + '</a>').join('') +
@@ -214,6 +222,43 @@ function vistaMis() {
     '<section class="card"><h2>Otras ofertas del equipo</h2><p class="note">Si falta alguien en una oferta, puedes unirte como apoyo con un clic.</p>' +
     lista(otras, (o) => '<button class="btn" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="1">Unirme como apoyo</button>') + '</section></div>';
   app.innerHTML = shell('mis', cuerpo);
+}
+
+/* ----- Calendario ----- */
+const MESES_L = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const COLORES = { miguel: '#4B44A3', andres: '#B0286A', jacobo: '#0F766E', maribel: '#1D6FB8', elisa: '#5A5870' };
+const colorDe = (id) => COLORES[id] || '#5A5870';
+function vistaCalendario() {
+  const hoy = S.inicio.hoy;
+  if (!/^\d{4}-\d{2}$/.test(S.mesCal)) S.mesCal = hoy.slice(0, 7);
+  const anio = Number(S.mesCal.slice(0, 4)); const mes = Number(S.mesCal.slice(5, 7));
+  const dias = new Date(Date.UTC(anio, mes, 0)).getUTCDate();
+  const offset = (new Date(Date.UTC(anio, mes - 1, 1)).getUTCDay() + 6) % 7;
+  const ev = {}; const lista = [];
+  S.inicio.ofertas.filter((o) => o.estado !== 'Cancelado').forEach((o) => {
+    [['Inicio', o.fecha_inicio], ['Fin', o.fecha_fin]].forEach((p) => {
+      if (p[1] && p[1].slice(0, 7) === S.mesCal) { const d = Number(p[1].slice(8, 10)); (ev[d] = ev[d] || []).push({ tipo: p[0], o }); lista.push({ d, tipo: p[0], o }); }
+    });
+  });
+  const fest = {}; (S.inicio.festivos || []).forEach((f) => { if (f.fecha && f.fecha.slice(0, 7) === S.mesCal) fest[Number(f.fecha.slice(8, 10))] = t(f.nombre); });
+  const celdas = [];
+  for (let i = 0; i < offset; i++) celdas.push('<div class="cell vacia"></div>');
+  for (let d = 1; d <= dias; d++) {
+    const iso = S.mesCal + '-' + (d < 10 ? '0' : '') + d;
+    const evs = (ev[d] || []).map((e) => '<a class="evc" style="background:' + colorDe(e.o.responsable) + '" href="#/oferta/' + esc(e.o.id) + '" title="' + esc(e.o.nombre) + ' · ' + esc(primerNombre(e.o.responsable)) + '">' + esc(primerNombre(e.o.responsable).charAt(0)) + ' · ' + e.tipo + ' · ' + esc(e.o.nombre) + '</a>').join('');
+    celdas.push('<div class="cell' + (iso === hoy ? ' hoy' : '') + (fest[d] ? ' fest' : '') + '"><div class="n">' + d + (iso === hoy ? ' · Hoy' : '') + '</div>' + (fest[d] ? '<span class="evf">' + esc(fest[d]) + '</span>' : '') + evs + '</div>');
+  }
+  while (celdas.length % 7) celdas.push('<div class="cell vacia"></div>');
+  let semanas = ''; for (let i = 0; i < celdas.length; i += 7) semanas += '<div class="calw">' + celdas.slice(i, i + 7).join('') + '</div>';
+  const quienes = S.cat.personas.map((p) => '<span style="background:' + colorDe(p.id) + '">' + esc(p.nombre.split(' ')[0]) + '</span>').join('') + '<span style="background:#ECEBF2;color:#3A3752;font-style:italic">Festivo</span>';
+  lista.sort((a, b) => a.d - b.d);
+  const sinFecha = S.inicio.ofertas.filter((o) => !o.fecha_inicio && o.estado !== 'Cancelado');
+  const cuerpo = '<h1>Calendario</h1><p class="sub">Inicios y finales de todas las ofertas. El color indica quién es el responsable, y la inicial del nombre aparece en cada marca. Toca una marca para abrir la oferta.</p>' +
+    '<section class="card"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px"><button class="btn sec" data-act="mes" data-d="-1" aria-label="Mes anterior">←</button><h2 style="margin:0 8px;min-width:190px;text-align:center">' + MESES_L[mes - 1] + ' ' + anio + '</h2><button class="btn sec" data-act="mes" data-d="1" aria-label="Mes siguiente">→</button><button class="btn sec" data-act="mes" data-d="0">Hoy</button></div>' +
+    '<div class="leyenda">' + quienes + '</div><div class="scroll"><div class="cal"><div class="calh"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>' + semanas + '</div></div></section>' +
+    '<div class="two" style="margin-top:16px"><section class="card"><h2>Este mes</h2>' + (lista.length ? lista.map((e) => '<div class="row"><b>' + e.d + ' de ' + MESES_L[mes - 1] + '</b> · ' + e.tipo + ' · <a href="#/oferta/' + esc(e.o.id) + '">' + esc(e.o.nombre) + '</a><small>Responsable: ' + esc(nombrePersona(e.o.responsable)) + '</small></div>').join('') : '<div class="row"><small>No hay inicios ni finales este mes.</small></div>') + '</section>' +
+    '<section class="card"><h2>Ofertas sin fecha de inicio</h2>' + (sinFecha.length ? sinFecha.map((o) => '<div class="row"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>No aparecen en el calendario hasta que tengan fecha.</small></div>').join('') : '<div class="row"><small>Todas las ofertas tienen fecha.</small></div>') + '</section></div>';
+  app.innerHTML = shell('calendario', cuerpo);
 }
 
 /* ----- Nueva oferta ----- */
@@ -333,7 +378,7 @@ async function ruta() {
   cargando();
   try {
     await asegurarBase();
-    if (que === 'inicio' || que === 'mis') { S.inicio = await api('inicio'); que === 'inicio' ? vistaInicio() : vistaMis(); }
+    if (que === 'inicio' || que === 'mis' || que === 'calendario') { S.inicio = await api('inicio'); que === 'inicio' ? vistaInicio() : que === 'mis' ? vistaMis() : vistaCalendario(); }
     else if (que === 'nueva') vistaNueva();
     else if (que === 'oferta' && h[1]) {
       if (S.fichaId !== h[1]) { S.tab = 'datos'; }
@@ -397,6 +442,12 @@ app.addEventListener('click', async (ev) => {
   if (a === 'salir') { try { await api('salir'); } catch (e) { /* ya sin sesión */ } cerrarLocal(); vistaLogin(); }
   else if (a === 'reintentar') { if (S.reintento) S.reintento(); }
   else if (a === 'reintentarLogin') { vistaLogin(); }
+  else if (a === 'mes') {
+    const d = Number(b.dataset.d);
+    if (d === 0) S.mesCal = S.inicio.hoy.slice(0, 7);
+    else { let y = Number(S.mesCal.slice(0, 4)); let m = Number(S.mesCal.slice(5, 7)) + d; if (m < 1) { m = 12; y -= 1; } if (m > 12) { m = 1; y += 1; } S.mesCal = y + '-' + (m < 10 ? '0' : '') + m; }
+    vistaCalendario();
+  }
   else if (a === 'ftipo') { S.filtroTipo = b.dataset.v; vistaInicio(); }
   else if (a === 'falerta') { S.soloAlerta = !S.soloAlerta; vistaInicio(); }
   else if (a === 'apoyar') { try { await api('apoyar', { id: b.dataset.id, unirse: b.dataset.u === '1' }); flash('ok', b.dataset.u === '1' ? 'Ahora apoyas esta oferta.' : 'Dejaste de apoyar esta oferta.'); } catch (e) { flash('err', e.message); } ruta(); }
