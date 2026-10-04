@@ -1,9 +1,430 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><title>Educación continua · FCS</title></head>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Educación continua · FCS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1F1D2B;--ink2:#4A4766;--line:#DAD7EC;--bg:#F6F5FB;--acc:#4B44A3;--acc2:#7F77DD;--accsoft:#EDEBFA}
+*{box-sizing:border-box}
+body{margin:0;font-family:'DM Sans',system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+button,input,select,textarea{font:inherit}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 28px;padding:10px 28px;background:#fff;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-size:15px}
+.dot{width:12px;height:12px;border-radius:3px;background:var(--acc2);display:inline-block}
+.nav{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.tab{padding:0 14px;border-radius:8px;font-size:15px;color:#3A3752;min-height:44px;display:flex;align-items:center}
+.tab:hover{text-decoration:none;background:#F3F2FA}
+.tab.on{background:var(--accsoft);color:#3F3890;font-weight:700}
+.who{font-size:14px;color:#3A3752;display:flex;align-items:center;gap:12px}
+.wrap{max-width:1296px;margin:0 auto;padding:24px 28px 56px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 8px}
+.sub{color:var(--ink2);font-size:14px;margin:0 0 18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:16px}
+.two{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}.two>*{flex:1 1 380px;min-width:0}
+.pill{display:inline-flex;align-items:center;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.v{background:#E3F4EC;color:#175F42}.a{background:#FFD166;color:#1F1D2B}.r{background:#FDE7E5;color:#A3201A}.g{background:#ECEBF2;color:#3A3752}.p{background:var(--accsoft);color:#3F3890}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{border:1px solid #B9B4E4;background:#fff;color:#3F3890;border-radius:999px;padding:0 16px;min-height:44px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:8px;background:var(--acc);color:#fff;font-weight:700;font-size:14px;border:1px solid var(--acc);cursor:pointer}
+.btn:hover{text-decoration:none}.btn.sec{background:#fff;color:#3F3890;border-color:#B9B4E4}.btn:disabled{opacity:.55;cursor:not-allowed}
+label{font-size:13px;color:var(--ink2);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;min-height:44px;font-size:14px;padding:0 10px;border:1px solid #B9B4E4;border-radius:8px;background:#fff;color:var(--ink)}
+textarea{min-height:76px;padding:10px}
+input[type=checkbox]{width:auto;min-height:0}
+.f{margin-bottom:12px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 18px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12px;color:var(--ink2);padding:8px 10px;border-bottom:1px solid var(--line);font-weight:700}
+td{padding:10px;border-bottom:1px solid #EEECF6;vertical-align:middle}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.row{padding:10px 0;border-top:1px solid #EEECF6;font-size:14px}.row small,.sm{display:block;color:var(--ink2);font-size:13px;margin-top:2px}
+.note{font-size:13px;color:var(--ink2);margin:0 0 10px}
+.big{font-size:38px;font-weight:700;line-height:1;color:#3F3890}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--line);margin:18px 0 16px}
+.t{background:none;border:0;padding:0 16px;font-weight:500;color:#3A3752;min-height:44px;cursor:pointer;border-bottom:3px solid transparent}
+.t.on{color:#3F3890;font-weight:700;border-bottom-color:var(--acc2)}
+.steps{display:flex;flex-wrap:wrap;gap:8px}
+.step{flex:1 1 140px;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff;font-size:13px;color:var(--ink2)}
+.step b{display:block;font-size:14px;margin-top:2px;color:var(--ink)}
+.step.done{background:var(--accsoft)}.step.cur{border:2px solid var(--acc)}
+.bar{height:10px;border-radius:6px;background:#E6E3F5;overflow:hidden;margin:10px 0 14px}.bar i{display:block;height:100%;background:var(--acc)}
+.flash{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:14px;font-weight:500}
+.flash.ok{background:#E3F4EC;color:#175F42}.flash.err{background:#FDE7E5;color:#A3201A}
+.rowc{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,2fr) minmax(0,2.3fr) minmax(0,.7fr);gap:10px;align-items:center;padding:3px 10px;border-bottom:1px solid #EEECF6;font-size:14px;min-width:820px}
+.rowc.h{font-size:12px;font-weight:700;color:var(--ink2)}.rowc.maribel{background:#F3F2F8}
+.obs{min-height:36px;font-size:13px}
+.opts{display:inline-flex;border:1px solid #B9B4E4;border-radius:8px;overflow:hidden}
+.opts button{border:0;background:#fff;padding:0 12px;min-height:36px;font-size:13px;cursor:pointer;color:#3A3752}
+.opts button.c{background:#175F42;color:#fff;font-weight:700}.opts button.p{background:#FFB020;color:#1F1D2B;font-weight:700}.opts button.n{background:#3A3752;color:#fff;font-weight:700}
+.mv{display:inline-flex;gap:4px}.mv button{min-height:36px;min-width:36px;border:1px solid #B9B4E4;background:#fff;border-radius:8px;cursor:pointer;color:#3F3890}
+.login{max-width:420px;margin:12vh auto 0;padding:0 20px}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff}summary{cursor:pointer;min-height:32px;display:flex;align-items:center;font-weight:500}
+.checks{display:flex;flex-wrap:wrap;gap:6px 16px}.checks label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
+.pin{background:#FFF8E1}
+.loading{padding:60px 20px;text-align:center;color:var(--ink2)}
+</style>
+</head>
 <body>
 <!-- PORTAL: EDUCACION CONTINUA -->
-<h1>Educación continua · FCS</h1>
-<p>Portal en construcción.</p>
+<div id="app"></div>
+<script>
+'use strict';
+const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbwQsXDwxd6g0mUWqQoMNzAz-1oP4qZaqDP8HWIl_-gz7SvTxZ0u3QrVYB7THE3i7HHQ/exec';
+
+/* ---------- estado ---------- */
+const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '' };
+try { S.token = sessionStorage.getItem('ec_token') || ''; } catch (e) { S.token = ''; }
+
+/* ---------- utilidades ---------- */
+const app = document.getElementById('app');
+const esc = (s) => String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const ETQ = {
+  'Ideacion': 'Ideación', 'Negociacion': 'Negociación', 'En diseno': 'En diseño', 'Ejecucion': 'Ejecución', 'En ejecucion': 'En ejecución',
+  'Programacion': 'Programación', 'Piezas / Difusion': 'Piezas / Difusión', 'Informe de liquidacion': 'Informe de liquidación',
+  'Requerimientos comunicacion': 'Requerimientos comunicación', 'Cafe y agua': 'Café y agua',
+  'Envio de requerimientos y seguridad': 'Envío de requerimientos y seguridad', 'Condicion': 'Condición', 'Observacion': 'Observación',
+  'Coordinacion': 'Coordinación', 'No alcanzo el punto de equilibrio': 'No alcanzó el punto de equilibrio', 'Sin negociacion': 'Sin negociación',
+  'Equipo de Educacion continua': 'Equipo de Educación continua', 'Asistente de Extension': 'Asistente de Extensión'
+};
+const t = (x) => ETQ[x] || x;
+const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+function fecha(f) {
+  if (!f || !/^\d{4}-\d{2}-\d{2}/.test(f)) return '—';
+  const p = f.slice(0, 10).split('-');
+  return Number(p[2]) + ' ' + MESES[Number(p[1]) - 1] + ' ' + p[0];
+}
+function fechaHora(f) {
+  if (!f) return '';
+  return fecha(f) + (f.length > 10 ? ' · ' + f.slice(11, 16) : '');
+}
+const SEM = { verde: ['v', 'Verde'], amarillo: ['a', 'Amarillo'], rojo: ['r', 'Rojo'], gris: ['g', 'Cerrada'], sin_fecha: ['g', 'Sin fecha'] };
+const semPill = (c) => { const x = SEM[c] || ['g', '—']; return '<span class="pill ' + x[0] + '">' + x[1] + '</span>'; };
+const pill = (cls, txt) => '<span class="pill ' + cls + '">' + esc(txt) + '</span>';
+const nombrePersona = (id) => { const p = S.cat && S.cat.personas.filter((x) => x.id === id)[0]; return p ? p.nombre : id; };
+const primerNombre = (id) => nombrePersona(id).split(' ')[0];
+const opcion = (v, txt, sel) => '<option value="' + esc(v) + '"' + (sel ? ' selected' : '') + '>' + esc(txt) + '</option>';
+const campo = (id, etiqueta, valor, tipo, extra) => '<div class="f"><label for="' + id + '">' + esc(etiqueta) + '</label><input id="' + id + '" type="' + (tipo || 'text') + '" value="' + esc(valor) + '" ' + (extra || '') + '></div>';
+const val = (id) => { const e = document.getElementById(id); return e ? e.value : ''; };
+const flash = (tipo, msg) => { S.flash = { tipo, msg }; };
+
+/* ---------- servidor ---------- */
+async function api(accion, datos) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 30000);
+  try {
+    const r = await fetch(URL_SERVIDOR, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ accion, token: S.token }, datos || {})), signal: ctl.signal });
+    const j = await r.json();
+    if (!j.ok) {
+      if (j.codigo === 'SESION') cerrarLocal();
+      const err = new Error(j.error || 'Ocurrió un error.');
+      err.codigo = j.codigo;
+      throw err;
+    }
+    return j;
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('El servidor tardó demasiado en responder. Intenta de nuevo.');
+    if (e instanceof TypeError) throw new Error('No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.');
+    throw e;
+  } finally { clearTimeout(timer); }
+}
+function cerrarLocal() {
+  S.token = ''; S.persona = null; S.cat = null; S.inicio = null; S.ficha = null;
+  try { sessionStorage.removeItem('ec_token'); } catch (e) { /* sin almacenamiento */ }
+}
+
+/* ---------- vistas ---------- */
+function shell(activo, cuerpo) {
+  const tabs = [['inicio', 'Inicio'], ['mis', 'Mis ofertas'], ['nueva', 'Nueva oferta']];
+  const fl = S.flash ? '<div class="flash ' + S.flash.tipo + '" role="status">' + esc(S.flash.msg) + '</div>' : '';
+  return '<header class="top"><div class="brand"><span class="dot"></span><span>Extensión FCS · <b>Educación continua</b></span></div><nav class="nav">' +
+    tabs.map((x) => '<a class="tab' + (x[0] === activo ? ' on' : '') + '" href="#/' + x[0] + '">' + x[1] + '</a>').join('') +
+    '</nav><div class="who"><span>' + esc(S.persona ? S.persona.nombre : '') + '</span><button class="btn sec" data-act="salir">Salir</button></div></header>' +
+    '<main class="wrap">' + fl + cuerpo + '</main>';
+}
+async function vistaLogin(msg) {
+  const marco = (cuerpo) => '<div class="login"><div class="card"><div class="brand" style="margin-bottom:14px"><span class="dot"></span><span>Extensión FCS · <b>Educación continua</b></span></div><h1 style="font-size:22px">Ingresar</h1>' + cuerpo + '</div></div>';
+  if (!S.usuarios) {
+    cargando();
+    try { S.usuarios = (await api('usuarios')).usuarios; }
+    catch (e) { app.innerHTML = marco('<div class="flash err" role="alert">' + esc(e.message) + '</div><button class="btn" data-act="reintentarLogin">Reintentar</button>'); return; }
+  }
+  app.innerHTML = marco('<p class="sub">Elige tu nombre y escribe tu clave.</p>' +
+    (msg ? '<div class="flash err" role="alert">' + esc(msg) + '</div>' : '') +
+    '<form id="fLogin"><div class="f"><label for="lu">Nombre</label><select id="lu"><option value="">Elige tu nombre…</option>' +
+    S.usuarios.map((u) => opcion(u.id, u.nombre, u.id === S.ultimoUsuario)).join('') + '</select></div>' +
+    campo('lc', 'Clave', '', 'password', 'autocomplete="current-password"') + '<button class="btn" type="submit" id="bLogin">Ingresar</button></form>');
+  const foco = document.getElementById(S.ultimoUsuario ? 'lc' : 'lu'); if (foco) foco.focus();
+}
+function cargando(txt) { app.innerHTML = '<div class="loading">' + esc(txt || 'Cargando…') + '</div>'; }
+function vistaError(msg, reintento) {
+  app.innerHTML = shell('', '<div class="card"><h2>No se pudo cargar</h2><p class="sub">' + esc(msg) + '</p><button class="btn" data-act="reintentar">Reintentar</button></div>');
+  S.reintento = reintento;
+}
+
+/* ----- Inicio ----- */
+function diasTxt(d) { return d === null || d === undefined ? '—' : (d < 0 ? 'Hace ' + (-d) + ' días' : d === 0 ? 'Hoy' : d + ' días'); }
+function vistaInicio() {
+  const of = S.inicio.ofertas;
+  const activa = (o) => o.estado !== 'Cancelado' && o.estado !== 'Finalizado';
+  const prox = of.filter((o) => activa(o) && o.dias !== null && o.dias >= 0 && o.dias <= 30).sort((a, b) => a.dias - b.dias);
+  const alertas = of.filter((o) => o.semaforo === 'rojo' || o.semaforo === 'amarillo').sort((a, b) => (a.semaforo === 'rojo' ? 0 : 1) - (b.semaforo === 'rojo' ? 0 : 1));
+  const tipos = ['Todas', 'Curso', 'Diplomado', 'Laboratorio', 'Evento'];
+  let filas = of.filter((o) => (S.filtroTipo === 'Todas' || o.tipo === S.filtroTipo) && (!S.soloAlerta || o.semaforo === 'rojo' || o.semaforo === 'amarillo'));
+  const q = S.buscar.trim().toLowerCase();
+  if (q) filas = filas.filter((o) => (o.nombre + ' ' + o.id + ' ' + o.orden_interna).toLowerCase().indexOf(q) >= 0);
+  const link = (o) => '<a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a>';
+  const card1 = '<section class="card"><h2>Próximos inicios · 30 días</h2><div class="big">' + prox.length + '</div>' +
+    prox.slice(0, 5).map((o) => '<div class="row">' + link(o) + '<small>' + fecha(o.fecha_inicio) + ' · faltan ' + diasTxt(o.dias) + '</small></div>').join('') + '</section>';
+  const card2 = '<section class="card"><h2>Ofertas con alerta</h2><div class="big">' + alertas.length + '</div>' +
+    alertas.slice(0, 5).map((o) => '<div class="row">' + link(o) + ' ' + semPill(o.semaforo) + '<small>' + esc(o.semaforo_motivo) + '</small></div>').join('') + '</section>';
+  const conteo = {}; of.forEach((o) => { conteo[o.estado] = (conteo[o.estado] || 0) + 1; });
+  const card3 = '<section class="card"><h2>Ofertas por estado</h2><div class="big">' + of.length + '</div>' +
+    Object.keys(conteo).map((k) => '<div class="row">' + esc(t(k)) + ' <b>' + conteo[k] + '</b></div>').join('') + '</section>';
+  const tabla = filas.length ? '<div class="scroll"><table style="min-width:1100px"><thead><tr><th>Código / OI</th><th>Oferta</th><th>Tipo</th><th>Público</th><th>Responsable</th><th>Estado</th><th>Inicio</th><th>Faltan</th><th class="num">Inscritos / mínimo</th><th class="num">Checklist</th><th>Semáforo</th></tr></thead><tbody>' +
+    filas.map((o) => '<tr><td>' + esc(o.id) + '<small class="sm">' + esc(o.orden_interna || 'Sin OI') + '</small></td><td>' + link(o) + '</td><td>' + esc(o.tipo) + '</td><td>' + esc(o.publico) + '</td><td>' + esc(primerNombre(o.responsable)) + '</td><td>' + esc(t(o.estado)) + '</td><td>' + fecha(o.fecha_inicio) + '</td><td>' + diasTxt(o.dias) + '</td><td class="num">' +
+      (o.inscritos === null ? '—' : o.inscritos) + ' / ' + (o.minimo === null ? '—' : o.minimo) + '</td><td class="num">' + (o.avance === null ? '—' : o.avance + '%') + '</td><td>' + semPill(o.semaforo) + '</td></tr>').join('') + '</tbody></table></div>'
+    : '<p class="sub">' + (of.length ? 'Ninguna oferta coincide con el filtro.' : 'Todavía no hay ofertas. Crea la primera en «Nueva oferta».') + '</p>';
+  const cuerpo = '<h1>Inicio</h1><p class="sub">Todo el equipo ve aquí todas las ofertas de Educación continua. Fecha de hoy: ' + fecha(S.inicio.hoy) + '.</p>' +
+    '<div class="grid3">' + card1 + card2 + card3 + '</div><section class="card"><h2>Todas las ofertas</h2><div class="chips">' +
+    tipos.map((x) => '<button class="chip' + (S.filtroTipo === x ? ' on' : '') + '" data-act="ftipo" data-v="' + x + '">' + x + '</button>').join('') +
+    '<button class="chip' + (S.soloAlerta ? ' on' : '') + '" data-act="falerta">Solo con alerta</button></div>' +
+    '<div class="f" style="max-width:360px"><label for="bq">Buscar por nombre, código u orden interna</label><input id="bq" type="search" value="' + esc(S.buscar) + '"></div>' + tabla +
+    '<p class="note" style="margin-top:12px">El semáforo usa reglas provisionales que se definirán con Elisa: amarillo si faltan 15 días o menos y hay menos inscritos que el mínimo; rojo a 5 días o menos, o si la fecha de inicio ya pasó y la oferta no está en ejecución.</p></section>';
+  app.innerHTML = shell('inicio', cuerpo);
+}
+
+/* ----- Mis ofertas ----- */
+function vistaMis() {
+  const of = S.inicio.ofertas; const yo = S.persona.id;
+  const mias = of.filter((o) => o.responsable === yo);
+  const apoyo = of.filter((o) => o.apoyos.indexOf(yo) >= 0);
+  const otras = of.filter((o) => o.responsable !== yo && o.apoyos.indexOf(yo) < 0);
+  const fila = (o, btn) => '<div class="row" style="display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center"><div><a href="#/oferta/' + esc(o.id) + '"><b>' + esc(o.nombre) + '</b></a><small>' + esc(t(o.estado)) + ' · inicio ' + fecha(o.fecha_inicio) + ' · responsable ' + esc(primerNombre(o.responsable)) + '</small></div><div>' + semPill(o.semaforo) + ' ' + (btn || '') + '</div></div>';
+  const lista = (arr, btn) => arr.length ? arr.map((o) => fila(o, btn ? btn(o) : '')).join('') : '<div class="row"><small>Nada por aquí todavía.</small></div>';
+  const cuerpo = '<h1>Mis ofertas · ' + esc(primerNombre(yo)) + '</h1><p class="sub">Aquí solo aparece lo tuyo: las ofertas que lideras y las que apoyas. El panorama completo está en Inicio.</p><div class="stack">' +
+    '<section class="card"><h2>Como responsable</h2>' + lista(mias) + '</section>' +
+    '<section class="card"><h2>Apoyando</h2>' + lista(apoyo, (o) => '<button class="btn sec" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="0">Dejar de apoyar</button>') + '</section>' +
+    '<section class="card"><h2>Otras ofertas del equipo</h2><p class="note">Si falta alguien en una oferta, puedes unirte como apoyo con un clic.</p>' +
+    lista(otras, (o) => '<button class="btn" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="1">Unirme como apoyo</button>') + '</section></div>';
+  app.innerHTML = shell('mis', cuerpo);
+}
+
+/* ----- Nueva oferta ----- */
+function checksPersonas(nombre, marcados, excluir) {
+  return '<div class="checks">' + S.cat.personas.filter((p) => p.id !== excluir).map((p) => '<label><input type="checkbox" name="' + nombre + '" value="' + esc(p.id) + '"' + (marcados.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + esc(p.nombre) + '</label>').join('') + '</div>';
+}
+function vistaNueva() {
+  const tipos = ['Curso', 'Diplomado', 'Laboratorio', 'Evento'];
+  const cuerpo = '<h1>Nueva oferta</h1><p class="sub">Solo lo básico. La orden interna, el SAP y el aval de presupuesto se registran después, en la ficha, cuando lleguen. El sistema asigna un código provisional.</p>' +
+    '<section class="card"><form id="fNueva"><div class="fgrid">' + campo('n_nombre', 'Nombre (se puede cambiar después)', '') +
+    '<div class="f"><label for="n_tipo">Tipo</label><select id="n_tipo"><option value="">Elige…</option>' + tipos.map((x) => opcion(x, x)).join('') + '</select></div>' +
+    '<div class="f"><label for="n_pub">Público</label><select id="n_pub"><option value="">Elige…</option>' + opcion('Abierto', 'Abierto') + opcion('Cerrado', 'Cerrado') + '</select></div>' +
+    '<div class="f"><label for="n_resp">Responsable</label><select id="n_resp">' + S.cat.personas.map((p) => opcion(p.id, p.nombre, p.id === S.persona.id)).join('') + '</select></div>' +
+    campo('n_prog', 'Programa base (opcional)', '') + campo('n_coh', 'Cohorte o edición (opcional)', '') +
+    campo('n_fi', 'Fecha de inicio (opcional)', '', 'date') + campo('n_ff', 'Fecha de fin (opcional)', '', 'date') + '</div>' +
+    '<div class="f"><label>Personas de apoyo (opcional)</label>' + checksPersonas('n_apoyo', [], '') + '</div>' +
+    '<button class="btn" type="submit">Crear oferta</button></form></section>';
+  app.innerHTML = shell('nueva', cuerpo);
+}
+
+/* ----- Ficha ----- */
+function vistaFicha() {
+  const F = S.ficha; const o = F.oferta;
+  const tabs = [['datos', 'Datos y estado'], ['check', 'Checklist'], ['fin', 'Finanzas'], ['pat', 'Patrocinadores'], ['notas', 'Notas (' + F.notas.filter((n) => n.vigente).length + ')'], ['hist', 'Opiniones e historial']];
+  const chips = [pill('p', o.tipo), pill('p', o.publico), pill('p', t(o.estado))].join(' ') + ' ' + semPill(F.semaforo);
+  const cab = '<p class="note"><a href="#/inicio">← Volver a Inicio</a></p><section class="card"><h1>' + esc(o.nombre) + '</h1><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + chips +
+    '<span class="sm" style="margin:0">' + esc(o.codigo_provisional) + ' · ' + esc(o.orden_interna ? 'OI ' + o.orden_interna : 'Sin orden interna') + ' · ' + esc(o.sap ? 'SAP ' + o.sap : 'Sin SAP') + '</span></div>' +
+    (F.semaforo_motivo && (F.semaforo === 'rojo' || F.semaforo === 'amarillo') ? '<p class="note" style="margin:10px 0 0">' + esc(F.semaforo_motivo) + '</p>' : '') + '</section>' +
+    '<div class="tabs" role="tablist">' + tabs.map((x) => '<button class="t' + (S.tab === x[0] ? ' on' : '') + '" role="tab" data-act="tab" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
+  let c = '';
+  if (S.tab === 'datos') c = fichaDatos(F);
+  else if (S.tab === 'check') c = fichaChecklist(F);
+  else if (S.tab === 'notas') c = fichaNotas(F);
+  else if (S.tab === 'hist') c = fichaHistorial(F);
+  else c = '<section class="card"><h2>' + (S.tab === 'fin' ? 'Finanzas' : 'Patrocinadores') + '</h2><p class="sub" style="margin:0">Esta parte llega en el siguiente tramo de la construcción. Por ahora los datos de inscritos y el mínimo se registran en «Datos y estado».</p></section>';
+  app.innerHTML = shell('', cab + c);
+}
+function fichaDatos(F) {
+  const o = F.oferta; const conds = F.notas.filter((n) => n.vigente && n.tipo === 'Condicion');
+  const idx = F.pasos.indexOf(o.estado);
+  const pasos = F.pasos.map((p, i) => '<div class="step' + (i < idx ? ' done' : i === idx ? ' cur' : '') + '">' + (i < idx ? 'Hecho' : i === idx ? 'Estado actual' : i === idx + 1 ? 'Siguiente' : 'Después') + '<b>' + esc(t(p)) + '</b></div>').join('');
+  let accion = '';
+  if (o.estado === 'Cancelado') {
+    accion = '<p class="sub" style="margin:12px 0 0">Esta oferta está <b>cancelada</b>. Motivo: ' + esc(t(o.motivo_cancelacion)) + '.</p>';
+  } else {
+    const sig = F.siguiente;
+    if (sig) {
+      accion += '<div style="margin-top:14px"><b>Siguiente paso: ' + esc(t(sig.estado)) + '</b>';
+      if (sig.bloqueos.length) accion += '<p class="note" style="margin:6px 0 8px">Todavía falta: ' + esc(sig.bloqueos.map(t).join(', ')) + '.</p>';
+      accion += '<div><button class="btn" data-act="estado" data-v="' + esc(sig.estado) + '"' + (sig.bloqueos.length ? ' disabled' : '') + '>Pasar a «' + esc(t(sig.estado)) + '»</button></div></div>';
+    }
+    const ant = idx > 0 ? F.pasos[idx - 1] : null;
+    accion += '<div class="two" style="margin-top:14px">';
+    if (ant) accion += '<details><summary>Volver a «' + esc(t(ant)) + '»</summary><div class="f" style="margin-top:8px"><label for="m_atras">Motivo (obligatorio)</label><input id="m_atras" type="text"></div><button class="btn sec" data-act="estado" data-v="' + esc(ant) + '" data-atras="1">Volver al paso anterior</button></details>';
+    if (idx < F.pasos.indexOf(estadoEjec(o.tipo))) accion += '<details><summary>Cancelar esta oferta</summary><div class="f" style="margin-top:8px"><label for="m_canc">Motivo de la cancelación</label><select id="m_canc"><option value="">Elige…</option>' + (S.cat.catalogos.motivo_cancelacion || []).map((m) => opcion(m, t(m))).join('') + '</select></div><button class="btn sec" data-act="cancelar">Cancelar la oferta</button></details>';
+    accion += '</div>';
+  }
+  const apoyos = o.apoyos ? o.apoyos.split(',').filter(Boolean) : [];
+  const form = '<section class="card"><h2>Datos básicos</h2><form id="fDatos"><div class="fgrid">' +
+    campo('d_nombre', 'Nombre', o.nombre) + campo('d_prog', 'Programa base', o.programa_base) + campo('d_coh', 'Cohorte o edición', o.cohorte) +
+    '<div class="f"><label for="d_pub">Público</label><select id="d_pub">' + opcion('Abierto', 'Abierto', o.publico === 'Abierto') + opcion('Cerrado', 'Cerrado', o.publico === 'Cerrado') + '</select></div>' +
+    '<div class="f"><label for="d_resp">Responsable</label><select id="d_resp">' + S.cat.personas.map((p) => opcion(p.id, p.nombre, p.id === o.responsable)).join('') + '</select></div>' +
+    campo('d_fi', 'Fecha de inicio (opcional)', o.fecha_inicio, 'date') + campo('d_ff', 'Fecha de fin (opcional)', o.fecha_fin, 'date') +
+    campo('d_link', 'Link de publicación', o.link) + campo('d_esp', 'Espacio', o.espacio) + campo('d_aula', 'Asignación de aula (código)', o.codigo_aula) +
+    campo('d_ins', 'Inscritos', o.inscritos, 'number', 'min="0"') + campo('d_min', 'Mínimo de inscritos (punto de equilibrio)', o.minimo_inscritos, 'number', 'min="0"') + '</div>' +
+    '<div class="f"><label>Personas de apoyo</label>' + checksPersonas('d_apoyo', apoyos, o.responsable) + '</div>' +
+    '<h3 style="margin-top:8px">Requisitos para abrir inscripciones</h3><div class="fgrid">' +
+    campo('d_prop', 'Propuesta (referencia)', o.propuesta) + campo('d_sap', 'SAP', o.sap) + campo('d_oi', 'Orden interna (OI)', o.orden_interna) +
+    campo('d_avf', 'Fecha del aval de presupuesto', o.aval_fecha, 'date') + campo('d_avr', 'Referencia del aval (correo)', o.aval_referencia) + '</div>' +
+    campo('d_motivo', 'Motivo (obligatorio si cambias una fecha que ya estaba registrada)', '') +
+    '<button class="btn" type="submit">Guardar cambios</button></form></section>';
+  return '<div class="stack">' +
+    (conds.length ? '<section class="card pin"><h2>Notas que no se pueden olvidar</h2>' + conds.map((n) => '<div class="row"><b>' + esc(n.texto) + '</b><small>' + esc(n.autor) + ' · ' + fechaHora(n.creada_en) + '</small></div>').join('') + '</section>' : '') +
+    '<section class="card"><h2>Ciclo de vida</h2><div class="steps">' + pasos + '</div>' + accion + '</section>' + form + '</div>';
+}
+function estadoEjec(tipo) { return tipo === 'Evento' ? 'En ejecucion' : 'Ejecucion'; }
+
+function fichaChecklist(F) {
+  const items = F.checklist; const na = items.filter((i) => i.estado === 'No aplica').length; const ok = items.filter((i) => i.estado === 'Cumplido').length;
+  const total = items.length - na; const pct = total ? Math.round(100 * ok / total) : 0;
+  const filas = items.map((i, k) => {
+    const op = ['Cumplido', 'Pendiente', 'No aplica'].map((e) => '<button class="' + (i.estado === e ? { 'Cumplido': 'c', 'Pendiente': 'p', 'No aplica': 'n' }[e] : '') + '" data-act="item" data-item="' + esc(i.id_item) + '" data-v="' + e + '">' + e + '</button>').join('');
+    return '<div class="rowc' + (i.es_de_maribel ? ' maribel' : '') + '"><span>' + esc(t(i.nombre)) + '</span><input class="obs" type="text" data-chg="obs" data-item="' + esc(i.id_item) + '" placeholder="Código u observación" aria-label="Observación de ' + esc(t(i.nombre)) + '" value="' + esc(i.observacion) + '"><span class="opts">' + op + '</span><span class="mv"><button aria-label="Subir" data-act="mover" data-item="' + esc(i.id_item) + '" data-d="subir"' + (k === 0 ? ' disabled' : '') + '>↑</button><button aria-label="Bajar" data-act="mover" data-item="' + esc(i.id_item) + '" data-d="bajar"' + (k === items.length - 1 ? ' disabled' : '') + '>↓</button></span></div>';
+  }).join('');
+  const pos = '<option value="inicio">Al inicio</option>' + items.map((i) => opcion('despues:' + i.id_item, 'Después de: ' + t(i.nombre))).join('') + '<option value="fin" selected>Al final</option>';
+  return '<section class="card"><h2 style="margin-bottom:4px">Checklist</h2><p class="sub" style="margin:0">' + ok + ' de ' + total + ' ítems aplicables cumplidos · «No aplica» no penaliza el avance</p><div class="bar"><i style="width:' + pct + '%"></i></div>' +
+    '<p class="sub">Avance: <b>' + pct + '%</b>. Los ítems nuevos nacen en «Pendiente». Las filas grises son los ítems de Maribel. Presupuesto, OI y SAP se marcan solos al registrarlos en «Datos y estado».</p>' +
+    '<div class="scroll"><div class="rowc h"><span>Ítem</span><span>Observación o código</span><span>Estado</span><span>Orden</span></div>' + filas + '</div></section>' +
+    '<section class="card" style="margin-top:16px"><h2>Agregar ítem a esta oferta</h2><form id="fItem"><div class="fgrid">' + campo('i_nombre', 'Nombre del ítem', '') +
+    '<div class="f"><label for="i_pos">En qué paso va</label><select id="i_pos">' + pos + '</select></div>' + campo('i_aviso', 'Aviso (días antes, opcional)', '', 'number', 'min="0"') + '</div><button class="btn" type="submit">Agregar ítem</button></form></section>';
+}
+function fichaNotas(F) {
+  const vig = F.notas.filter((n) => n.vigente); const arc = F.notas.filter((n) => !n.vigente);
+  const fila = (n, btn) => '<div class="row"><span class="pill ' + (n.tipo === 'Condicion' ? 'a' : 'g') + '">' + esc(t(n.tipo)) + '</span> <b>' + esc(n.texto) + '</b><small>' + esc(n.autor) + ' · ' + fechaHora(n.creada_en) + '</small>' + (btn ? '<div style="margin-top:6px">' + btn(n) + '</div>' : '') + '</div>';
+  return '<div class="two"><section class="card" style="flex:2 1 520px"><h2>Notas de esta oferta</h2><p class="sub">Las <b>condiciones</b> aparecen arriba en «Datos y estado» cada vez que se abre la ficha.</p>' +
+    (vig.length ? vig.map((n) => fila(n, (x) => '<button class="btn sec" data-act="archivar" data-nota="' + esc(x.id) + '">Archivar</button>')).join('') : '<div class="row"><small>Todavía no hay notas.</small></div>') +
+    (arc.length ? '<details style="margin-top:12px"><summary>Archivadas (' + arc.length + ')</summary>' + arc.map((n) => fila(n)).join('') + '</details>' : '') + '</section>' +
+    '<section class="card" style="flex:1 1 320px"><h2>Agregar nota</h2><form id="fNota"><div class="f"><label for="nt_tipo">Tipo</label><select id="nt_tipo"><option value="Condicion">Condición (se fija arriba)</option><option value="Observacion">Observación</option></select></div>' +
+    '<div class="f"><label for="nt_txt">Nota</label><textarea id="nt_txt"></textarea></div><button class="btn" type="submit">Guardar nota</button></form></section></div>';
+}
+function fichaHistorial(F) {
+  return '<div class="two"><section class="card"><h2>Opiniones</h2>' +
+    (F.opiniones.length ? F.opiniones.map((p) => '<div class="row"><b>' + esc(p.autor) + '</b> · ' + fechaHora(p.creada_en) + '<small>' + esc(p.texto) + '</small></div>').join('') : '<div class="row"><small>Todavía no hay opiniones.</small></div>') +
+    '<form id="fOpin" style="margin-top:12px"><div class="f"><label for="op_txt">Agregar opinión</label><textarea id="op_txt"></textarea></div><button class="btn" type="submit">Publicar</button></form></section>' +
+    '<section class="card"><h2>Historial</h2>' + (F.historial.length ? F.historial.map((h) => '<div class="row">' + esc(h.accion) + (h.antes || h.despues ? ': ' + esc(t(h.antes)) + (h.antes && h.despues ? ' → ' : '') + esc(t(h.despues)) : '') + '<small>' + esc(h.persona) + ' · ' + fechaHora(h.fecha_hora) + (h.motivo ? ' · Motivo: ' + esc(h.motivo) : '') + '</small></div>').join('') : '<div class="row"><small>Sin movimientos.</small></div>') + '</section></div>';
+}
+
+/* ---------- enrutador ---------- */
+async function asegurarBase() {
+  if (!S.persona) { const r = await api('sesion'); S.persona = r.persona; }
+  if (!S.cat) { S.cat = await api('catalogo'); }
+}
+async function ruta() {
+  if (!S.token) { vistaLogin(); return; }
+  const h = (location.hash || '#/inicio').replace(/^#\/?/, '').split('/');
+  const que = h[0] || 'inicio';
+  cargando();
+  try {
+    await asegurarBase();
+    if (que === 'inicio' || que === 'mis') { S.inicio = await api('inicio'); que === 'inicio' ? vistaInicio() : vistaMis(); }
+    else if (que === 'nueva') vistaNueva();
+    else if (que === 'oferta' && h[1]) {
+      if (S.fichaId !== h[1]) { S.tab = 'datos'; }
+      S.fichaId = h[1]; S.ficha = await api('ficha', { id: h[1] }); vistaFicha();
+    } else { location.hash = '#/inicio'; return; }
+    S.flash = null;
+  } catch (e) {
+    if (!S.token) { vistaLogin(e.codigo === 'SESION' ? e.message : ''); return; }
+    vistaError(e.message, ruta);
+  }
+}
+async function conAviso(fn, okMsg, despues) {
+  try { const r = await fn(); if (okMsg) flash('ok', okMsg); if (despues) despues(r); }
+  catch (e) { if (!S.token) { vistaLogin(e.message); return; } flash('err', e.message); }
+  if (S.token) repintar2();
+}
+function repintar2() {
+  const hash = location.hash || '';
+  if (hash.indexOf('#/oferta/') === 0 && S.ficha) { const y = window.scrollY; vistaFicha(); window.scrollTo(0, y); }
+  else ruta();
+}
+
+/* ---------- eventos ---------- */
+app.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const id = ev.target.id;
+  if (id === 'fLogin') {
+    S.ultimoUsuario = val('lu');
+    if (!S.ultimoUsuario) { vistaLogin('Elige tu nombre de la lista.'); return; }
+    const b = document.getElementById('bLogin'); b.disabled = true;
+    try {
+      const r = await api('login', { usuario: S.ultimoUsuario, clave: val('lc') });
+      S.token = r.token; S.persona = r.persona;
+      try { sessionStorage.setItem('ec_token', S.token); } catch (e) { /* sin almacenamiento */ }
+      if (location.hash !== '#/inicio') location.hash = '#/inicio'; else ruta();
+    } catch (e) { vistaLogin(e.message); }
+  } else if (id === 'fNueva') {
+    const apoyos = Array.from(document.querySelectorAll('input[name=n_apoyo]:checked')).map((x) => x.value);
+    const datos = { nombre: val('n_nombre'), tipo: val('n_tipo'), publico: val('n_pub'), responsable: val('n_resp'), programa_base: val('n_prog'), cohorte: val('n_coh'), fecha_inicio: val('n_fi'), fecha_fin: val('n_ff'), apoyos };
+    try { const r = await api('crearOferta', { datos }); flash('ok', 'Oferta creada con el código ' + r.id + '.'); S.fichaId = ''; location.hash = '#/oferta/' + r.id; }
+    catch (e) { if (!S.token) { vistaLogin(e.message); return; } flash('err', e.message); vistaNueva(); }
+  } else if (id === 'fDatos') {
+    const o = S.ficha.oferta;
+    const apoyos = Array.from(document.querySelectorAll('input[name=d_apoyo]:checked')).map((x) => x.value).join(',');
+    const nuevo = { nombre: val('d_nombre'), programa_base: val('d_prog'), cohorte: val('d_coh'), publico: val('d_pub'), responsable: val('d_resp'), apoyos, fecha_inicio: val('d_fi'), fecha_fin: val('d_ff'), link: val('d_link'), espacio: val('d_esp'), codigo_aula: val('d_aula'), inscritos: val('d_ins'), minimo_inscritos: val('d_min'), propuesta: val('d_prop'), sap: val('d_sap'), orden_interna: val('d_oi'), aval_fecha: val('d_avf'), aval_referencia: val('d_avr') };
+    const norm = (k, v) => (k === 'apoyos' ? String(v).split(',').filter(Boolean).sort().join(',') : String(v === undefined || v === null ? '' : v));
+    const cambios = {}; Object.keys(nuevo).forEach((k) => { if (norm(k, nuevo[k]) !== norm(k, o[k])) cambios[k] = nuevo[k]; });
+    if (!Object.keys(cambios).length) { flash('ok', 'No hay cambios por guardar.'); vistaFicha(); return; }
+    await conAviso(() => api('guardarOferta', { id: S.fichaId, cambios, motivo: val('d_motivo') }), 'Cambios guardados.', (r) => { if (r.ficha) S.ficha = r.ficha; });
+  } else if (id === 'fItem') {
+    await conAviso(() => api('agregarItem', { id: S.fichaId, nombre: val('i_nombre'), posicion: val('i_pos'), diasAviso: val('i_aviso') }), 'Ítem agregado.', (r) => { S.ficha.checklist = r.checklist; });
+  } else if (id === 'fNota') {
+    await conAviso(() => api('agregarNota', { id: S.fichaId, tipo: val('nt_tipo'), texto: val('nt_txt') }), 'Nota guardada.', (r) => { S.ficha.notas = r.notas; });
+  } else if (id === 'fOpin') {
+    await conAviso(() => api('agregarOpinion', { id: S.fichaId, texto: val('op_txt') }), 'Opinión publicada.', (r) => { S.ficha.opiniones = r.opiniones; });
+  }
+});
+app.addEventListener('click', async (ev) => {
+  const b = ev.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'salir') { try { await api('salir'); } catch (e) { /* ya sin sesión */ } cerrarLocal(); vistaLogin(); }
+  else if (a === 'reintentar') { if (S.reintento) S.reintento(); }
+  else if (a === 'reintentarLogin') { vistaLogin(); }
+  else if (a === 'ftipo') { S.filtroTipo = b.dataset.v; vistaInicio(); }
+  else if (a === 'falerta') { S.soloAlerta = !S.soloAlerta; vistaInicio(); }
+  else if (a === 'apoyar') { try { await api('apoyar', { id: b.dataset.id, unirse: b.dataset.u === '1' }); flash('ok', b.dataset.u === '1' ? 'Ahora apoyas esta oferta.' : 'Dejaste de apoyar esta oferta.'); } catch (e) { flash('err', e.message); } ruta(); }
+  else if (a === 'tab') { S.tab = b.dataset.v; S.flash = null; vistaFicha(); }
+  else if (a === 'estado') {
+    const atras = b.dataset.atras === '1';
+    await conAviso(() => api('cambiarEstado', { id: S.fichaId, estado: b.dataset.v, motivo: atras ? val('m_atras') : '' }), 'Estado actualizado.', (r) => { S.ficha = r.ficha; });
+  } else if (a === 'cancelar') {
+    await conAviso(() => api('cambiarEstado', { id: S.fichaId, estado: 'Cancelado', motivo_cancelacion: val('m_canc') }), 'La oferta quedó cancelada.', (r) => { S.ficha = r.ficha; });
+  } else if (a === 'item') {
+    await conAviso(() => api('guardarItem', { id: S.fichaId, idItem: b.dataset.item, estado: b.dataset.v }), '', (r) => { S.ficha.checklist = r.checklist; });
+  } else if (a === 'mover') {
+    await conAviso(() => api('moverItem', { id: S.fichaId, idItem: b.dataset.item, direccion: b.dataset.d }), '', (r) => { S.ficha.checklist = r.checklist; });
+  } else if (a === 'archivar') {
+    await conAviso(() => api('archivarNota', { id: S.fichaId, idNota: b.dataset.nota }), 'Nota archivada.', (r) => { S.ficha.notas = r.notas; });
+  }
+});
+app.addEventListener('change', async (ev) => {
+  const e = ev.target;
+  if (e.dataset && e.dataset.chg === 'obs') {
+    await conAviso(() => api('guardarItem', { id: S.fichaId, idItem: e.dataset.item, observacion: e.value }), '', (r) => { S.ficha.checklist = r.checklist; });
+  }
+});
+app.addEventListener('input', (ev) => {
+  if (ev.target.id === 'bq') { S.buscar = ev.target.value; const pos = ev.target.selectionStart; vistaInicio(); const n = document.getElementById('bq'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
+});
+window.addEventListener('hashchange', ruta);
+ruta();
+</script>
 </body>
 </html>
