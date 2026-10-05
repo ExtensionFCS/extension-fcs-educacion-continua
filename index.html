@@ -86,7 +86,7 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbwQsXDwxd6g0mUWqQoMNzAz-1oP4qZaqDP8HWIl_-gz7SvTxZ0u3QrVYB7THE3i7HHQ/exec';
 
 /* ---------- estado ---------- */
-const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '', mesCal: '' };
+const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '', mesCal: '', precargado: false };
 try { S.token = sessionStorage.getItem('ec_token') || ''; } catch (e) { S.token = ''; }
 
 /* ---------- utilidades ---------- */
@@ -124,20 +124,23 @@ const val = (id) => { const e = document.getElementById(id); return e ? e.value 
 const flash = (tipo, msg) => { S.flash = { tipo, msg }; };
 
 /* ---------- servidor ---------- */
-let pendientes = 0; let avisoT = null;
+let pendientes = 0; let avisoT = null; let msgRed = '';
+const LECTURAS = ['usuarios', 'sesion', 'catalogo', 'inicio', 'ficha', 'login'];
+const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 function mostrarRed() {
   const e = document.getElementById('red'); if (!e) return;
-  if (pendientes > 0) { e.textContent = 'Conectando con el servidor… puede tardar hasta un minuto. No cierres la página.'; e.style.display = 'block'; }
+  if (pendientes > 0) { e.textContent = msgRed || 'Conectando con el servidor… puede tardar hasta un minuto. No cierres la página.'; e.style.display = 'block'; }
   else e.style.display = 'none';
 }
-async function api(accion, datos) {
+async function enviar(accion, datos) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), 120000);
-  pendientes += 1;
-  if (pendientes === 1) { clearTimeout(avisoT); avisoT = setTimeout(mostrarRed, 2000); }
   try {
     const r = await fetch(URL_SERVIDOR, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ accion, token: S.token }, datos || {})), signal: ctl.signal });
-    const j = await r.json();
+    const txt = await r.text();
+    let j = null;
+    try { j = JSON.parse(txt); } catch (e) { j = null; }
+    if (j === null) { const err = new Error('Google devolvió una página de error en lugar de los datos.'); err.transitorio = true; err.html = true; throw err; }
     if (!j.ok) {
       if (j.codigo === 'SESION') cerrarLocal();
       const err = new Error(j.error || 'Ocurrió un error.');
@@ -147,12 +150,28 @@ async function api(accion, datos) {
     return j;
   } catch (e) {
     if (e.name === 'AbortError') throw new Error('El servidor tardó más de dos minutos en responder. Intenta de nuevo en un rato.');
-    if (e instanceof TypeError) throw new Error('No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.');
+    if (e instanceof TypeError) { const err = new Error('No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.'); err.transitorio = true; throw err; }
     throw e;
+  } finally { clearTimeout(timer); }
+}
+async function api(accion, datos) {
+  const esLectura = LECTURAS.indexOf(accion) >= 0;
+  const intentos = esLectura ? 3 : 1;
+  pendientes += 1;
+  if (pendientes === 1) { msgRed = ''; clearTimeout(avisoT); avisoT = setTimeout(mostrarRed, 2000); }
+  try {
+    for (let n = 1; n <= intentos; n++) {
+      try { return await enviar(accion, datos); }
+      catch (e) {
+        if (!e.transitorio) throw e;
+        if (n < intentos) { msgRed = 'Google respondió con un error pasajero. Reintentando (' + (n + 1) + ' de ' + intentos + ')…'; mostrarRed(); await pausa(1500 * n); continue; }
+        if (esLectura) throw new Error(e.html ? 'Google devolvió una página de error en lugar de los datos. Suele ser pasajero: pulsa Reintentar en un momento.' : e.message);
+        throw new Error('No se pudo confirmar si el cambio quedó guardado. Recarga la ficha y revisa el historial antes de repetirlo.');
+      }
+    }
   } finally {
-    clearTimeout(timer);
     pendientes -= 1;
-    if (pendientes <= 0) { pendientes = 0; clearTimeout(avisoT); mostrarRed(); }
+    if (pendientes <= 0) { pendientes = 0; clearTimeout(avisoT); msgRed = ''; mostrarRed(); }
   }
 }
 function cerrarLocal() {
@@ -391,16 +410,17 @@ async function ruta() {
   if (['inicio', 'mis', 'calendario', 'nueva', 'oferta'].indexOf(que) < 0) { location.hash = '#/inicio'; return; }
   cargando('Cargando…');
   try {
-    const tareas = [];
-    if (!S.persona) tareas.push(api('sesion').then((r) => { S.persona = r.persona; }));
-    if (!S.cat) tareas.push(api('catalogo').then((r) => { S.cat = r; }));
-    if (que === 'inicio' || que === 'mis' || que === 'calendario') tareas.push(api('inicio').then((r) => { S.inicio = r; }));
+    if (!S.persona) { S.persona = (await api('sesion')).persona; }
+    if (!S.cat) { S.cat = await api('catalogo'); }
+    if (que === 'inicio' || que === 'mis' || que === 'calendario') {
+      if (S.precargado && S.inicio) { S.precargado = false; } else { S.inicio = await api('inicio'); }
+    }
     if (que === 'oferta') {
       if (S.fichaId !== h[1]) { S.tab = 'datos'; }
       S.fichaId = h[1];
-      tareas.push(api('ficha', { id: h[1] }).then((r) => { S.ficha = r; }));
+      S.ficha = await api('ficha', { id: h[1] });
     }
-    await Promise.all(tareas);
+    S.precargado = false;
     if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else if (que === 'calendario') vistaCalendario();
     else if (que === 'nueva') vistaNueva(); else vistaFicha();
     S.flash = null;
@@ -430,7 +450,7 @@ app.addEventListener('submit', async (ev) => {
     const b = document.getElementById('bLogin'); b.disabled = true;
     try {
       const r = await api('login', { usuario: S.ultimoUsuario, clave: val('lc') });
-      S.token = r.token; S.persona = r.persona;
+      S.token = r.token; S.persona = r.persona; S.cat = r.catalogo; S.inicio = r.inicio; S.precargado = true;
       try { sessionStorage.setItem('ec_token', S.token); } catch (e) { /* sin almacenamiento */ }
       if (location.hash !== '#/inicio') location.hash = '#/inicio'; else ruta();
     } catch (e) { vistaLogin(e.message); }
