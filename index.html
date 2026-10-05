@@ -80,6 +80,7 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 <body>
 <!-- PORTAL: EDUCACION CONTINUA -->
 <div id="app"></div>
+<div id="red" role="status" aria-live="polite" style="display:none;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1F1D2B;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:50;max-width:92vw;text-align:center"></div>
 <script>
 'use strict';
 const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbwQsXDwxd6g0mUWqQoMNzAz-1oP4qZaqDP8HWIl_-gz7SvTxZ0u3QrVYB7THE3i7HHQ/exec';
@@ -123,9 +124,17 @@ const val = (id) => { const e = document.getElementById(id); return e ? e.value 
 const flash = (tipo, msg) => { S.flash = { tipo, msg }; };
 
 /* ---------- servidor ---------- */
+let pendientes = 0; let avisoT = null;
+function mostrarRed() {
+  const e = document.getElementById('red'); if (!e) return;
+  if (pendientes > 0) { e.textContent = 'Conectando con el servidor… puede tardar hasta un minuto. No cierres la página.'; e.style.display = 'block'; }
+  else e.style.display = 'none';
+}
 async function api(accion, datos) {
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), 30000);
+  const timer = setTimeout(() => ctl.abort(), 120000);
+  pendientes += 1;
+  if (pendientes === 1) { clearTimeout(avisoT); avisoT = setTimeout(mostrarRed, 2000); }
   try {
     const r = await fetch(URL_SERVIDOR, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ accion, token: S.token }, datos || {})), signal: ctl.signal });
     const j = await r.json();
@@ -137,10 +146,14 @@ async function api(accion, datos) {
     }
     return j;
   } catch (e) {
-    if (e.name === 'AbortError') throw new Error('El servidor tardó demasiado en responder. Intenta de nuevo.');
+    if (e.name === 'AbortError') throw new Error('El servidor tardó más de dos minutos en responder. Intenta de nuevo en un rato.');
     if (e instanceof TypeError) throw new Error('No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.');
     throw e;
-  } finally { clearTimeout(timer); }
+  } finally {
+    clearTimeout(timer);
+    pendientes -= 1;
+    if (pendientes <= 0) { pendientes = 0; clearTimeout(avisoT); mostrarRed(); }
+  }
 }
 function cerrarLocal() {
   S.token = ''; S.persona = null; S.cat = null; S.inicio = null; S.ficha = null;
@@ -159,8 +172,11 @@ function shell(activo, cuerpo) {
 async function vistaLogin(msg) {
   const marco = (cuerpo) => '<div class="login"><div class="card"><div class="brand" style="margin-bottom:14px"><span class="dot"></span><span>Extensión FCS · <b>Educación continua</b></span></div><h1 style="font-size:22px">Ingresar</h1>' + cuerpo + '</div></div>';
   if (!S.usuarios) {
+    try { S.usuarios = JSON.parse(sessionStorage.getItem('ec_usuarios') || 'null'); } catch (e) { S.usuarios = null; }
+  }
+  if (!S.usuarios) {
     cargando();
-    try { S.usuarios = (await api('usuarios')).usuarios; }
+    try { S.usuarios = (await api('usuarios')).usuarios; try { sessionStorage.setItem('ec_usuarios', JSON.stringify(S.usuarios)); } catch (e) { /* sin almacenamiento */ } }
     catch (e) { app.innerHTML = marco('<div class="flash err" role="alert">' + esc(e.message) + '</div><button class="btn" data-act="reintentarLogin">Reintentar</button>'); return; }
   }
   app.innerHTML = marco('<p class="sub">Elige tu nombre y escribe tu clave.</p>' +
@@ -367,23 +383,26 @@ function fichaHistorial(F) {
 }
 
 /* ---------- enrutador ---------- */
-async function asegurarBase() {
-  if (!S.persona) { const r = await api('sesion'); S.persona = r.persona; }
-  if (!S.cat) { S.cat = await api('catalogo'); }
-}
 async function ruta() {
   if (!S.token) { vistaLogin(); return; }
   const h = (location.hash || '#/inicio').replace(/^#\/?/, '').split('/');
   const que = h[0] || 'inicio';
-  cargando();
+  if (que === 'oferta' && !h[1]) { location.hash = '#/inicio'; return; }
+  if (['inicio', 'mis', 'calendario', 'nueva', 'oferta'].indexOf(que) < 0) { location.hash = '#/inicio'; return; }
+  cargando('Cargando…');
   try {
-    await asegurarBase();
-    if (que === 'inicio' || que === 'mis' || que === 'calendario') { S.inicio = await api('inicio'); que === 'inicio' ? vistaInicio() : que === 'mis' ? vistaMis() : vistaCalendario(); }
-    else if (que === 'nueva') vistaNueva();
-    else if (que === 'oferta' && h[1]) {
+    const tareas = [];
+    if (!S.persona) tareas.push(api('sesion').then((r) => { S.persona = r.persona; }));
+    if (!S.cat) tareas.push(api('catalogo').then((r) => { S.cat = r; }));
+    if (que === 'inicio' || que === 'mis' || que === 'calendario') tareas.push(api('inicio').then((r) => { S.inicio = r; }));
+    if (que === 'oferta') {
       if (S.fichaId !== h[1]) { S.tab = 'datos'; }
-      S.fichaId = h[1]; S.ficha = await api('ficha', { id: h[1] }); vistaFicha();
-    } else { location.hash = '#/inicio'; return; }
+      S.fichaId = h[1];
+      tareas.push(api('ficha', { id: h[1] }).then((r) => { S.ficha = r; }));
+    }
+    await Promise.all(tareas);
+    if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else if (que === 'calendario') vistaCalendario();
+    else if (que === 'nueva') vistaNueva(); else vistaFicha();
     S.flash = null;
   } catch (e) {
     if (!S.token) { vistaLogin(e.codigo === 'SESION' ? e.message : ''); return; }
