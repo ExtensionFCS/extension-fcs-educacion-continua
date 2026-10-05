@@ -86,7 +86,7 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbwQsXDwxd6g0mUWqQoMNzAz-1oP4qZaqDP8HWIl_-gz7SvTxZ0u3QrVYB7THE3i7HHQ/exec';
 
 /* ---------- estado ---------- */
-const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '', mesCal: '', precargado: false };
+const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '', mesCal: '', precargado: false, soloPend: false };
 try { S.token = sessionStorage.getItem('ec_token') || ''; } catch (e) { S.token = ''; }
 
 /* ---------- utilidades ---------- */
@@ -99,6 +99,7 @@ const ETQ = {
   'Envio de requerimientos y seguridad': 'Envío de requerimientos y seguridad', 'Condicion': 'Condición', 'Observacion': 'Observación',
   'Coordinacion': 'Coordinación', 'No alcanzo el punto de equilibrio': 'No alcanzó el punto de equilibrio', 'Sin negociacion': 'Sin negociación',
   'Equipo de Educacion continua': 'Equipo de Educación continua', 'Asistente de Extension': 'Asistente de Extensión',
+  'Pasantia': 'Pasantía', 'Publico': 'Público', 'Motivo de la cancelacion': 'Motivo de la cancelación',
   'Ano Nuevo': 'Año Nuevo', 'San Jose': 'San José', 'Dia del Trabajo': 'Día del Trabajo', 'Ascension del Senor': 'Ascensión del Señor', 'Sagrado Corazon': 'Sagrado Corazón',
   'Batalla de Boyaca': 'Batalla de Boyacá', 'Asuncion de la Virgen': 'Asunción de la Virgen', 'Dia de la Raza': 'Día de la Raza', 'Inmaculada Concepcion': 'Inmaculada Concepción'
 };
@@ -114,7 +115,9 @@ function fechaHora(f) {
   return fecha(f) + (f.length > 10 ? ' · ' + f.slice(11, 16) : '');
 }
 const SEM = { verde: ['v', 'Verde'], amarillo: ['a', 'Amarillo'], rojo: ['r', 'Rojo'], gris: ['g', 'Cerrada'], sin_fecha: ['g', 'Sin fecha'] };
-const semPill = (c) => { const x = SEM[c] || ['g', '—']; return '<span class="pill ' + x[0] + '">' + x[1] + '</span>'; };
+const semPill = (c, motivo) => { const x = SEM[c] || ['g', '—']; const txt = (c === 'gris' && motivo) ? motivo : x[1]; return '<span class="pill ' + x[0] + '">' + esc(txt) + '</span>'; };
+const TIPOS_EVENTO = ['Evento', 'Congreso', 'Simposio', 'Foro', 'Concurso'];
+const pendTxt = (arr) => arr.map(t).join(', ');
 const pill = (cls, txt) => '<span class="pill ' + cls + '">' + esc(txt) + '</span>';
 const nombrePersona = (id) => { const p = S.cat && S.cat.personas.filter((x) => x.id === id)[0]; return p ? p.nombre : id; };
 const primerNombre = (id) => nombrePersona(id).split(' ')[0];
@@ -218,26 +221,34 @@ function vistaInicio() {
   const activa = (o) => o.estado !== 'Cancelado' && o.estado !== 'Finalizado';
   const prox = of.filter((o) => activa(o) && o.dias !== null && o.dias >= 0 && o.dias <= 30).sort((a, b) => a.dias - b.dias);
   const alertas = of.filter((o) => o.semaforo === 'rojo' || o.semaforo === 'amarillo').sort((a, b) => (a.semaforo === 'rojo' ? 0 : 1) - (b.semaforo === 'rojo' ? 0 : 1));
-  const tipos = ['Todas', 'Curso', 'Diplomado', 'Laboratorio', 'Evento'];
-  let filas = of.filter((o) => (S.filtroTipo === 'Todas' || o.tipo === S.filtroTipo) && (!S.soloAlerta || o.semaforo === 'rojo' || o.semaforo === 'amarillo'));
+  const tipos = ['Todas', 'Curso', 'Diplomado', 'Laboratorio', 'Evento', 'Otros'];
+  const principales = ['Curso', 'Diplomado', 'Laboratorio', 'Evento'];
+  const conPend = of.filter((o) => o.pendientes.length > 0);
+  let filas = of.filter((o) => (S.filtroTipo === 'Todas' || (S.filtroTipo === 'Otros' ? principales.indexOf(o.tipo) < 0 : o.tipo === S.filtroTipo)) &&
+    (!S.soloAlerta || o.semaforo === 'rojo' || o.semaforo === 'amarillo') && (!S.soloPend || o.pendientes.length > 0));
   const q = S.buscar.trim().toLowerCase();
   if (q) filas = filas.filter((o) => (o.nombre + ' ' + o.id + ' ' + o.orden_interna).toLowerCase().indexOf(q) >= 0);
   const link = (o) => '<a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a>';
   const card1 = '<section class="card"><h2>Próximos inicios · 30 días</h2><div class="big">' + prox.length + '</div>' +
     prox.slice(0, 5).map((o) => '<div class="row">' + link(o) + '<small>' + fecha(o.fecha_inicio) + ' · faltan ' + diasTxt(o.dias) + '</small></div>').join('') + '</section>';
   const card2 = '<section class="card"><h2>Ofertas con alerta</h2><div class="big">' + alertas.length + '</div>' +
-    alertas.slice(0, 5).map((o) => '<div class="row">' + link(o) + ' ' + semPill(o.semaforo) + '<small>' + esc(o.semaforo_motivo) + '</small></div>').join('') + '</section>';
-  const conteo = {}; of.forEach((o) => { conteo[o.estado] = (conteo[o.estado] || 0) + 1; });
+    alertas.slice(0, 5).map((o) => '<div class="row">' + link(o) + ' ' + semPill(o.semaforo, o.semaforo_motivo) + '<small>' + esc(o.semaforo_motivo) + '</small></div>').join('') + '</section>';
+  const card4 = '<section class="card" style="background:#FFF8E1"><h2>Información pendiente</h2><div class="big">' + conPend.length + '</div>' +
+    (conPend.length ? '<p class="note" style="margin:8px 0 0">Es obligatorio completarla.</p>' : '') +
+    conPend.slice(0, 5).map((o) => '<div class="row">' + link(o) + '<small>' + esc(pendTxt(o.pendientes)) + '</small></div>').join('') +
+    (conPend.length > 5 ? '<div class="row"><a href="#/inicio" data-act="verpend">Ver todas (' + conPend.length + ')</a></div>' : '') + '</section>';
+  const conteo = {}; of.forEach((o) => { const k = o.estado || 'Sin estado'; conteo[k] = (conteo[k] || 0) + 1; });
   const card3 = '<section class="card"><h2>Ofertas por estado</h2><div class="big">' + of.length + '</div>' +
     Object.keys(conteo).map((k) => '<div class="row">' + esc(t(k)) + ' <b>' + conteo[k] + '</b></div>').join('') + '</section>';
-  const tabla = filas.length ? '<div class="scroll"><table style="min-width:1100px"><thead><tr><th>Código / OI</th><th>Oferta</th><th>Tipo</th><th>Público</th><th>Responsable</th><th>Estado</th><th>Inicio</th><th>Faltan</th><th class="num">Inscritos / mínimo</th><th class="num">Checklist</th><th>Semáforo</th></tr></thead><tbody>' +
-    filas.map((o) => '<tr><td>' + esc(o.id) + '<small class="sm">' + esc(o.orden_interna || 'Sin OI') + '</small></td><td>' + link(o) + '</td><td>' + esc(o.tipo) + '</td><td>' + esc(o.publico) + '</td><td>' + esc(primerNombre(o.responsable)) + '</td><td>' + esc(t(o.estado)) + '</td><td>' + fecha(o.fecha_inicio) + '</td><td>' + diasTxt(o.dias) + '</td><td class="num">' +
-      (o.inscritos === null ? '—' : o.inscritos) + ' / ' + (o.minimo === null ? '—' : o.minimo) + '</td><td class="num">' + (o.avance === null ? '—' : o.avance + '%') + '</td><td>' + semPill(o.semaforo) + '</td></tr>').join('') + '</tbody></table></div>'
+  const tabla = filas.length ? '<div class="scroll"><table style="min-width:1250px"><thead><tr><th>Código / OI</th><th>Oferta</th><th>Tipo</th><th>Público</th><th>Responsable</th><th>Estado</th><th>Inicio</th><th>Faltan</th><th class="num">Inscritos / mínimo</th><th class="num">Checklist</th><th>Semáforo</th><th>Pendiente</th></tr></thead><tbody>' +
+    filas.map((o) => '<tr><td>' + esc(o.id) + '<small class="sm">' + esc(o.orden_interna || 'Sin OI') + '</small></td><td>' + link(o) + '</td><td>' + (o.tipo ? esc(t(o.tipo)) : '—') + '</td><td>' + (o.publico ? esc(o.publico) : '—') + '</td><td>' + (o.responsable ? esc(primerNombre(o.responsable)) : '—') + '</td><td>' + (o.estado ? esc(t(o.estado)) : '—') + '</td><td>' + fecha(o.fecha_inicio) + '</td><td>' + diasTxt(o.dias) + '</td><td class="num">' +
+      (o.inscritos === null ? '—' : o.inscritos) + ' / ' + (o.minimo === null ? '—' : o.minimo) + '</td><td class="num">' + (o.avance === null ? '—' : o.avance + '%') + '</td><td>' + semPill(o.semaforo, o.semaforo_motivo) + '</td><td>' + (o.pendientes.length ? '<span class="pill a" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + ' pendiente' + (o.pendientes.length > 1 ? 's' : '') + '</span>' : '—') + '</td></tr>').join('') + '</tbody></table></div>'
     : '<p class="sub">' + (of.length ? 'Ninguna oferta coincide con el filtro.' : 'Todavía no hay ofertas. Crea la primera en «Nueva oferta».') + '</p>';
   const cuerpo = '<h1>Inicio</h1><p class="sub">Todo el equipo ve aquí todas las ofertas de Educación continua. Fecha de hoy: ' + fecha(S.inicio.hoy) + '.</p>' +
-    '<div class="grid3">' + card1 + card2 + card3 + '</div><section class="card"><h2>Todas las ofertas</h2><div class="chips">' +
+    '<div class="grid3">' + card1 + card2 + card4 + card3 + '</div><section class="card"><h2>Todas las ofertas</h2><div class="chips">' +
     tipos.map((x) => '<button class="chip' + (S.filtroTipo === x ? ' on' : '') + '" data-act="ftipo" data-v="' + x + '">' + x + '</button>').join('') +
-    '<button class="chip' + (S.soloAlerta ? ' on' : '') + '" data-act="falerta">Solo con alerta</button></div>' +
+    '<button class="chip' + (S.soloAlerta ? ' on' : '') + '" data-act="falerta">Solo con alerta</button>' +
+    '<button class="chip' + (S.soloPend ? ' on' : '') + '" data-act="fpend">Con información pendiente (' + conPend.length + ')</button></div>' +
     '<div class="f" style="max-width:360px"><label for="bq">Buscar por nombre, código u orden interna</label><input id="bq" type="search" value="' + esc(S.buscar) + '"></div>' + tabla +
     '<p class="note" style="margin-top:12px">El semáforo usa reglas provisionales que se definirán con Elisa: amarillo si faltan 15 días o menos y hay menos inscritos que el mínimo; rojo a 5 días o menos, o si la fecha de inicio ya pasó y la oferta no está en ejecución.</p></section>';
   app.innerHTML = shell('inicio', cuerpo);
@@ -249,7 +260,7 @@ function vistaMis() {
   const mias = of.filter((o) => o.responsable === yo);
   const apoyo = of.filter((o) => o.apoyos.indexOf(yo) >= 0);
   const otras = of.filter((o) => o.responsable !== yo && o.apoyos.indexOf(yo) < 0);
-  const fila = (o, btn) => '<div class="row" style="display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center"><div><a href="#/oferta/' + esc(o.id) + '"><b>' + esc(o.nombre) + '</b></a><small>' + esc(t(o.estado)) + ' · inicio ' + fecha(o.fecha_inicio) + ' · responsable ' + esc(primerNombre(o.responsable)) + '</small></div><div>' + semPill(o.semaforo) + ' ' + (btn || '') + '</div></div>';
+  const fila = (o, btn) => '<div class="row" style="display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center"><div><a href="#/oferta/' + esc(o.id) + '"><b>' + esc(o.nombre) + '</b></a><small>' + esc(t(o.estado)) + ' · inicio ' + fecha(o.fecha_inicio) + ' · responsable ' + esc(primerNombre(o.responsable)) + '</small></div><div>' + semPill(o.semaforo, o.semaforo_motivo) + ' ' + (btn || '') + '</div></div>';
   const lista = (arr, btn) => arr.length ? arr.map((o) => fila(o, btn ? btn(o) : '')).join('') : '<div class="row"><small>Nada por aquí todavía.</small></div>';
   const cuerpo = '<h1>Mis ofertas · ' + esc(primerNombre(yo)) + '</h1><p class="sub">Aquí solo aparece lo tuyo: las ofertas que lideras y las que apoyas. El panorama completo está en Inicio.</p><div class="stack">' +
     '<section class="card"><h2>Como responsable</h2>' + lista(mias) + '</section>' +
@@ -301,10 +312,10 @@ function checksPersonas(nombre, marcados, excluir) {
   return '<div class="checks">' + S.cat.personas.filter((p) => p.id !== excluir).map((p) => '<label><input type="checkbox" name="' + nombre + '" value="' + esc(p.id) + '"' + (marcados.indexOf(p.id) >= 0 ? ' checked' : '') + '> ' + esc(p.nombre) + '</label>').join('') + '</div>';
 }
 function vistaNueva() {
-  const tipos = ['Curso', 'Diplomado', 'Laboratorio', 'Evento'];
+  const tipos = S.cat.tipos || ['Curso', 'Diplomado', 'Laboratorio', 'Evento'];
   const cuerpo = '<h1>Nueva oferta</h1><p class="sub">Solo lo básico. La orden interna, el SAP y el aval de presupuesto se registran después, en la ficha, cuando lleguen. El sistema asigna un código provisional.</p>' +
     '<section class="card"><form id="fNueva"><div class="fgrid">' + campo('n_nombre', 'Nombre (se puede cambiar después)', '') +
-    '<div class="f"><label for="n_tipo">Tipo</label><select id="n_tipo"><option value="">Elige…</option>' + tipos.map((x) => opcion(x, x)).join('') + '</select></div>' +
+    '<div class="f"><label for="n_tipo">Tipo</label><select id="n_tipo"><option value="">Elige…</option>' + tipos.map((x) => opcion(x, t(x))).join('') + '</select></div>' +
     '<div class="f"><label for="n_pub">Público</label><select id="n_pub"><option value="">Elige…</option>' + opcion('Abierto', 'Abierto') + opcion('Cerrado', 'Cerrado') + '</select></div>' +
     '<div class="f"><label for="n_resp">Responsable</label><select id="n_resp">' + S.cat.personas.map((p) => opcion(p.id, p.nombre, p.id === S.persona.id)).join('') + '</select></div>' +
     campo('n_prog', 'Programa base (opcional)', '') + campo('n_coh', 'Cohorte o edición (opcional)', '') +
@@ -318,11 +329,12 @@ function vistaNueva() {
 function vistaFicha() {
   const F = S.ficha; const o = F.oferta;
   const tabs = [['datos', 'Datos y estado'], ['check', 'Checklist'], ['fin', 'Finanzas'], ['pat', 'Patrocinadores'], ['notas', 'Notas (' + F.notas.filter((n) => n.vigente).length + ')'], ['hist', 'Opiniones e historial']];
-  const chips = [pill('p', o.tipo), pill('p', o.publico), pill('p', t(o.estado))].join(' ') + ' ' + semPill(F.semaforo);
+  const chips = [o.tipo ? pill('p', t(o.tipo)) : pill('a', 'Sin tipo'), o.publico ? pill('p', o.publico) : pill('a', 'Sin público'), o.estado ? pill(o.estado_por_confirmar === 'Si' ? 'a' : 'p', t(o.estado) + (o.estado_por_confirmar === 'Si' ? ' (por confirmar)' : '')) : pill('a', 'Sin estado')].join(' ') + ' ' + semPill(F.semaforo, F.semaforo_motivo);
+  const banner = F.pendientes.length ? '<section class="card pin" style="margin-top:16px"><h2 style="margin-bottom:6px">Pendiente de información</h2><p class="sub" style="margin:0">Es obligatorio completar: <b>' + esc(pendTxt(F.pendientes)) + '</b>. Hazlo en «Datos y estado». Mientras tanto la oferta no puede avanzar de estado.</p></section>' : '';
   const cab = '<p class="note"><a href="#/inicio">← Volver a Inicio</a></p><section class="card"><h1>' + esc(o.nombre) + '</h1><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + chips +
     '<span class="sm" style="margin:0">' + esc(o.codigo_provisional) + ' · ' + esc(o.orden_interna ? 'OI ' + o.orden_interna : 'Sin orden interna') + ' · ' + esc(o.sap ? 'SAP ' + o.sap : 'Sin SAP') + '</span></div>' +
     (F.semaforo_motivo && (F.semaforo === 'rojo' || F.semaforo === 'amarillo') ? '<p class="note" style="margin:10px 0 0">' + esc(F.semaforo_motivo) + '</p>' : '') + '</section>' +
-    '<div class="tabs" role="tablist">' + tabs.map((x) => '<button class="t' + (S.tab === x[0] ? ' on' : '') + '" role="tab" data-act="tab" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
+    banner + '<div class="tabs" role="tablist">' + tabs.map((x) => '<button class="t' + (S.tab === x[0] ? ' on' : '') + '" role="tab" data-act="tab" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
   let c = '';
   if (S.tab === 'datos') c = fichaDatos(F);
   else if (S.tab === 'check') c = fichaChecklist(F);
@@ -331,45 +343,68 @@ function vistaFicha() {
   else c = '<section class="card"><h2>' + (S.tab === 'fin' ? 'Finanzas' : 'Patrocinadores') + '</h2><p class="sub" style="margin:0">Esta parte llega en el siguiente tramo de la construcción. Por ahora los datos de inscritos y el mínimo se registran en «Datos y estado».</p></section>';
   app.innerHTML = shell('', cab + c);
 }
+const esPend = (F, k) => F.pendientes.indexOf(k) >= 0;
+const PEND_ESTILO = 'style="border:2px solid #FFB020"';
 function fichaDatos(F) {
   const o = F.oferta; const conds = F.notas.filter((n) => n.vigente && n.tipo === 'Condicion');
+  const sinTipo = !o.tipo;
   const idx = F.pasos.indexOf(o.estado);
-  const pasos = F.pasos.map((p, i) => '<div class="step' + (i < idx ? ' done' : i === idx ? ' cur' : '') + '">' + (i < idx ? 'Hecho' : i === idx ? 'Estado actual' : i === idx + 1 ? 'Siguiente' : 'Después') + '<b>' + esc(t(p)) + '</b></div>').join('');
+  const porConfirmar = !o.estado || o.estado_por_confirmar === 'Si';
+  const pasos = idx >= 0 ? F.pasos.map((p, i) => '<div class="step' + (i < idx ? ' done' : i === idx ? ' cur' : '') + '">' + (i < idx ? 'Hecho' : i === idx ? (porConfirmar ? 'Estado por confirmar' : 'Estado actual') : i === idx + 1 ? 'Siguiente' : 'Después') + '<b>' + esc(t(p)) + '</b></div>').join('') : '';
+  const detAplazar = '<details><summary>Aplazar esta oferta</summary><div class="f" style="margin-top:8px"><label for="ap_motivo">Motivo del aplazamiento (obligatorio)</label><input id="ap_motivo" type="text"></div><div class="f"><label for="ap_fecha">Nueva fecha de inicio (opcional)</label><input id="ap_fecha" type="date"></div><button class="btn sec" data-act="aplazar">Aplazar la oferta</button></details>';
+  const detCancelar = '<details><summary>Cancelar esta oferta</summary><div class="f" style="margin-top:8px"><label for="m_canc">Motivo de la cancelación</label><select id="m_canc"><option value="">Elige…</option>' + (S.cat.catalogos.motivo_cancelacion || []).map((m) => opcion(m, t(m))).join('') + '</select></div><button class="btn sec" data-act="cancelar">Cancelar la oferta</button></details>';
+  const selPasos = (id, elegido) => '<select id="' + id + '"><option value="">Elige…</option>' + F.pasos.map((p) => opcion(p, t(p), p === elegido)).join('') + '</select>';
   let accion = '';
   if (o.estado === 'Cancelado') {
-    accion = '<p class="sub" style="margin:12px 0 0">Esta oferta está <b>cancelada</b>. Motivo: ' + esc(t(o.motivo_cancelacion)) + '.</p>';
+    accion = '<p class="sub" style="margin:12px 0 0">Esta oferta está <b>cancelada</b>. Motivo: ' + esc(o.motivo_cancelacion ? t(o.motivo_cancelacion) : 'pendiente de informar') + '.</p>';
+  } else if (o.estado === 'Aplazado') {
+    accion = '<div style="margin-top:14px"><p class="sub" style="margin:0 0 8px">Esta oferta está <b>aplazada</b>. Motivo: ' + esc(o.motivo_aplazamiento || 'pendiente de informar (escríbelo en «Datos básicos»)') + '.</p>' +
+      (sinTipo ? '<p class="note">Para reactivarla, primero indica el tipo de la oferta.</p>' :
+        '<div class="f" style="max-width:340px"><label for="re_estado">Estado al que vuelve</label>' + selPasos('re_estado', o.estado_previo) + '</div><button class="btn" data-act="reactivar">Reactivar la oferta</button>') + '</div>' +
+      (sinTipo ? '' : '<div class="two" style="margin-top:14px">' + detCancelar + '</div>');
+  } else if (sinTipo) {
+    accion = '<p class="sub" style="margin:12px 0 0"><b>Primero indica el tipo de la oferta</b> en «Datos básicos». Con el tipo se definen los pasos y se crea el checklist.</p>';
+  } else if (porConfirmar) {
+    accion = '<div style="margin-top:14px;padding:12px;border-radius:10px;background:#FFF8E1"><b>Confirma en qué estado está esta oferta</b><p class="note" style="margin:6px 0 8px">' + (o.estado ? 'Vino de otro registro como «' + esc(t(o.estado)) + '». Confírmalo o elige el correcto.' : 'No tiene estado. Elige el que corresponde.') + '</p>' +
+      '<div class="f" style="max-width:340px"><label for="c_estado">Estado actual</label>' + selPasos('c_estado', o.estado) + '</div><button class="btn" data-act="confirmar">Confirmar el estado</button></div>' +
+      '<div class="two" style="margin-top:14px">' + detAplazar + detCancelar + '</div>';
   } else {
     const sig = F.siguiente;
     if (sig) {
       accion += '<div style="margin-top:14px"><b>Siguiente paso: ' + esc(t(sig.estado)) + '</b>';
       if (sig.bloqueos.length) accion += '<p class="note" style="margin:6px 0 8px">Todavía falta: ' + esc(sig.bloqueos.map(t).join(', ')) + '.</p>';
-      accion += '<div><button class="btn" data-act="estado" data-v="' + esc(sig.estado) + '"' + (sig.bloqueos.length ? ' disabled' : '') + '>Pasar a «' + esc(t(sig.estado)) + '»</button></div></div>';
+      if (F.pendientes.length) accion += '<p class="note" style="margin:6px 0 8px">Antes de avanzar hay que completar la información pendiente.</p>';
+      accion += '<div><button class="btn" data-act="estado" data-v="' + esc(sig.estado) + '"' + (sig.bloqueos.length || F.pendientes.length ? ' disabled' : '') + '>Pasar a «' + esc(t(sig.estado)) + '»</button></div></div>';
     }
     const ant = idx > 0 ? F.pasos[idx - 1] : null;
     accion += '<div class="two" style="margin-top:14px">';
     if (ant) accion += '<details><summary>Volver a «' + esc(t(ant)) + '»</summary><div class="f" style="margin-top:8px"><label for="m_atras">Motivo (obligatorio)</label><input id="m_atras" type="text"></div><button class="btn sec" data-act="estado" data-v="' + esc(ant) + '" data-atras="1">Volver al paso anterior</button></details>';
-    if (idx < F.pasos.indexOf(estadoEjec(o.tipo))) accion += '<details><summary>Cancelar esta oferta</summary><div class="f" style="margin-top:8px"><label for="m_canc">Motivo de la cancelación</label><select id="m_canc"><option value="">Elige…</option>' + (S.cat.catalogos.motivo_cancelacion || []).map((m) => opcion(m, t(m))).join('') + '</select></div><button class="btn sec" data-act="cancelar">Cancelar la oferta</button></details>';
+    if (o.estado !== 'Finalizado') accion += detAplazar;
+    if (idx < F.pasos.indexOf(estadoEjec(o.tipo))) accion += detCancelar;
     accion += '</div>';
   }
   const apoyos = o.apoyos ? o.apoyos.split(',').filter(Boolean) : [];
+  const opt0 = (cond) => (cond ? '<option value="">Elige…</option>' : '');
   const form = '<section class="card"><h2>Datos básicos</h2><form id="fDatos"><div class="fgrid">' +
     campo('d_nombre', 'Nombre', o.nombre) + campo('d_prog', 'Programa base', o.programa_base) + campo('d_coh', 'Cohorte o edición', o.cohorte) +
-    '<div class="f"><label for="d_pub">Público</label><select id="d_pub">' + opcion('Abierto', 'Abierto', o.publico === 'Abierto') + opcion('Cerrado', 'Cerrado', o.publico === 'Cerrado') + '</select></div>' +
-    '<div class="f"><label for="d_resp">Responsable</label><select id="d_resp">' + S.cat.personas.map((p) => opcion(p.id, p.nombre, p.id === o.responsable)).join('') + '</select></div>' +
-    campo('d_fi', 'Fecha de inicio (opcional)', o.fecha_inicio, 'date') + campo('d_ff', 'Fecha de fin (opcional)', o.fecha_fin, 'date') +
+    (sinTipo ? '<div class="f"><label for="d_tipo">Tipo (obligatorio; después no se puede cambiar)</label><select id="d_tipo" ' + PEND_ESTILO + '><option value="">Elige…</option>' + (S.cat.tipos || []).map((x) => opcion(x, t(x))).join('') + '</select></div>' : campo('d_tipo_ro', 'Tipo', t(o.tipo), 'text', 'disabled')) +
+    '<div class="f"><label for="d_pub">Público' + (esPend(F, 'Publico') ? ' (obligatorio)' : '') + '</label><select id="d_pub" ' + (esPend(F, 'Publico') ? PEND_ESTILO : '') + '>' + opt0(!o.publico) + opcion('Abierto', 'Abierto', o.publico === 'Abierto') + opcion('Cerrado', 'Cerrado', o.publico === 'Cerrado') + '</select></div>' +
+    '<div class="f"><label for="d_resp">Responsable' + (esPend(F, 'Responsable') ? ' (obligatorio)' : '') + '</label><select id="d_resp" ' + (esPend(F, 'Responsable') ? PEND_ESTILO : '') + '>' + opt0(!o.responsable) + S.cat.personas.map((p) => opcion(p.id, p.nombre, p.id === o.responsable)).join('') + '</select></div>' +
+    campo('d_fi', 'Fecha de inicio' + (esPend(F, 'Fecha de inicio') ? ' (obligatoria)' : ' (opcional)'), o.fecha_inicio, 'date', esPend(F, 'Fecha de inicio') ? PEND_ESTILO : '') + campo('d_ff', 'Fecha de fin (opcional)', o.fecha_fin, 'date') +
     campo('d_link', 'Link de publicación', o.link) + campo('d_esp', 'Espacio', o.espacio) + campo('d_aula', 'Asignación de aula (código)', o.codigo_aula) +
-    campo('d_ins', 'Inscritos', o.inscritos, 'number', 'min="0"') + campo('d_min', 'Mínimo de inscritos (punto de equilibrio)', o.minimo_inscritos, 'number', 'min="0"') + '</div>' +
+    campo('d_ins', 'Inscritos', o.inscritos, 'number', 'min="0"') + campo('d_min', 'Mínimo de inscritos (punto de equilibrio)', o.minimo_inscritos, 'number', 'min="0"') +
+    (o.estado === 'Aplazado' ? campo('d_motap', 'Motivo del aplazamiento' + (esPend(F, 'Motivo del aplazamiento') ? ' (obligatorio)' : ''), o.motivo_aplazamiento, 'text', esPend(F, 'Motivo del aplazamiento') ? PEND_ESTILO : '') : '') + '</div>' +
     '<div class="f"><label>Personas de apoyo</label>' + checksPersonas('d_apoyo', apoyos, o.responsable) + '</div>' +
     '<h3 style="margin-top:8px">Requisitos para abrir inscripciones</h3><div class="fgrid">' +
-    campo('d_prop', 'Propuesta (referencia)', o.propuesta) + campo('d_sap', 'SAP', o.sap) + campo('d_oi', 'Orden interna (OI)', o.orden_interna) +
+    campo('d_prop', 'Propuesta (referencia)', o.propuesta) + campo('d_sap', 'SAP' + (esPend(F, 'SAP') ? ' (obligatorio)' : ''), o.sap, 'text', esPend(F, 'SAP') ? PEND_ESTILO : '') + campo('d_oi', 'Orden interna (OI)' + (esPend(F, 'Orden interna') ? ' (obligatoria)' : ''), o.orden_interna, 'text', esPend(F, 'Orden interna') ? PEND_ESTILO : '') +
     campo('d_avf', 'Fecha del aval de presupuesto', o.aval_fecha, 'date') + campo('d_avr', 'Referencia del aval (correo)', o.aval_referencia) + '</div>' +
     campo('d_motivo', 'Motivo (obligatorio si cambias una fecha que ya estaba registrada)', '') +
     '<button class="btn" type="submit">Guardar cambios</button></form></section>';
   return '<div class="stack">' +
     (conds.length ? '<section class="card pin"><h2>Notas que no se pueden olvidar</h2>' + conds.map((n) => '<div class="row"><b>' + esc(n.texto) + '</b><small>' + esc(n.autor) + ' · ' + fechaHora(n.creada_en) + '</small></div>').join('') + '</section>' : '') +
-    '<section class="card"><h2>Ciclo de vida</h2><div class="steps">' + pasos + '</div>' + accion + '</section>' + form + '</div>';
+    '<section class="card"><h2>Ciclo de vida</h2>' + (pasos ? '<div class="steps">' + pasos + '</div>' : '') + accion + '</section>' + form + '</div>';
 }
-function estadoEjec(tipo) { return tipo === 'Evento' ? 'En ejecucion' : 'Ejecucion'; }
+function estadoEjec(tipo) { return TIPOS_EVENTO.indexOf(tipo) >= 0 ? 'En ejecucion' : 'Ejecucion'; }
 
 function fichaChecklist(F) {
   const items = F.checklist; const na = items.filter((i) => i.estado === 'No aplica').length; const ok = items.filter((i) => i.estado === 'Cumplido').length;
@@ -464,6 +499,8 @@ app.addEventListener('submit', async (ev) => {
     const apoyos = Array.from(document.querySelectorAll('input[name=d_apoyo]:checked')).map((x) => x.value).join(',');
     const nuevo = { nombre: val('d_nombre'), programa_base: val('d_prog'), cohorte: val('d_coh'), publico: val('d_pub'), responsable: val('d_resp'), apoyos, fecha_inicio: val('d_fi'), fecha_fin: val('d_ff'), link: val('d_link'), espacio: val('d_esp'), codigo_aula: val('d_aula'), inscritos: val('d_ins'), minimo_inscritos: val('d_min'), propuesta: val('d_prop'), sap: val('d_sap'), orden_interna: val('d_oi'), aval_fecha: val('d_avf'), aval_referencia: val('d_avr') };
     const norm = (k, v) => (k === 'apoyos' ? String(v).split(',').filter(Boolean).sort().join(',') : String(v === undefined || v === null ? '' : v));
+    if (document.getElementById('d_tipo')) nuevo.tipo = val('d_tipo');
+    if (document.getElementById('d_motap')) nuevo.motivo_aplazamiento = val('d_motap');
     const cambios = {}; Object.keys(nuevo).forEach((k) => { if (norm(k, nuevo[k]) !== norm(k, o[k])) cambios[k] = nuevo[k]; });
     if (!Object.keys(cambios).length) { flash('ok', 'No hay cambios por guardar.'); vistaFicha(); return; }
     await conAviso(() => api('guardarOferta', { id: S.fichaId, cambios, motivo: val('d_motivo') }), 'Cambios guardados.', (r) => { if (r.ficha) S.ficha = r.ficha; });
@@ -489,11 +526,18 @@ app.addEventListener('click', async (ev) => {
   }
   else if (a === 'ftipo') { S.filtroTipo = b.dataset.v; vistaInicio(); }
   else if (a === 'falerta') { S.soloAlerta = !S.soloAlerta; vistaInicio(); }
+  else if (a === 'fpend' || a === 'verpend') { S.soloPend = a === 'verpend' ? true : !S.soloPend; vistaInicio(); }
   else if (a === 'apoyar') { try { await api('apoyar', { id: b.dataset.id, unirse: b.dataset.u === '1' }); flash('ok', b.dataset.u === '1' ? 'Ahora apoyas esta oferta.' : 'Dejaste de apoyar esta oferta.'); } catch (e) { flash('err', e.message); } ruta(); }
   else if (a === 'tab') { S.tab = b.dataset.v; S.flash = null; vistaFicha(); }
   else if (a === 'estado') {
     const atras = b.dataset.atras === '1';
     await conAviso(() => api('cambiarEstado', { id: S.fichaId, estado: b.dataset.v, motivo: atras ? val('m_atras') : '' }), 'Estado actualizado.', (r) => { S.ficha = r.ficha; });
+  } else if (a === 'confirmar') {
+    await conAviso(() => api('confirmarEstado', { id: S.fichaId, estado: val('c_estado') }), 'Estado confirmado.', (r) => { S.ficha = r.ficha; });
+  } else if (a === 'aplazar') {
+    await conAviso(() => api('aplazar', { id: S.fichaId, motivo: val('ap_motivo'), nueva_fecha: val('ap_fecha') }), 'La oferta quedó aplazada.', (r) => { S.ficha = r.ficha; });
+  } else if (a === 'reactivar') {
+    await conAviso(() => api('reactivar', { id: S.fichaId, estado: val('re_estado') }), 'La oferta fue reactivada.', (r) => { S.ficha = r.ficha; });
   } else if (a === 'cancelar') {
     await conAviso(() => api('cambiarEstado', { id: S.fichaId, estado: 'Cancelado', motivo_cancelacion: val('m_canc') }), 'La oferta quedó cancelada.', (r) => { S.ficha = r.ficha; });
   } else if (a === 'item') {
