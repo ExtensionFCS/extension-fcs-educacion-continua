@@ -68,6 +68,21 @@ td{padding:10px;border-bottom:1px solid #EEECF6;vertical-align:middle}
 details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff}summary{cursor:pointer;min-height:32px;display:flex;align-items:center;font-weight:500}
 .checks{display:flex;flex-wrap:wrap;gap:6px 16px}.checks label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
 .pin{background:#FFF8E1}
+.pill.o{background:#FF9F43;color:#1F1D2B}
+.dona{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.leg{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--ink);text-align:left;min-height:36px}.leg:hover{background:#F3F2FA}.leg small{color:var(--ink2);margin-left:auto}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+.aten{display:flex;align-items:baseline;gap:10px;width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:10px;cursor:pointer;text-align:left;color:var(--ink);min-height:56px}.aten:hover{border-color:var(--acc)}.aten .n{font-size:30px;font-weight:700;color:#3F3890;line-height:1}.aten small{color:var(--ink2);font-size:13px}
+.filtros{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 12px;align-items:end;margin-bottom:10px}.filtros .f{margin:0}
+.checks2{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:12px}.checks2 label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
+.gh{display:flex;align-items:center;gap:10px;width:100%;border:1px solid var(--line);background:#F8F7FD;border-radius:10px;padding:10px 14px;margin-top:8px;cursor:pointer;font-size:15px;color:var(--ink);min-height:44px;text-align:left}.gh:hover{border-color:var(--acc)}
+.gh .car{color:var(--acc);width:14px}.gh .cnt{margin-left:auto;color:var(--ink2);font-size:13px}.gh .chs{display:flex;gap:6px;flex-wrap:wrap}
+.orow{display:flex;gap:12px;align-items:center;padding:8px 6px;border-bottom:1px solid #EEECF6}
+.fchip{flex:none;width:52px;text-align:center;border-radius:10px;background:var(--accsoft);padding:6px 0}.fchip b{display:block;font-size:20px;line-height:1.1;color:#3F3890}.fchip span{font-size:11px;text-transform:uppercase;color:var(--ink2)}.fchip.sinf{background:#F0EFF6}.fchip.sinf b{color:var(--ink2)}
+.otxt{flex:1;min-width:0}.otxt a{font-weight:500}.otxt small{display:block;color:var(--ink2);font-size:13px;margin-top:1px}
+.obad{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.prox{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid #EEECF6;font-size:14px}.prox small{display:block;color:var(--ink2);font-size:13px}
+.lim{max-height:340px;overflow-y:auto}
 .cal{min-width:760px}.calh,.calw{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.calh{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px}.calw{margin-bottom:6px}
 .cell{min-height:110px;border:1px solid #E3E0F2;border-radius:8px;padding:6px;background:#fff;font-size:12px}.cell.vacia{background:var(--bg);border-style:dashed}.cell.hoy{border:2px solid var(--acc)}.cell.fest{background:#F3F2F8}
 .cell .n{font-weight:700;font-size:13px;margin-bottom:4px}
@@ -86,7 +101,7 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbwQsXDwxd6g0mUWqQoMNzAz-1oP4qZaqDP8HWIl_-gz7SvTxZ0u3QrVYB7THE3i7HHQ/exec';
 
 /* ---------- estado ---------- */
-const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '', mesCal: '', precargado: false, soloPend: false };
+const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '', mesCal: '', precargado: false, soloPend: false, verProx: false, abiertos: {}, fx: null };
 try { S.token = sessionStorage.getItem('ec_token') || ''; } catch (e) { S.token = ''; }
 
 /* ---------- utilidades ---------- */
@@ -114,8 +129,8 @@ function fechaHora(f) {
   if (!f) return '';
   return fecha(f) + (f.length > 10 ? ' · ' + f.slice(11, 16) : '');
 }
-const SEM = { verde: ['v', 'Verde'], amarillo: ['a', 'Amarillo'], rojo: ['r', 'Rojo'], gris: ['g', 'Cerrada'], sin_fecha: ['g', 'Sin fecha'] };
-const semPill = (c, motivo) => { const x = SEM[c] || ['g', '—']; const txt = (c === 'gris' && motivo) ? motivo : x[1]; return '<span class="pill ' + x[0] + '">' + esc(txt) + '</span>'; };
+const SEM = { verde: ['v', 'Verde'], amarillo: ['a', 'Amarillo'], rojo: ['r', 'Rojo'], gris: ['g', 'Cerrada'], sin_fecha: ['g', 'Sin fecha'], pendiente: ['a', 'Por definir'] };
+const semPill = (c, motivo) => { const x = SEM[c] || ['g', '—']; const txt = (c === 'gris' && motivo) ? motivo : x[1]; return '<span class="pill ' + x[0] + '" title="' + esc(motivo || '') + '">' + esc(txt) + '</span>'; };
 const TIPOS_EVENTO = ['Evento', 'Congreso', 'Simposio', 'Foro', 'Concurso'];
 const pendTxt = (arr) => arr.map(t).join(', ');
 const pill = (cls, txt) => '<span class="pill ' + cls + '">' + esc(txt) + '</span>';
@@ -214,59 +229,160 @@ function vistaError(msg, reintento) {
   S.reintento = reintento;
 }
 
+/* ----- Cronograma y explorador (Inicio y Mis ofertas) ----- */
+const CAT = { insc: ['En inscripciones', '#4B44A3'], ejec: ['En ejecución', '#0F766E'], prep: ['En preparación', '#8E88C9'], sin: ['Sin estado (por definir)', '#FFB020'], apl: ['Aplazadas', '#E08A00'], fin: ['Finalizadas', '#9A97B5'], canc: ['Canceladas', '#C9C6DA'] };
+const CAT_ORDEN = ['insc', 'ejec', 'prep', 'sin', 'apl', 'fin', 'canc'];
+const PREP = ['Ideacion', 'Idea', 'Negociacion', 'Presupuesto', 'En diseno', 'Aprobado'];
+function catEstado(o) {
+  const e = o.estado;
+  if (!e) return 'sin'; if (e === 'Finalizado') return 'fin'; if (e === 'Cancelado') return 'canc'; if (e === 'Aplazado') return 'apl';
+  if (e === 'Ejecucion' || e === 'En ejecucion') return 'ejec'; if (e === 'Apertura e inscripciones' || e === 'Abierto') return 'insc';
+  return PREP.indexOf(e) >= 0 ? 'prep' : 'sin';
+}
+const esActiva = (o) => ['fin', 'canc'].indexOf(catEstado(o)) < 0;
+const hayAlerta = (o) => o.semaforo === 'rojo' || o.semaforo === 'amarillo';
+function fxInicial(ctx) { return { q: '', tipo: '', cat: 'activas', resp: '', alerta: false, pend: false, agrupar: 'mes', alcance: ctx === 'mis' ? 'ambas' : 'todas' }; }
+S.fx = { inicio: fxInicial('inicio'), mis: fxInicial('mis') };
+const vista = (ctx) => (ctx === 'mis' ? vistaMis() : vistaInicio());
+function irExplorador(ctx) { vista(ctx); const e = document.getElementById('expl'); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+function listaBase(ctx) {
+  const of = S.inicio.ofertas; const yo = S.persona.id; const al = S.fx[ctx].alcance;
+  if (ctx !== 'mis') return of;
+  if (al === 'mias') return of.filter((o) => o.responsable === yo);
+  if (al === 'apoyo') return of.filter((o) => o.apoyos.indexOf(yo) >= 0);
+  if (al === 'otras') return of.filter((o) => o.responsable !== yo && o.apoyos.indexOf(yo) < 0);
+  return of.filter((o) => o.responsable === yo || o.apoyos.indexOf(yo) >= 0);
+}
+function filtrar(ctx) {
+  const f = S.fx[ctx]; const q = f.q.trim().toLowerCase();
+  return listaBase(ctx).filter((o) => {
+    const c = catEstado(o);
+    if (f.cat === 'activas' ? !esActiva(o) : (f.cat !== 'todas' && c !== f.cat)) return false;
+    if (f.tipo === 'sin' ? !!o.tipo : (f.tipo && o.tipo !== f.tipo)) return false;
+    if (f.resp === 'sin' ? !!o.responsable : (f.resp && o.responsable !== f.resp)) return false;
+    if (f.alerta && !hayAlerta(o)) return false;
+    if (f.pend && !o.pendientes.length) return false;
+    if (q && (o.nombre + ' ' + o.id + ' ' + o.orden_interna).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+}
+function agrupar(lista, modo, f) {
+  const g = {};
+  const add = (k, label, orden, o) => { (g[k] = g[k] || { k, label, orden, items: [] }).items.push(o); };
+  lista.forEach((o) => {
+    if (modo === 'mes') { if (o.fecha_inicio) add(o.fecha_inicio.slice(0, 7), MESES_L[Number(o.fecha_inicio.slice(5, 7)) - 1] + ' ' + o.fecha_inicio.slice(0, 4), o.fecha_inicio.slice(0, 7), o); else add('sin', 'Sin fecha de inicio', '9999', o); }
+    else if (modo === 'estado') { const c = catEstado(o); add(c, CAT[c][0], String(CAT_ORDEN.indexOf(c)), o); }
+    else if (modo === 'resp') add(o.responsable || 'sin', o.responsable ? nombrePersona(o.responsable) : 'Sin responsable', o.responsable ? nombrePersona(o.responsable) : 'zzz', o);
+    else add(o.tipo || 'sin', o.tipo ? t(o.tipo) : 'Sin tipo', o.tipo ? t(o.tipo) : 'zzz', o);
+  });
+  let arr = Object.keys(g).map((k) => g[k]).sort((a, b) => (a.orden < b.orden ? -1 : a.orden > b.orden ? 1 : 0));
+  if (modo === 'mes' && (f.cat === 'fin' || f.cat === 'canc')) { const sf = arr.filter((x) => x.k === 'sin'); arr = arr.filter((x) => x.k !== 'sin').reverse().concat(sf); }
+  arr.forEach((x) => x.items.sort((a, b) => ((a.fecha_inicio || '9999') < (b.fecha_inicio || '9999') ? -1 : 1)));
+  return arr;
+}
+function mesSiguiente(m) { let y = Number(m.slice(0, 4)); let n = Number(m.slice(5, 7)) + 1; if (n > 12) { n = 1; y += 1; } return y + '-' + (n < 10 ? '0' : '') + n; }
+function grupoAbierto(ctx, modo, g, i, total) {
+  const key = ctx + '|' + modo + '|' + g.k;
+  if (key in S.abiertos) return S.abiertos[key];
+  if (total <= 12) return true;
+  if (modo === 'mes') { const hoy = S.inicio.hoy.slice(0, 7); return g.k === hoy || g.k === mesSiguiente(hoy); }
+  return i === 0;
+}
+function filaOferta(o, ctx) {
+  const yo = S.persona.id; const f = S.fx[ctx];
+  const fch = o.fecha_inicio ? '<div class="fchip"><b>' + Number(o.fecha_inicio.slice(8, 10)) + '</b><span>' + MESES[Number(o.fecha_inicio.slice(5, 7)) - 1] + '</span></div>' : '<div class="fchip sinf"><b>—</b><span>sin fecha</span></div>';
+  const sub = [o.tipo ? t(o.tipo) : 'Sin tipo', o.responsable ? primerNombre(o.responsable) : 'Sin responsable', o.estado ? t(o.estado) : 'Sin estado'].join(' · ');
+  let bad = '';
+  if (hayAlerta(o)) bad += semPill(o.semaforo, o.semaforo_motivo);
+  if (o.semaforo === 'pendiente') bad += pill('a', 'Estado por definir');
+  if (o.pendientes.length) bad += '<span class="pill a" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + (o.pendientes.length > 1 ? ' pendientes' : ' pendiente') + '</span>';
+  if (ctx === 'mis' && f.alcance === 'otras') bad += '<button class="btn" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="1">Unirme como apoyo</button>';
+  else if (ctx === 'mis' && o.apoyos.indexOf(yo) >= 0 && o.responsable !== yo) bad += '<button class="btn sec" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="0">Dejar de apoyar</button>';
+  return '<div class="orow">' + fch + '<div class="otxt"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>' + esc(sub) + '</small></div><div class="obad">' + bad + '</div></div>';
+}
+function gruposActuales(ctx) { const f = S.fx[ctx]; return agrupar(filtrar(ctx), f.agrupar, f); }
+function htmlResultados(ctx) {
+  const f = S.fx[ctx]; const lista = filtrar(ctx);
+  const filtrado = f.q || f.tipo || f.resp || f.alerta || f.pend || f.cat !== 'activas' || (ctx === 'mis' && f.alcance !== 'ambas');
+  if (!lista.length) return '<p class="sub" style="margin:8px 0">' + (listaBase(ctx).length ? 'Ninguna oferta coincide con estos filtros.' : (ctx === 'mis' ? 'Todavía no tienes ofertas asignadas.' : 'Todavía no hay ofertas. Crea la primera en «Nueva oferta».')) + '</p>' + (filtrado ? '<button class="btn sec" data-act="limpiar" data-ctx="' + ctx + '">Quitar filtros</button>' : '');
+  const grupos = agrupar(lista, f.agrupar, f);
+  const barra = '<div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:4px 0 4px"><span class="note" style="margin:0"><b>' + lista.length + '</b> ' + (lista.length === 1 ? 'oferta' : 'ofertas') + ' en ' + grupos.length + (grupos.length === 1 ? ' grupo' : ' grupos') + '</span>' +
+    '<button class="btn sec" style="min-height:36px" data-act="todos" data-ctx="' + ctx + '" data-v="1">Desplegar todo</button><button class="btn sec" style="min-height:36px" data-act="todos" data-ctx="' + ctx + '" data-v="0">Contraer todo</button>' +
+    (filtrado ? '<button class="btn sec" style="min-height:36px" data-act="limpiar" data-ctx="' + ctx + '">Quitar filtros</button>' : '') + '</div>';
+  return barra + grupos.map((g, i) => {
+    const key = ctx + '|' + f.agrupar + '|' + g.k; const ab = grupoAbierto(ctx, f.agrupar, g, i, lista.length);
+    const nr = g.items.filter((o) => o.semaforo === 'rojo').length; const na = g.items.filter((o) => o.semaforo === 'amarillo').length; const np = g.items.filter((o) => o.pendientes.length).length;
+    const chs = (nr ? '<span class="pill r">' + nr + ' rojo' + '</span>' : '') + (na ? '<span class="pill a">' + na + ' amarillo</span>' : '') + (np ? '<span class="pill a" title="Con información pendiente">' + np + ' pend.</span>' : '');
+    return '<button class="gh" data-act="grupo" data-ctx="' + ctx + '" data-key="' + esc(key) + '" aria-expanded="' + ab + '"><span class="car">' + (ab ? '▾' : '▸') + '</span><b>' + esc(g.label) + '</b><span class="chs">' + chs + '</span><span class="cnt">' + g.items.length + '</span></button>' +
+      (ab ? '<div>' + g.items.map((o) => filaOferta(o, ctx)).join('') + '</div>' : '');
+  }).join('');
+}
+function pintarResultados(ctx) { const e = document.getElementById('expl_res'); if (e) e.innerHTML = htmlResultados(ctx); }
+function selectFx(ctx, k, etiqueta, opciones) {
+  return '<div class="f"><label for="fx_' + k + '">' + etiqueta + '</label><select id="fx_' + k + '" data-fx="' + k + '" data-ctx="' + ctx + '">' + opciones.map((x) => opcion(x[0], x[1], S.fx[ctx][k] === x[0])).join('') + '</select></div>';
+}
+function explorador(ctx, titulo) {
+  const f = S.fx[ctx];
+  const tipos = [['', 'Todos los tipos']].concat((S.cat.tipos || []).map((x) => [x, t(x)])).concat([['sin', 'Sin tipo']]);
+  const cats = [['activas', 'Activas'], ['todas', 'Todas']].concat(CAT_ORDEN.map((k) => [k, CAT[k][0]]));
+  const agr = [['mes', 'Mes (cronograma)'], ['estado', 'Estado'], ['resp', 'Responsable'], ['tipo', 'Tipo']];
+  const resp = [['', 'Todos los responsables']].concat(S.cat.personas.map((p) => [p.id, p.nombre])).concat([['sin', 'Sin responsable']]);
+  const alc = [['ambas', 'Las que lidero y apoyo'], ['mias', 'Solo las que lidero'], ['apoyo', 'Solo las que apoyo'], ['otras', 'Otras del equipo (para unirme)']];
+  return '<section class="card" id="expl"><h2>' + titulo + '</h2><div class="filtros">' +
+    '<div class="f"><label for="fx_q">Buscar</label><input id="fx_q" type="search" placeholder="Nombre, código u orden interna" value="' + esc(f.q) + '" data-fx="q" data-ctx="' + ctx + '"></div>' +
+    (ctx === 'mis' ? selectFx(ctx, 'alcance', 'Mostrar', alc) : selectFx(ctx, 'resp', 'Responsable', resp)) +
+    selectFx(ctx, 'cat', 'Estado', cats) + selectFx(ctx, 'tipo', 'Tipo', tipos) + selectFx(ctx, 'agrupar', 'Agrupar por', agr) + '</div>' +
+    '<div class="checks2"><label><input type="checkbox" id="fx_alerta" data-fx="alerta" data-ctx="' + ctx + '"' + (f.alerta ? ' checked' : '') + '> Solo con alerta</label><label><input type="checkbox" id="fx_pend" data-fx="pend" data-ctx="' + ctx + '"' + (f.pend ? ' checked' : '') + '> Solo con información pendiente</label></div>' +
+    '<div id="expl_res">' + htmlResultados(ctx) + '</div></section>';
+}
+function dona(of) {
+  const cnt = {}; of.forEach((o) => { const c = catEstado(o); cnt[c] = (cnt[c] || 0) + 1; });
+  const total = of.length; const claves = CAT_ORDEN.filter((k) => cnt[k]);
+  if (!total) return '<p class="sub" style="margin:0">Todavía no hay ofertas.</p>';
+  const R = 54; const C = 2 * Math.PI * R; let acc = 0;
+  const segs = claves.map((k) => { const len = C * cnt[k] / total; const x = '<circle r="' + R + '" cx="70" cy="70" fill="none" stroke="' + CAT[k][1] + '" stroke-width="22" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-acc).toFixed(2) + '" transform="rotate(-90 70 70)"></circle>'; acc += len; return x; }).join('');
+  const svg = '<svg viewBox="0 0 140 140" width="150" height="150" role="img" aria-label="Ofertas por estado: ' + claves.map((k) => CAT[k][0] + ' ' + cnt[k]).join(', ') + '">' + segs + '<text x="70" y="70" text-anchor="middle" font-size="28" font-weight="700" fill="#3F3890">' + total + '</text><text x="70" y="88" text-anchor="middle" font-size="11" fill="#4A4766">ofertas</text></svg>';
+  const leg = claves.map((k) => '<button class="leg" data-act="cat" data-v="' + k + '"><span class="sw" style="background:' + CAT[k][1] + '"></span>' + esc(CAT[k][0]) + ' <b>' + cnt[k] + '</b><small>' + Math.round(100 * cnt[k] / total) + '%</small></button>').join('');
+  return '<div class="dona"><div style="flex:none">' + svg + '</div><div style="flex:1 1 170px;min-width:0">' + leg + '</div></div><p class="note" style="margin:8px 0 0">Toca un estado para ver esas ofertas.</p>';
+}
+function clsProx(d) { return d <= 3 ? 'r' : d <= 5 ? 'o' : d <= 10 ? 'a' : ''; }
+
 /* ----- Inicio ----- */
 function diasTxt(d) { return d === null || d === undefined ? '—' : (d < 0 ? 'Hace ' + (-d) + ' días' : d === 0 ? 'Hoy' : d + ' días'); }
 function vistaInicio() {
   const of = S.inicio.ofertas;
-  const activa = (o) => o.estado !== 'Cancelado' && o.estado !== 'Finalizado';
-  const prox = of.filter((o) => activa(o) && o.dias !== null && o.dias >= 0 && o.dias <= 30).sort((a, b) => a.dias - b.dias);
-  const alertas = of.filter((o) => o.semaforo === 'rojo' || o.semaforo === 'amarillo').sort((a, b) => (a.semaforo === 'rojo' ? 0 : 1) - (b.semaforo === 'rojo' ? 0 : 1));
-  const tipos = ['Todas', 'Curso', 'Diplomado', 'Laboratorio', 'Evento', 'Otros'];
-  const principales = ['Curso', 'Diplomado', 'Laboratorio', 'Evento'];
-  const conPend = of.filter((o) => o.pendientes.length > 0);
-  let filas = of.filter((o) => (S.filtroTipo === 'Todas' || (S.filtroTipo === 'Otros' ? principales.indexOf(o.tipo) < 0 : o.tipo === S.filtroTipo)) &&
-    (!S.soloAlerta || o.semaforo === 'rojo' || o.semaforo === 'amarillo') && (!S.soloPend || o.pendientes.length > 0));
-  const q = S.buscar.trim().toLowerCase();
-  if (q) filas = filas.filter((o) => (o.nombre + ' ' + o.id + ' ' + o.orden_interna).toLowerCase().indexOf(q) >= 0);
-  const link = (o) => '<a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a>';
-  const card1 = '<section class="card"><h2>Próximos inicios · 30 días</h2><div class="big">' + prox.length + '</div>' +
-    prox.slice(0, 5).map((o) => '<div class="row">' + link(o) + '<small>' + fecha(o.fecha_inicio) + ' · faltan ' + diasTxt(o.dias) + '</small></div>').join('') + '</section>';
-  const card2 = '<section class="card"><h2>Ofertas con alerta</h2><div class="big">' + alertas.length + '</div>' +
-    alertas.slice(0, 5).map((o) => '<div class="row">' + link(o) + ' ' + semPill(o.semaforo, o.semaforo_motivo) + '<small>' + esc(o.semaforo_motivo) + '</small></div>').join('') + '</section>';
-  const card4 = '<section class="card" style="background:#FFF8E1"><h2>Información pendiente</h2><div class="big">' + conPend.length + '</div>' +
-    (conPend.length ? '<p class="note" style="margin:8px 0 0">Es obligatorio completarla.</p>' : '') +
-    conPend.slice(0, 5).map((o) => '<div class="row">' + link(o) + '<small>' + esc(pendTxt(o.pendientes)) + '</small></div>').join('') +
-    (conPend.length > 5 ? '<div class="row"><a href="#/inicio" data-act="verpend">Ver todas (' + conPend.length + ')</a></div>' : '') + '</section>';
-  const conteo = {}; of.forEach((o) => { const k = o.estado || 'Sin estado'; conteo[k] = (conteo[k] || 0) + 1; });
-  const card3 = '<section class="card"><h2>Ofertas por estado</h2><div class="big">' + of.length + '</div>' +
-    Object.keys(conteo).map((k) => '<div class="row">' + esc(t(k)) + ' <b>' + conteo[k] + '</b></div>').join('') + '</section>';
-  const tabla = filas.length ? '<div class="scroll"><table style="min-width:1250px"><thead><tr><th>Código / OI</th><th>Oferta</th><th>Tipo</th><th>Público</th><th>Responsable</th><th>Estado</th><th>Inicio</th><th>Faltan</th><th class="num">Inscritos / mínimo</th><th class="num">Checklist</th><th>Semáforo</th><th>Pendiente</th></tr></thead><tbody>' +
-    filas.map((o) => '<tr><td>' + esc(o.id) + '<small class="sm">' + esc(o.orden_interna || 'Sin OI') + '</small></td><td>' + link(o) + '</td><td>' + (o.tipo ? esc(t(o.tipo)) : '—') + '</td><td>' + (o.publico ? esc(o.publico) : '—') + '</td><td>' + (o.responsable ? esc(primerNombre(o.responsable)) : '—') + '</td><td>' + (o.estado ? esc(t(o.estado)) : '—') + '</td><td>' + fecha(o.fecha_inicio) + '</td><td>' + diasTxt(o.dias) + '</td><td class="num">' +
-      (o.inscritos === null ? '—' : o.inscritos) + ' / ' + (o.minimo === null ? '—' : o.minimo) + '</td><td class="num">' + (o.avance === null ? '—' : o.avance + '%') + '</td><td>' + semPill(o.semaforo, o.semaforo_motivo) + '</td><td>' + (o.pendientes.length ? '<span class="pill a" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + ' pendiente' + (o.pendientes.length > 1 ? 's' : '') + '</span>' : '—') + '</td></tr>').join('') + '</tbody></table></div>'
-    : '<p class="sub">' + (of.length ? 'Ninguna oferta coincide con el filtro.' : 'Todavía no hay ofertas. Crea la primera en «Nueva oferta».') + '</p>';
-  const cuerpo = '<h1>Inicio</h1><p class="sub">Todo el equipo ve aquí todas las ofertas de Educación continua. Fecha de hoy: ' + fecha(S.inicio.hoy) + '.</p>' +
-    '<div class="grid3">' + card1 + card2 + card4 + card3 + '</div><section class="card"><h2>Todas las ofertas</h2><div class="chips">' +
-    tipos.map((x) => '<button class="chip' + (S.filtroTipo === x ? ' on' : '') + '" data-act="ftipo" data-v="' + x + '">' + x + '</button>').join('') +
-    '<button class="chip' + (S.soloAlerta ? ' on' : '') + '" data-act="falerta">Solo con alerta</button>' +
-    '<button class="chip' + (S.soloPend ? ' on' : '') + '" data-act="fpend">Con información pendiente (' + conPend.length + ')</button></div>' +
-    '<div class="f" style="max-width:360px"><label for="bq">Buscar por nombre, código u orden interna</label><input id="bq" type="search" value="' + esc(S.buscar) + '"></div>' + tabla +
-    '<p class="note" style="margin-top:12px">El semáforo usa reglas provisionales que se definirán con Elisa: amarillo si faltan 15 días o menos y hay menos inscritos que el mínimo; rojo a 5 días o menos, o si la fecha de inicio ya pasó y la oferta no está en ejecución.</p></section>';
+  const prox = of.filter((o) => esActiva(o) && catEstado(o) !== 'apl' && o.dias !== null && o.dias >= 0 && o.dias <= 30).sort((a, b) => a.dias - b.dias);
+  const nRojo = of.filter((o) => o.semaforo === 'rojo').length; const nAma = of.filter((o) => o.semaforo === 'amarillo').length;
+  const nAlerta = nRojo + nAma; const nPend = of.filter((o) => o.pendientes.length > 0).length;
+  const verTodo = S.verProx; const mostradas = verTodo ? prox : prox.slice(0, 5);
+  const c1 = '<section class="card"><h2>Próximos inicios · 30 días</h2><div class="big">' + prox.length + '</div>' +
+    '<p class="note" style="margin:6px 0 4px"><span class="pill r">3 días o menos</span> <span class="pill o">5 o menos</span> <span class="pill a">10 o menos</span></p>' +
+    '<div class="' + (verTodo ? 'lim' : '') + '">' + (mostradas.length ? mostradas.map((o) => '<div class="prox"><div><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>' + fecha(o.fecha_inicio) + (o.responsable ? ' · ' + esc(primerNombre(o.responsable)) : '') + '</small></div>' +
+      '<span class="pill ' + (clsProx(o.dias) || 'g') + '">' + (o.dias === 0 ? 'Hoy' : 'en ' + o.dias + (o.dias === 1 ? ' día' : ' días')) + '</span></div>').join('') : '<div class="prox"><small>No hay inicios en los próximos 30 días.</small></div>') + '</div>' +
+    (prox.length > 5 ? '<button class="btn sec" style="margin-top:10px" data-act="prox">' + (verTodo ? 'Ver solo las primeras 5' : 'Ver las ' + prox.length) + '</button>' : '') + '</section>';
+  const c2 = '<section class="card"><h2>Requiere atención</h2>' +
+    '<button class="aten" data-act="verfiltro" data-ctx="inicio" data-v="alerta"><span class="n">' + nAlerta + '</span><span>ofertas con alerta<small>' + nRojo + ' rojo · ' + nAma + ' amarillo</small></span></button>' +
+    '<button class="aten" data-act="verfiltro" data-ctx="inicio" data-v="pend"><span class="n">' + nPend + '</span><span>con información pendiente<small>Es obligatorio completarla</small></span></button>' +
+    '<p class="note" style="margin:0">Toca una tarjeta para revisarlas abajo, agrupadas por mes.</p></section>';
+  const c3 = '<section class="card"><h2>Ofertas por estado</h2>' + dona(of) + '</section>';
+  const cuerpo = '<h1>Inicio</h1><p class="sub">Todo el equipo ve aquí todas las ofertas de Educación continua. Hoy es ' + fecha(S.inicio.hoy) + '.</p><div class="grid3">' + c1 + c2 + c3 + '</div>' +
+    explorador('inicio', 'Ofertas') +
+    '<p class="note" style="margin-top:12px">El semáforo usa reglas provisionales que se definirán con Elisa: amarillo si faltan 15 días o menos y hay menos inscritos que el mínimo; rojo a 5 días o menos, o si la fecha de inicio ya pasó y la oferta no está en ejecución. Las ofertas sin estado no se evalúan hasta confirmarlo.</p>';
   app.innerHTML = shell('inicio', cuerpo);
 }
 
 /* ----- Mis ofertas ----- */
 function vistaMis() {
-  const of = S.inicio.ofertas; const yo = S.persona.id;
-  const mias = of.filter((o) => o.responsable === yo);
-  const apoyo = of.filter((o) => o.apoyos.indexOf(yo) >= 0);
-  const otras = of.filter((o) => o.responsable !== yo && o.apoyos.indexOf(yo) < 0);
-  const fila = (o, btn) => '<div class="row" style="display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center"><div><a href="#/oferta/' + esc(o.id) + '"><b>' + esc(o.nombre) + '</b></a><small>' + esc(t(o.estado)) + ' · inicio ' + fecha(o.fecha_inicio) + ' · responsable ' + esc(primerNombre(o.responsable)) + '</small></div><div>' + semPill(o.semaforo, o.semaforo_motivo) + ' ' + (btn || '') + '</div></div>';
-  const lista = (arr, btn) => arr.length ? arr.map((o) => fila(o, btn ? btn(o) : '')).join('') : '<div class="row"><small>Nada por aquí todavía.</small></div>';
-  const cuerpo = '<h1>Mis ofertas · ' + esc(primerNombre(yo)) + '</h1><p class="sub">Aquí solo aparece lo tuyo: las ofertas que lideras y las que apoyas. El panorama completo está en Inicio.</p><div class="stack">' +
-    '<section class="card"><h2>Como responsable</h2>' + lista(mias) + '</section>' +
-    '<section class="card"><h2>Apoyando</h2>' + lista(apoyo, (o) => '<button class="btn sec" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="0">Dejar de apoyar</button>') + '</section>' +
-    '<section class="card"><h2>Otras ofertas del equipo</h2><p class="note">Si falta alguien en una oferta, puedes unirte como apoyo con un clic.</p>' +
-    lista(otras, (o) => '<button class="btn" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="1">Unirme como apoyo</button>') + '</section></div>';
+  const yo = S.persona.id;
+  const mias = S.inicio.ofertas.filter((o) => (o.responsable === yo || o.apoyos.indexOf(yo) >= 0) && esActiva(o));
+  const semana = mias.filter((o) => o.dias !== null && o.dias >= 0 && o.dias <= 7).length;
+  const mes = mias.filter((o) => o.dias !== null && o.dias >= 0 && o.dias <= 30).length;
+  const alertas = mias.filter(hayAlerta).length; const pend = mias.filter((o) => o.pendientes.length).length;
+  const stat = (n, txt, v) => '<button class="aten" style="margin:0" data-act="verfiltro" data-ctx="mis" data-v="' + v + '"><span class="n">' + n + '</span><span>' + txt + '</span></button>';
+  const cuerpo = '<h1>Mis ofertas · ' + esc(primerNombre(yo)) + '</h1><p class="sub">Tu cronograma: lo que lideras y apoyas, ordenado por fecha. Los grupos se pueden contraer.</p>' +
+    '<div class="grid3" style="margin-bottom:16px">' + stat(semana, 'inician esta semana', 'semana') + stat(mes, 'inician en los próximos 30 días', 'mes') + stat(alertas, 'con alerta', 'alerta') + stat(pend, 'con información pendiente', 'pend') + '</div>' +
+    explorador('mis', 'Mi cronograma');
   app.innerHTML = shell('mis', cuerpo);
 }
 
@@ -524,9 +640,18 @@ app.addEventListener('click', async (ev) => {
     else { let y = Number(S.mesCal.slice(0, 4)); let m = Number(S.mesCal.slice(5, 7)) + d; if (m < 1) { m = 12; y -= 1; } if (m > 12) { m = 1; y += 1; } S.mesCal = y + '-' + (m < 10 ? '0' : '') + m; }
     vistaCalendario();
   }
-  else if (a === 'ftipo') { S.filtroTipo = b.dataset.v; vistaInicio(); }
-  else if (a === 'falerta') { S.soloAlerta = !S.soloAlerta; vistaInicio(); }
-  else if (a === 'fpend' || a === 'verpend') { S.soloPend = a === 'verpend' ? true : !S.soloPend; vistaInicio(); }
+  else if (a === 'cat') { S.fx.inicio = Object.assign(fxInicial('inicio'), { cat: b.dataset.v }); irExplorador('inicio'); }
+  else if (a === 'verfiltro') {
+    const ctx = b.dataset.ctx; const f = fxInicial(ctx); const v = b.dataset.v;
+    if (ctx === 'inicio') f.cat = 'todas';
+    if (v === 'alerta') f.alerta = true; else if (v === 'pend') f.pend = true;
+    if (ctx === 'mis' && (v === 'semana' || v === 'mes')) f.agrupar = 'mes';
+    S.fx[ctx] = f; irExplorador(ctx);
+  }
+  else if (a === 'grupo') { S.abiertos[b.dataset.key] = b.getAttribute('aria-expanded') !== 'true'; pintarResultados(b.dataset.ctx); }
+  else if (a === 'todos') { const ctx = b.dataset.ctx; const f = S.fx[ctx]; gruposActuales(ctx).forEach((g) => { S.abiertos[ctx + '|' + f.agrupar + '|' + g.k] = b.dataset.v === '1'; }); pintarResultados(ctx); }
+  else if (a === 'limpiar') { const ctx = b.dataset.ctx; const alc = S.fx[ctx].alcance; S.fx[ctx] = fxInicial(ctx); S.fx[ctx].alcance = ctx === 'mis' ? 'ambas' : alc; vista(ctx); }
+  else if (a === 'prox') { S.verProx = !S.verProx; vistaInicio(); }
   else if (a === 'apoyar') { try { await api('apoyar', { id: b.dataset.id, unirse: b.dataset.u === '1' }); flash('ok', b.dataset.u === '1' ? 'Ahora apoyas esta oferta.' : 'Dejaste de apoyar esta oferta.'); } catch (e) { flash('err', e.message); } ruta(); }
   else if (a === 'tab') { S.tab = b.dataset.v; S.flash = null; vistaFicha(); }
   else if (a === 'estado') {
@@ -550,12 +675,14 @@ app.addEventListener('click', async (ev) => {
 });
 app.addEventListener('change', async (ev) => {
   const e = ev.target;
+  if (e.dataset && e.dataset.fx && e.dataset.fx !== 'q') { const ctx = e.dataset.ctx; S.fx[ctx][e.dataset.fx] = e.type === 'checkbox' ? e.checked : e.value; pintarResultados(ctx); return; }
   if (e.dataset && e.dataset.chg === 'obs') {
     await conAviso(() => api('guardarItem', { id: S.fichaId, idItem: e.dataset.item, observacion: e.value }), '', (r) => { S.ficha.checklist = r.checklist; });
   }
 });
 app.addEventListener('input', (ev) => {
-  if (ev.target.id === 'bq') { S.buscar = ev.target.value; const pos = ev.target.selectionStart; vistaInicio(); const n = document.getElementById('bq'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } }
+  const e = ev.target;
+  if (e.dataset && e.dataset.fx === 'q') { S.fx[e.dataset.ctx].q = e.value; pintarResultados(e.dataset.ctx); }
 });
 window.addEventListener('hashchange', ruta);
 ruta();
