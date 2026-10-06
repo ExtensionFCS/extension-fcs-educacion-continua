@@ -67,8 +67,11 @@ td{padding:10px;border-bottom:1px solid #EEECF6;vertical-align:middle}
 .login{max-width:420px;margin:12vh auto 0;padding:0 20px}
 details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff}summary{cursor:pointer;min-height:32px;display:flex;align-items:center;font-weight:500}
 .checks{display:flex;flex-wrap:wrap;gap:6px 16px}.checks label{display:flex;align-items:center;gap:6px;margin:0;color:var(--ink);font-size:14px}
-.pin{background:#FFF8E1}
-.pill.o{background:#FF9F43;color:#1F1D2B}
+.pin{background:#F3F2FA;border-color:#B9B4E4}
+.pill.o{background:#FF8A1F;color:#1F1D2B}
+.pill.sr{background:#D32F2F;color:#fff}
+.pill.sa{background:#FFC400;color:#1F1D2B}
+.pill.pd{background:#fff;color:#3F3890;border:1px solid #8E88C9;font-weight:500}
 .dona{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
 .leg{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--ink);text-align:left;min-height:36px}.leg:hover{background:#F3F2FA}.leg small{color:var(--ink2);margin-left:auto}
 .sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
@@ -104,6 +107,7 @@ const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbwQsXDwxd6g0mUWqQo
 /* ---------- estado ---------- */
 const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, usuariosFrescos: false, ultimoUsuario: '', mesCal: '', precargado: false, soloPend: false, verProx: false, abiertos: {}, fx: null };
 try { S.token = sessionStorage.getItem('ec_token') || ''; } catch (e) { S.token = ''; }
+if (S.token) restaurarCache();
 
 /* ---------- utilidades ---------- */
 const app = document.getElementById('app');
@@ -130,7 +134,7 @@ function fechaHora(f) {
   if (!f) return '';
   return fecha(f) + (f.length > 10 ? ' · ' + f.slice(11, 16) : '');
 }
-const SEM = { verde: ['v', 'Verde'], amarillo: ['a', 'Amarillo'], rojo: ['r', 'Rojo'], gris: ['g', 'Cerrada'], sin_fecha: ['g', 'Sin fecha'], pendiente: ['a', 'Por definir'] };
+const SEM = { verde: ['v', 'Verde'], amarillo: ['sa', 'Amarillo'], rojo: ['sr', 'Rojo'], gris: ['g', 'Cerrada'], sin_fecha: ['g', 'Sin fecha'], pendiente: ['pd', 'Por definir'] };
 const semPill = (c, motivo) => { const x = SEM[c] || ['g', '—']; const txt = (c === 'gris' && motivo) ? motivo : x[1]; return '<span class="pill ' + x[0] + '" title="' + esc(motivo || '') + '">' + esc(txt) + '</span>'; };
 const TIPOS_EVENTO = ['Evento', 'Congreso', 'Simposio', 'Foro', 'Concurso'];
 const pendTxt = (arr) => arr.map(t).join(', ');
@@ -151,10 +155,11 @@ function mostrarRed() {
   if (pendientes > 0) { e.textContent = msgRed || 'Conectando con el servidor… puede tardar hasta un minuto. No cierres la página.'; e.style.display = 'block'; }
   else e.style.display = 'none';
 }
-async function enviar(accion, datos) {
+const ESPERADO = { usuarios: 'usuarios', sesion: 'persona', catalogo: 'personas', inicio: 'ofertas', ficha: 'oferta', login: 'token', crearOferta: 'id', guardarOferta: null, cambiarEstado: 'ficha', confirmarEstado: 'ficha', aplazar: 'ficha', reactivar: 'ficha', guardarItem: 'checklist', agregarItem: 'checklist', moverItem: 'checklist', agregarNota: 'notas', archivarNota: 'notas', agregarOpinion: 'opiniones' };
+async function enviar(accion, datos, limite) {
   const t0 = performance.now();
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), 120000);
+  const timer = setTimeout(() => ctl.abort(), limite || 90000);
   try {
     const r = await fetch(URL_SERVIDOR, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ accion, token: S.token }, datos || {})), signal: ctl.signal });
     const txt = await r.text();
@@ -162,7 +167,9 @@ async function enviar(accion, datos) {
     try { j = JSON.parse(txt); } catch (e) { j = null; }
     const tot = performance.now() - t0;
     if (j !== null && typeof j.ms === 'number') { const d = document.getElementById('diag'); if (d) d.textContent = accion + ': ' + (tot / 1000).toFixed(1) + ' s en total · servidor ' + (j.ms / 1000).toFixed(1) + ' s · Google/red ' + Math.max(0, (tot - j.ms) / 1000).toFixed(1) + ' s'; }
-    if (j === null) { const err = new Error('Google devolvió una página de error en lugar de los datos.'); err.transitorio = true; err.html = true; throw err; }
+    if (j === null || typeof j !== 'object') { const err = new Error('Google devolvió una página de error en lugar de los datos.'); err.transitorio = true; err.html = true; throw err; }
+    /* Una respuesta buena trae el dato que la acción pide. Si falta (o es el saludo del servidor), Google contestó con otra cosa. */
+    if (j.ok === true && (j.servicio !== undefined || (ESPERADO[accion] && j[ESPERADO[accion]] === undefined))) { const err = new Error('Google contestó con una respuesta que no es del sistema.'); err.transitorio = true; err.html = true; throw err; }
     if (!j.ok) {
       if (j.codigo === 'SESION') cerrarLocal();
       const err = new Error(j.error || 'Ocurrió un error.');
@@ -171,11 +178,13 @@ async function enviar(accion, datos) {
     }
     return j;
   } catch (e) {
-    if (e.name === 'AbortError') throw new Error('El servidor tardó más de dos minutos en responder. Intenta de nuevo en un rato.');
+    if (e.name === 'AbortError') { const err = new Error(limite ? 'Google tardó demasiado en responder.' : 'El servidor tardó demasiado en responder. Intenta de nuevo en un rato.'); err.transitorio = !!limite; err.tardo = true; throw err; }
     if (e instanceof TypeError) { const err = new Error('No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.'); err.transitorio = true; throw err; }
     throw e;
   } finally { clearTimeout(timer); }
 }
+/** Lecturas: si Google tarda o contesta mal, se cortan pronto y se repiten (casi siempre la repetición responde en segundos). Escrituras: una sola vez. */
+const LIMITES_LECTURA = [15000, 20000, 40000];
 async function api(accion, datos) {
   const esLectura = LECTURAS.indexOf(accion) >= 0;
   const intentos = esLectura ? 3 : 1;
@@ -183,11 +192,11 @@ async function api(accion, datos) {
   if (pendientes === 1) { msgRed = esLectura ? '' : 'Guardando… no cierres la página.'; clearTimeout(avisoT); avisoT = setTimeout(mostrarRed, esLectura ? 2000 : 500); }
   try {
     for (let n = 1; n <= intentos; n++) {
-      try { return await enviar(accion, datos); }
+      try { return await enviar(accion, datos, esLectura ? LIMITES_LECTURA[n - 1] : 90000); }
       catch (e) {
         if (!e.transitorio) throw e;
-        if (n < intentos) { msgRed = 'Google respondió con un error pasajero. Reintentando (' + (n + 1) + ' de ' + intentos + ')…'; mostrarRed(); await pausa(1500 * n); continue; }
-        if (esLectura) throw new Error(e.html ? 'Google devolvió una página de error en lugar de los datos. Suele ser pasajero: pulsa Reintentar en un momento.' : e.message);
+        if (n < intentos) { msgRed = 'Google respondió lento o con un error pasajero. Reintentando (' + (n + 1) + ' de ' + intentos + ')…'; mostrarRed(); await pausa(n === 1 ? 300 : 1500); continue; }
+        if (esLectura) throw new Error(e.html ? 'Google devolvió una respuesta equivocada en las tres pruebas. Suele ser pasajero: pulsa Reintentar en un momento.' : (e.tardo ? 'Google tardó demasiado en responder. Pulsa Reintentar.' : e.message));
         throw new Error('No se pudo confirmar si el cambio quedó guardado. Recarga la ficha y revisa el historial antes de repetirlo.');
       }
     }
@@ -198,7 +207,17 @@ async function api(accion, datos) {
 }
 function cerrarLocal() {
   S.token = ''; S.persona = null; S.cat = null; S.inicio = null; S.ficha = null;
-  try { sessionStorage.removeItem('ec_token'); } catch (e) { /* sin almacenamiento */ }
+  try { sessionStorage.removeItem('ec_token'); sessionStorage.removeItem('ec_cache'); } catch (e) { /* sin almacenamiento */ }
+}
+/** Guarda lo ya cargado para que, al recargar la página, Inicio aparezca al instante y se actualice por detrás. */
+function guardarCache() {
+  try { if (S.persona && S.cat && S.inicio) sessionStorage.setItem('ec_cache', JSON.stringify({ persona: S.persona, cat: S.cat, inicio: S.inicio })); } catch (e) { /* sin almacenamiento */ }
+}
+function restaurarCache() {
+  try {
+    const c = JSON.parse(sessionStorage.getItem('ec_cache') || 'null');
+    if (c && c.persona && c.cat && c.inicio && c.inicio.ofertas) { S.persona = c.persona; S.cat = c.cat; S.inicio = c.inicio; S.inicioT = Date.now() - 60000; }
+  } catch (e) { /* cache dañada: se ignora */ }
 }
 
 /* ---------- vistas ---------- */
@@ -309,8 +328,7 @@ function filaOferta(o, ctx) {
   const sub = [o.tipo ? t(o.tipo) : 'Sin tipo', o.responsable ? primerNombre(o.responsable) : 'Sin responsable', o.estado ? t(o.estado) : 'Sin estado'].join(' · ');
   let bad = '';
   if (hayAlerta(o)) bad += semPill(o.semaforo, o.semaforo_motivo);
-  if (o.semaforo === 'pendiente') bad += pill('a', 'Estado por definir');
-  if (o.pendientes.length) bad += '<span class="pill a" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + (o.pendientes.length > 1 ? ' pendientes' : ' pendiente') + '</span>';
+  if (o.pendientes.length) bad += '<span class="pill pd" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + (o.pendientes.length > 1 ? ' pendientes' : ' pendiente') + '</span>';
   if (ctx === 'mis' && f.alcance === 'otras') bad += '<button class="btn" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="1">Unirme como apoyo</button>';
   else if (ctx === 'mis' && o.apoyos.indexOf(yo) >= 0 && o.responsable !== yo) bad += '<button class="btn sec" data-act="apoyar" data-id="' + esc(o.id) + '" data-u="0">Dejar de apoyar</button>';
   return '<div class="orow">' + fch + '<div class="otxt"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>' + esc(sub) + '</small></div><div class="obad">' + bad + '</div></div>';
@@ -327,7 +345,7 @@ function htmlResultados(ctx) {
   return barra + grupos.map((g, i) => {
     const key = ctx + '|' + f.agrupar + '|' + g.k; const ab = grupoAbierto(ctx, f.agrupar, g, i, lista.length);
     const nr = g.items.filter((o) => o.semaforo === 'rojo').length; const na = g.items.filter((o) => o.semaforo === 'amarillo').length; const np = g.items.filter((o) => o.pendientes.length).length;
-    const chs = (nr ? '<span class="pill r">' + nr + ' rojo' + '</span>' : '') + (na ? '<span class="pill a">' + na + ' amarillo</span>' : '') + (np ? '<span class="pill a" title="Con información pendiente">' + np + ' pend.</span>' : '');
+    const chs = (nr ? '<span class="pill sr">' + nr + ' rojo' + '</span>' : '') + (na ? '<span class="pill sa">' + na + ' amarillo</span>' : '') + (np ? '<span class="pill pd" title="Con información pendiente">' + np + ' pend.</span>' : '');
     return '<button class="gh" data-act="grupo" data-ctx="' + ctx + '" data-key="' + esc(key) + '" aria-expanded="' + ab + '"><span class="car">' + (ab ? '▾' : '▸') + '</span><b>' + esc(g.label) + '</b><span class="chs">' + chs + '</span><span class="cnt">' + g.items.length + '</span></button>' +
       (ab ? '<div>' + g.items.map((o) => filaOferta(o, ctx)).join('') + '</div>' : '');
   }).join('');
@@ -360,7 +378,7 @@ function dona(of) {
   const leg = claves.map((k) => '<button class="leg" data-act="cat" data-v="' + k + '"><span class="sw" style="background:' + CAT[k][1] + '"></span>' + esc(CAT[k][0]) + ' <b>' + cnt[k] + '</b><small>' + Math.round(100 * cnt[k] / total) + '%</small></button>').join('');
   return '<div class="dona"><div style="flex:none">' + svg + '</div><div style="flex:1 1 170px;min-width:0">' + leg + '</div></div><p class="note" style="margin:8px 0 0">Toca un estado para ver esas ofertas.</p>';
 }
-function clsProx(d) { return d <= 3 ? 'r' : d <= 5 ? 'o' : d <= 10 ? 'a' : ''; }
+function clsProx(d) { return d <= 3 ? 'sr' : d <= 5 ? 'o' : d <= 10 ? 'sa' : ''; }
 
 /* ----- Inicio ----- */
 function diasTxt(d) { return d === null || d === undefined ? '—' : (d < 0 ? 'Hace ' + (-d) + ' días' : d === 0 ? 'Hoy' : d + ' días'); }
@@ -371,7 +389,7 @@ function vistaInicio() {
   const nAlerta = nRojo + nAma; const nPend = of.filter((o) => o.pendientes.length > 0).length;
   const verTodo = S.verProx; const mostradas = verTodo ? prox : prox.slice(0, 5);
   const c1 = '<section class="card"><h2>Próximos inicios · 30 días</h2><div class="big">' + prox.length + '</div>' +
-    '<p class="note" style="margin:6px 0 4px"><span class="pill r">3 días o menos</span> <span class="pill o">5 o menos</span> <span class="pill a">10 o menos</span></p>' +
+    '<p class="note" style="margin:6px 0 4px"><span class="pill sr">3 días o menos</span> <span class="pill o">5 o menos</span> <span class="pill sa">10 o menos</span></p>' +
     '<div class="' + (verTodo ? 'lim' : '') + '">' + (mostradas.length ? mostradas.map((o) => '<div class="prox"><div><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>' + fecha(o.fecha_inicio) + (o.responsable ? ' · ' + esc(primerNombre(o.responsable)) : '') + '</small></div>' +
       '<span class="pill ' + (clsProx(o.dias) || 'g') + '">' + (o.dias === 0 ? 'Hoy' : 'en ' + o.dias + (o.dias === 1 ? ' día' : ' días')) + '</span></div>').join('') : '<div class="prox"><small>No hay inicios en los próximos 30 días.</small></div>') + '</div>' +
     (prox.length > 5 ? '<button class="btn sec" style="margin-top:10px" data-act="prox">' + (verTodo ? 'Ver solo las primeras 5' : 'Ver las ' + prox.length) + '</button>' : '') + '</section>';
@@ -459,7 +477,7 @@ function vistaNueva() {
 function vistaFicha() {
   const F = S.ficha; const o = F.oferta;
   const tabs = [['datos', 'Datos y estado'], ['check', 'Checklist'], ['fin', 'Finanzas'], ['pat', 'Patrocinadores'], ['notas', 'Notas (' + F.notas.filter((n) => n.vigente).length + ')'], ['hist', 'Opiniones e historial']];
-  const chips = [o.tipo ? pill('p', t(o.tipo)) : pill('a', 'Sin tipo'), o.publico ? pill('p', o.publico) : pill('a', 'Sin público'), o.estado ? pill(o.estado_por_confirmar === 'Si' ? 'a' : 'p', t(o.estado) + (o.estado_por_confirmar === 'Si' ? ' (por confirmar)' : '')) : pill('a', 'Sin estado')].join(' ') + ' ' + semPill(F.semaforo, F.semaforo_motivo);
+  const chips = [o.tipo ? pill('p', t(o.tipo)) : pill('pd', 'Sin tipo'), o.publico ? pill('p', o.publico) : pill('pd', 'Sin público'), o.estado ? pill(o.estado_por_confirmar === 'Si' ? 'pd' : 'p', t(o.estado) + (o.estado_por_confirmar === 'Si' ? ' (por confirmar)' : '')) : pill('pd', 'Sin estado')].join(' ') + ' ' + semPill(F.semaforo, F.semaforo_motivo);
   const banner = F.pendientes.length ? '<section class="card pin" style="margin-top:16px"><h2 style="margin-bottom:6px">Pendiente de información</h2><p class="sub" style="margin:0">Es obligatorio completar: <b>' + esc(pendTxt(F.pendientes)) + '</b>. Hazlo en «Datos y estado». Mientras tanto la oferta no puede avanzar de estado.</p></section>' : '';
   const cab = '<p class="note"><a href="#/inicio">← Volver a Inicio</a></p><section class="card"><h1>' + esc(o.nombre) + '</h1><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + chips +
     '<span class="sm" style="margin:0">' + esc(o.codigo_provisional) + ' · ' + esc(o.orden_interna ? 'OI ' + o.orden_interna : 'Sin orden interna') + ' · ' + esc(o.sap ? 'SAP ' + o.sap : 'Sin SAP') + '</span></div>' +
@@ -495,7 +513,7 @@ function fichaDatos(F) {
   } else if (sinTipo) {
     accion = '<p class="sub" style="margin:12px 0 0"><b>Primero indica el tipo de la oferta</b> en «Datos básicos». Con el tipo se definen los pasos y se crea el checklist.</p>';
   } else if (porConfirmar) {
-    accion = '<div style="margin-top:14px;padding:12px;border-radius:10px;background:#FFF8E1"><b>Confirma en qué estado está esta oferta</b><p class="note" style="margin:6px 0 8px">' + (o.estado ? 'Vino de otro registro como «' + esc(t(o.estado)) + '». Confírmalo o elige el correcto.' : 'No tiene estado. Elige el que corresponde.') + '</p>' +
+    accion = '<div style="margin-top:14px;padding:12px;border-radius:10px;background:#F3F2FA;border:1px solid #B9B4E4"><b>Confirma en qué estado está esta oferta</b><p class="note" style="margin:6px 0 8px">' + (o.estado ? 'Vino de otro registro como «' + esc(t(o.estado)) + '». Confírmalo o elige el correcto.' : 'No tiene estado. Elige el que corresponde.') + '</p>' +
       '<div class="f" style="max-width:340px"><label for="c_estado">Estado actual</label>' + selPasos('c_estado', o.estado) + '</div><button class="btn" data-act="confirmar">Confirmar el estado</button></div>' +
       '<div class="two" style="margin-top:14px">' + detAplazar + detCancelar + '</div>';
   } else {
@@ -575,19 +593,22 @@ async function ruta() {
   if (['inicio', 'mis', 'calendario', 'nueva', 'oferta'].indexOf(que) < 0) { location.hash = '#/inicio'; return; }
   cargando('Cargando…');
   try {
-    if (!S.persona) { S.persona = (await api('sesion')).persona; }
-    if (!S.cat) { S.cat = await api('catalogo'); }
+    const tareas = [];
+    if (!S.persona) tareas.push(api('sesion').then((r) => { S.persona = r.persona; }));
+    if (!S.cat) tareas.push(api('catalogo').then((r) => { S.cat = r; }));
     let refrescar = false;
     if (que === 'inicio' || que === 'mis' || que === 'calendario') {
       if (S.precargado && S.inicio) { S.precargado = false; S.inicioT = Date.now(); }
       else if (S.inicio && !S.inicioSucio && S.inicioT && Date.now() - S.inicioT < 600000) { refrescar = Date.now() - S.inicioT > 20000; }
-      else { S.inicio = await api('inicio'); S.inicioT = Date.now(); S.inicioSucio = false; }
+      else tareas.push(api('inicio').then((r) => { S.inicio = r; S.inicioT = Date.now(); S.inicioSucio = false; }));
     }
     if (que === 'oferta') {
       if (S.fichaId !== h[1]) { S.tab = 'datos'; const ya = S.inicio && S.inicio.ofertas.filter((o) => o.id === h[1])[0]; cargando(ya ? 'Abriendo «' + ya.nombre + '»…' : 'Abriendo la oferta…'); }
       S.fichaId = h[1];
-      S.ficha = await api('ficha', { id: h[1] });
+      tareas.push(api('ficha', { id: h[1] }).then((r) => { S.ficha = r; }));
     }
+    await Promise.all(tareas);
+    guardarCache();
     S.precargado = false;
     if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else if (que === 'calendario') vistaCalendario();
     else if (que === 'nueva') vistaNueva(); else vistaFicha();
@@ -616,11 +637,14 @@ async function refrescarInicio(que) {
   try {
     const r = await api('inicio');
     const igual = JSON.stringify(r.ofertas) === JSON.stringify(S.inicio.ofertas);
-    S.inicio = r; S.inicioT = Date.now();
+    S.inicio = r; S.inicioT = Date.now(); guardarCache();
     const ocupado = document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(document.activeElement.tagName) >= 0;
     const aun = (location.hash || '#/inicio').replace(/^#\/?/, '').split('/')[0] === que;
     if (!igual && aun && !ocupado) { const y = window.scrollY; if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else vistaCalendario(); window.scrollTo(0, y); }
-  } catch (e) { /* si falla el refresco en segundo plano, se sigue con lo que ya hay */ }
+  } catch (e) {
+    if (!S.token) { vistaLogin('Tu sesión terminó. Ingresa de nuevo.'); return; }
+    /* si falla el refresco en segundo plano, se sigue con lo que ya hay */
+  }
 }
 async function conAviso(fn, okMsg, despues) {
   S.inicioSucio = true;
@@ -644,7 +668,7 @@ app.addEventListener('submit', async (ev) => {
     const b = document.getElementById('bLogin'); b.disabled = true;
     try {
       const r = await api('login', { usuario: S.ultimoUsuario, clave: val('lc') });
-      S.token = r.token; S.persona = r.persona; S.cat = r.catalogo; S.inicio = r.inicio; S.precargado = true;
+      S.token = r.token; S.persona = r.persona; S.cat = r.catalogo; S.inicio = r.inicio; S.precargado = true; guardarCache();
       try { sessionStorage.setItem('ec_token', S.token); } catch (e) { /* sin almacenamiento */ }
       if (location.hash !== '#/inicio') location.hash = '#/inicio'; else ruta();
     } catch (e) { vistaLogin(e.message); }
