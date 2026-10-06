@@ -95,6 +95,7 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 <body>
 <!-- PORTAL: EDUCACION CONTINUA -->
 <div id="app"></div>
+<div id="diag" aria-hidden="true" style="position:fixed;right:10px;bottom:6px;font-size:11px;color:#6B6890;z-index:40"></div>
 <div id="red" role="status" aria-live="polite" style="display:none;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1F1D2B;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:50;max-width:92vw;text-align:center"></div>
 <script>
 'use strict';
@@ -142,7 +143,7 @@ const val = (id) => { const e = document.getElementById(id); return e ? e.value 
 const flash = (tipo, msg) => { S.flash = { tipo, msg }; };
 
 /* ---------- servidor ---------- */
-let pendientes = 0; let avisoT = null; let msgRed = '';
+let pendientes = 0; let avisoT = null; let msgRed = ''; let enVuelo = 0;
 const LECTURAS = ['usuarios', 'sesion', 'catalogo', 'inicio', 'ficha', 'login'];
 const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 function mostrarRed() {
@@ -151,6 +152,7 @@ function mostrarRed() {
   else e.style.display = 'none';
 }
 async function enviar(accion, datos) {
+  const t0 = performance.now();
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), 120000);
   try {
@@ -158,6 +160,8 @@ async function enviar(accion, datos) {
     const txt = await r.text();
     let j = null;
     try { j = JSON.parse(txt); } catch (e) { j = null; }
+    const tot = performance.now() - t0;
+    if (j !== null && typeof j.ms === 'number') { const d = document.getElementById('diag'); if (d) d.textContent = accion + ': ' + (tot / 1000).toFixed(1) + ' s en total · servidor ' + (j.ms / 1000).toFixed(1) + ' s · Google/red ' + Math.max(0, (tot - j.ms) / 1000).toFixed(1) + ' s'; }
     if (j === null) { const err = new Error('Google devolvió una página de error en lugar de los datos.'); err.transitorio = true; err.html = true; throw err; }
     if (!j.ok) {
       if (j.codigo === 'SESION') cerrarLocal();
@@ -176,7 +180,7 @@ async function api(accion, datos) {
   const esLectura = LECTURAS.indexOf(accion) >= 0;
   const intentos = esLectura ? 3 : 1;
   pendientes += 1;
-  if (pendientes === 1) { msgRed = ''; clearTimeout(avisoT); avisoT = setTimeout(mostrarRed, 2000); }
+  if (pendientes === 1) { msgRed = esLectura ? '' : 'Guardando… no cierres la página.'; clearTimeout(avisoT); avisoT = setTimeout(mostrarRed, esLectura ? 2000 : 500); }
   try {
     for (let n = 1; n <= intentos; n++) {
       try { return await enviar(accion, datos); }
@@ -220,7 +224,10 @@ async function vistaLogin(msg) {
     (msg ? '<div class="flash err" role="alert">' + esc(msg) + '</div>' : '') +
     '<form id="fLogin"><div class="f"><label for="lu">Nombre</label><select id="lu"><option value="">Elige tu nombre…</option>' +
     S.usuarios.map((u) => opcion(u.id, u.nombre, u.id === S.ultimoUsuario)).join('') + '</select></div>' +
-    campo('lc', 'Clave', '', 'password', 'autocomplete="current-password"') + '<button class="btn" type="submit" id="bLogin">Ingresar</button></form>');
+    campo('lc', 'Clave', '', 'password', 'autocomplete="current-password"') +
+    '<p id="lcaps" class="note" role="alert" style="display:none;color:#A3201A;font-weight:700;margin:-4px 0 10px">Tienes activado Bloq Mayús. La clave distingue mayúsculas de minúsculas.</p>' +
+    '<label style="display:flex;align-items:center;gap:8px;color:var(--ink);margin:0 0 14px"><input type="checkbox" id="lver"> Mostrar la clave mientras la escribo</label>' +
+    '<button class="btn" type="submit" id="bLogin">Ingresar</button></form>');
   const foco = document.getElementById(S.ultimoUsuario ? 'lc' : 'lu'); if (foco) foco.focus();
 }
 function cargando(txt) { app.innerHTML = '<div class="loading">' + esc(txt || 'Cargando…') + '</div>'; }
@@ -563,11 +570,14 @@ async function ruta() {
   try {
     if (!S.persona) { S.persona = (await api('sesion')).persona; }
     if (!S.cat) { S.cat = await api('catalogo'); }
+    let refrescar = false;
     if (que === 'inicio' || que === 'mis' || que === 'calendario') {
-      if (S.precargado && S.inicio) { S.precargado = false; } else { S.inicio = await api('inicio'); }
+      if (S.precargado && S.inicio) { S.precargado = false; S.inicioT = Date.now(); }
+      else if (S.inicio && !S.inicioSucio && S.inicioT && Date.now() - S.inicioT < 600000) { refrescar = Date.now() - S.inicioT > 20000; }
+      else { S.inicio = await api('inicio'); S.inicioT = Date.now(); S.inicioSucio = false; }
     }
     if (que === 'oferta') {
-      if (S.fichaId !== h[1]) { S.tab = 'datos'; }
+      if (S.fichaId !== h[1]) { S.tab = 'datos'; const ya = S.inicio && S.inicio.ofertas.filter((o) => o.id === h[1])[0]; cargando(ya ? 'Abriendo «' + ya.nombre + '»…' : 'Abriendo la oferta…'); }
       S.fichaId = h[1];
       S.ficha = await api('ficha', { id: h[1] });
     }
@@ -575,12 +585,38 @@ async function ruta() {
     if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else if (que === 'calendario') vistaCalendario();
     else if (que === 'nueva') vistaNueva(); else vistaFicha();
     S.flash = null;
+    if (refrescar) refrescarInicio(que);
   } catch (e) {
     if (!S.token) { vistaLogin(e.codigo === 'SESION' ? e.message : ''); return; }
     vistaError(e.message, ruta);
   }
 }
+/** Cambia la pantalla de inmediato y confirma con el servidor después; si falla, deshace el cambio y avisa. */
+function repintarSuave() { const y = window.scrollY; vistaFicha(); window.scrollTo(0, y); }
+async function escribirOptimista(fn, deshacer, silencioso) {
+  enVuelo += 1;
+  try {
+    const r = await fn();
+    enVuelo -= 1;
+    if (enVuelo === 0 && r && r.checklist && S.ficha) { S.ficha.checklist = r.checklist; if (!silencioso) repintarSuave(); }
+  } catch (e) {
+    enVuelo -= 1;
+    if (!S.token) { vistaLogin(e.message); return; }
+    deshacer(); flash('err', e.message); repintarSuave();
+  }
+}
+async function refrescarInicio(que) {
+  try {
+    const r = await api('inicio');
+    const igual = JSON.stringify(r.ofertas) === JSON.stringify(S.inicio.ofertas);
+    S.inicio = r; S.inicioT = Date.now();
+    const ocupado = document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(document.activeElement.tagName) >= 0;
+    const aun = (location.hash || '#/inicio').replace(/^#\/?/, '').split('/')[0] === que;
+    if (!igual && aun && !ocupado) { const y = window.scrollY; if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else vistaCalendario(); window.scrollTo(0, y); }
+  } catch (e) { /* si falla el refresco en segundo plano, se sigue con lo que ya hay */ }
+}
 async function conAviso(fn, okMsg, despues) {
+  S.inicioSucio = true;
   try { const r = await fn(); if (okMsg) flash('ok', okMsg); if (despues) despues(r); }
   catch (e) { if (!S.token) { vistaLogin(e.message); return; } flash('err', e.message); }
   if (S.token) repintar2();
@@ -666,24 +702,40 @@ app.addEventListener('click', async (ev) => {
   } else if (a === 'cancelar') {
     await conAviso(() => api('cambiarEstado', { id: S.fichaId, estado: 'Cancelado', motivo_cancelacion: val('m_canc') }), 'La oferta quedó cancelada.', (r) => { S.ficha = r.ficha; });
   } else if (a === 'item') {
-    await conAviso(() => api('guardarItem', { id: S.fichaId, idItem: b.dataset.item, estado: b.dataset.v }), '', (r) => { S.ficha.checklist = r.checklist; });
+    const lista = S.ficha.checklist; const it = lista.filter((x) => x.id_item === b.dataset.item)[0];
+    if (!it || it.estado === b.dataset.v) return;
+    const antes = it.estado; it.estado = b.dataset.v; S.inicioSucio = true; repintarSuave();
+    escribirOptimista(() => api('guardarItem', { id: S.fichaId, idItem: b.dataset.item, estado: b.dataset.v }), () => { it.estado = antes; });
   } else if (a === 'mover') {
-    await conAviso(() => api('moverItem', { id: S.fichaId, idItem: b.dataset.item, direccion: b.dataset.d }), '', (r) => { S.ficha.checklist = r.checklist; });
+    const lista = S.ficha.checklist; const i = lista.findIndex((x) => x.id_item === b.dataset.item); const j = i + (b.dataset.d === 'subir' ? -1 : 1);
+    if (i < 0 || j < 0 || j >= lista.length) return;
+    const copia = lista.slice(); const tmp = lista[i]; lista[i] = lista[j]; lista[j] = tmp; S.inicioSucio = true; repintarSuave();
+    escribirOptimista(() => api('moverItem', { id: S.fichaId, idItem: b.dataset.item, direccion: b.dataset.d }), () => { S.ficha.checklist = copia; });
   } else if (a === 'archivar') {
     await conAviso(() => api('archivarNota', { id: S.fichaId, idNota: b.dataset.nota }), 'Nota archivada.', (r) => { S.ficha.notas = r.notas; });
   }
 });
 app.addEventListener('change', async (ev) => {
   const e = ev.target;
+  if (e.id === 'lver') { const c = document.getElementById('lc'); if (c) c.type = e.checked ? 'text' : 'password'; return; }
   if (e.dataset && e.dataset.fx && e.dataset.fx !== 'q') { const ctx = e.dataset.ctx; S.fx[ctx][e.dataset.fx] = e.type === 'checkbox' ? e.checked : e.value; pintarResultados(ctx); return; }
   if (e.dataset && e.dataset.chg === 'obs') {
-    await conAviso(() => api('guardarItem', { id: S.fichaId, idItem: e.dataset.item, observacion: e.value }), '', (r) => { S.ficha.checklist = r.checklist; });
+    const it = S.ficha.checklist.filter((x) => x.id_item === e.dataset.item)[0]; if (!it) return;
+    const antes = it.observacion; it.observacion = e.value; S.inicioSucio = true;
+    escribirOptimista(() => api('guardarItem', { id: S.fichaId, idItem: e.dataset.item, observacion: e.value }), () => { it.observacion = antes; }, true);
   }
 });
 app.addEventListener('input', (ev) => {
   const e = ev.target;
   if (e.dataset && e.dataset.fx === 'q') { S.fx[e.dataset.ctx].q = e.value; pintarResultados(e.dataset.ctx); }
 });
+const avisoMayus = (ev) => {
+  if (ev.target && ev.target.id === 'lc' && ev.getModifierState) {
+    const a = document.getElementById('lcaps'); if (a) a.style.display = ev.getModifierState('CapsLock') ? 'block' : 'none';
+  }
+};
+app.addEventListener('keydown', avisoMayus);
+app.addEventListener('keyup', avisoMayus);
 window.addEventListener('hashchange', ruta);
 ruta();
 </script>
