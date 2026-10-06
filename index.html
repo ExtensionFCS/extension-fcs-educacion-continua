@@ -102,7 +102,7 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbwQsXDwxd6g0mUWqQoMNzAz-1oP4qZaqDP8HWIl_-gz7SvTxZ0u3QrVYB7THE3i7HHQ/exec';
 
 /* ---------- estado ---------- */
-const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, ultimoUsuario: '', mesCal: '', precargado: false, soloPend: false, verProx: false, abiertos: {}, fx: null };
+const S = { token: '', persona: null, cat: null, inicio: null, ficha: null, fichaId: '', tab: 'datos', flash: null, filtroTipo: 'Todas', buscar: '', soloAlerta: false, verArchivadas: false, usuarios: null, usuariosFrescos: false, ultimoUsuario: '', mesCal: '', precargado: false, soloPend: false, verProx: false, abiertos: {}, fx: null };
 try { S.token = sessionStorage.getItem('ec_token') || ''; } catch (e) { S.token = ''; }
 
 /* ---------- utilidades ---------- */
@@ -210,25 +210,32 @@ function shell(activo, cuerpo) {
     '</nav><div class="who"><span>' + esc(S.persona ? S.persona.nombre : '') + '</span><button class="btn sec" data-act="salir">Salir</button></div></header>' +
     '<main class="wrap">' + fl + cuerpo + '</main>';
 }
-async function vistaLogin(msg) {
-  const marco = (cuerpo) => '<div class="login"><div class="card"><div class="brand" style="margin-bottom:14px"><span class="dot"></span><span>Extensión FCS · <b>Educación continua</b></span></div><h1 style="font-size:22px">Ingresar</h1>' + cuerpo + '</div></div>';
-  if (!S.usuarios) {
-    try { S.usuarios = JSON.parse(sessionStorage.getItem('ec_usuarios') || 'null'); } catch (e) { S.usuarios = null; }
-  }
-  if (!S.usuarios) {
-    cargando();
-    try { S.usuarios = (await api('usuarios')).usuarios; try { sessionStorage.setItem('ec_usuarios', JSON.stringify(S.usuarios)); } catch (e) { /* sin almacenamiento */ } }
-    catch (e) { app.innerHTML = marco('<div class="flash err" role="alert">' + esc(e.message) + '</div><button class="btn" data-act="reintentarLogin">Reintentar</button>'); return; }
-  }
-  app.innerHTML = marco('<p class="sub">Elige tu nombre y escribe tu clave.</p>' +
-    (msg ? '<div class="flash err" role="alert">' + esc(msg) + '</div>' : '') +
-    '<form id="fLogin"><div class="f"><label for="lu">Nombre</label><select id="lu"><option value="">Elige tu nombre…</option>' +
-    S.usuarios.map((u) => opcion(u.id, u.nombre, u.id === S.ultimoUsuario)).join('') + '</select></div>' +
+/** Lista inicial de nombres: la pantalla de ingreso aparece al instante y se actualiza después, sin esperar al servidor. */
+const USUARIOS_BASE = [{ id: 'andres', nombre: 'Andrés Ospina' }, { id: 'elisa', nombre: 'Elisa Velásquez' }, { id: 'jacobo', nombre: 'Jacobo Aguilar' }, { id: 'maribel', nombre: 'Maribel' }, { id: 'miguel', nombre: 'Miguel Ángel Zuleta' }];
+function usuariosGuardados() {
+  try { const x = JSON.parse(localStorage.getItem('ec_usuarios') || 'null'); if (Array.isArray(x) && x.length) return x; } catch (e) { /* sin almacenamiento */ }
+  return USUARIOS_BASE;
+}
+function opcionesUsuarios(sel) { return S.usuarios.map((u) => opcion(u.id, u.nombre, u.id === sel)).join(''); }
+function vistaLogin(msg) {
+  if (!S.usuarios) S.usuarios = usuariosGuardados();
+  app.innerHTML = '<div class="login"><div class="card"><div class="brand" style="margin-bottom:14px"><span class="dot"></span><span>Extensión FCS · <b>Educación continua</b></span></div><h1 style="font-size:22px">Ingresar</h1>' +
+    '<p class="sub">Elige tu nombre y escribe tu clave.</p>' + (msg ? '<div class="flash err" role="alert">' + esc(msg) + '</div>' : '') +
+    '<form id="fLogin"><div class="f"><label for="lu">Nombre</label><select id="lu"><option value="">Elige tu nombre…</option>' + opcionesUsuarios(S.ultimoUsuario) + '</select></div>' +
     campo('lc', 'Clave', '', 'password', 'autocomplete="current-password"') +
     '<p id="lcaps" class="note" role="alert" style="display:none;color:#A3201A;font-weight:700;margin:-4px 0 10px">Tienes activado Bloq Mayús. La clave distingue mayúsculas de minúsculas.</p>' +
     '<label style="display:flex;align-items:center;gap:8px;color:var(--ink);margin:0 0 14px"><input type="checkbox" id="lver"> Mostrar la clave mientras la escribo</label>' +
-    '<button class="btn" type="submit" id="bLogin">Ingresar</button></form>');
+    '<button class="btn" type="submit" id="bLogin">Ingresar</button></form></div></div>';
   const foco = document.getElementById(S.ultimoUsuario ? 'lc' : 'lu'); if (foco) foco.focus();
+  if (!S.usuariosFrescos) {
+    S.usuariosFrescos = true;
+    api('usuarios').then((r) => {
+      S.usuarios = r.usuarios;
+      try { localStorage.setItem('ec_usuarios', JSON.stringify(S.usuarios)); } catch (e) { /* sin almacenamiento */ }
+      const sel = document.getElementById('lu');
+      if (sel) { const cur = sel.value; sel.innerHTML = '<option value="">Elige tu nombre…</option>' + opcionesUsuarios(cur); sel.value = cur; }
+    }).catch(() => { /* si no responde, se sigue con la lista guardada */ });
+  }
 }
 function cargando(txt) { app.innerHTML = '<div class="loading">' + esc(txt || 'Cargando…') + '</div>'; }
 function vistaError(msg, reintento) {
@@ -669,7 +676,6 @@ app.addEventListener('click', async (ev) => {
   const a = b.dataset.act;
   if (a === 'salir') { try { await api('salir'); } catch (e) { /* ya sin sesión */ } cerrarLocal(); vistaLogin(); }
   else if (a === 'reintentar') { if (S.reintento) S.reintento(); }
-  else if (a === 'reintentarLogin') { vistaLogin(); }
   else if (a === 'mes') {
     const d = Number(b.dataset.d);
     if (d === 0) S.mesCal = S.inicio.hoy.slice(0, 7);
