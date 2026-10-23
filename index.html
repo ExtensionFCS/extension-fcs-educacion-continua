@@ -148,14 +148,14 @@ const flash = (tipo, msg) => { S.flash = { tipo, msg }; };
 
 /* ---------- servidor ---------- */
 let pendientes = 0; let avisoT = null; let msgRed = ''; let enVuelo = 0;
-const LECTURAS = ['usuarios', 'sesion', 'catalogo', 'inicio', 'ficha', 'login'];
+const LECTURAS = ['usuarios', 'sesion', 'catalogo', 'inicio', 'ficha', 'login', 'facturacion'];
 const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 function mostrarRed() {
   const e = document.getElementById('red'); if (!e) return;
   if (pendientes > 0) { e.textContent = msgRed || 'Conectando con el servidor… puede tardar hasta un minuto. No cierres la página.'; e.style.display = 'block'; }
   else e.style.display = 'none';
 }
-const ESPERADO = { usuarios: 'usuarios', sesion: 'persona', catalogo: 'personas', inicio: 'ofertas', ficha: 'oferta', login: 'token', crearOferta: 'id', guardarOferta: null, cambiarEstado: 'ficha', confirmarEstado: 'ficha', aplazar: 'ficha', reactivar: 'ficha', guardarItem: 'checklist', agregarItem: 'checklist', moverItem: 'checklist', agregarNota: 'notas', archivarNota: 'notas', agregarOpinion: 'opiniones' };
+const ESPERADO = { usuarios: 'usuarios', sesion: 'persona', catalogo: 'personas', inicio: 'ofertas', ficha: 'oferta', login: 'token', crearOferta: 'id', guardarOferta: null, cambiarEstado: 'ficha', confirmarEstado: 'ficha', aplazar: 'ficha', reactivar: 'ficha', guardarItem: 'checklist', agregarItem: 'checklist', moverItem: 'checklist', agregarNota: 'notas', archivarNota: 'notas', agregarOpinion: 'opiniones', facturacion: 'docentes', guardarDocente: 'docente', guardarContrato: 'contrato', eliminarContrato: 'eliminado' };
 async function enviar(accion, datos, limite) {
   const t0 = performance.now();
   const ctl = new AbortController();
@@ -206,7 +206,7 @@ async function api(accion, datos) {
   }
 }
 function cerrarLocal() {
-  S.token = ''; S.persona = null; S.cat = null; S.inicio = null; S.ficha = null;
+  S.token = ''; S.persona = null; S.cat = null; S.inicio = null; S.ficha = null; if (S.fa) S.fa.datos = null;
   try { sessionStorage.removeItem('ec_token'); sessionStorage.removeItem('ec_cache'); } catch (e) { /* sin almacenamiento */ }
 }
 /** Guarda lo ya cargado para que, al recargar la página, Inicio aparezca al instante y se actualice por detrás. */
@@ -222,7 +222,7 @@ function restaurarCache() {
 
 /* ---------- vistas ---------- */
 function shell(activo, cuerpo) {
-  const tabs = [['inicio', 'Inicio'], ['mis', 'Mis ofertas'], ['calendario', 'Calendario'], ['nueva', 'Nueva oferta']];
+  const tabs = [['inicio', 'Inicio'], ['mis', 'Mis ofertas'], ['calendario', 'Calendario'], ['nueva', 'Nueva oferta'], ['facturacion', 'Facturación']];
   const fl = S.flash ? '<div class="flash ' + S.flash.tipo + '" role="status">' + esc(S.flash.msg) + '</div>' : '';
   return '<header class="top"><div class="brand"><span class="dot"></span><span>Extensión FCS · <b>Educación continua</b></span></div><nav class="nav">' +
     tabs.map((x) => '<a class="tab' + (x[0] === activo ? ' on' : '') + '" href="#/' + x[0] + '">' + x[1] + '</a>').join('') +
@@ -584,13 +584,295 @@ function fichaHistorial(F) {
     '<section class="card"><h2>Historial</h2>' + (F.historial.length ? F.historial.map((h) => '<div class="row">' + esc(h.accion) + (h.antes || h.despues ? ': ' + esc(t(h.antes)) + (h.antes && h.despues ? ' → ' : '') + esc(t(h.despues)) : '') + '<small>' + esc(h.persona) + ' · ' + fechaHora(h.fecha_hora) + (h.motivo ? ' · Motivo: ' + esc(h.motivo) : '') + '</small></div>').join('') : '<div class="row"><small>Sin movimientos.</small></div>') + '</section></div>';
 }
 
+/* ---------- facturación: docentes, contratos por OI y tarifas ---------- */
+const FA_ETQ = {
+  'Facturacion electronica': 'Facturación electrónica', 'Independientes': 'Independientes', 'Intermitentes': 'Intermitentes',
+  'Consultar existencia/actualizacion': 'Consultar existencia/actualización', 'Pendiente documentacion': 'Pendiente documentación', 'Factura electronica': 'Factura electrónica',
+  'Diplomados A Tecnologos, Tecnicos Auxiliares': 'Diplomados a Tecnólogos, Técnicos Auxiliares', 'Diseno Ejercicios Simulacion': 'Diseño Ejercicios Simulación',
+  'Especializacion': 'Especialización', 'Maestria Y Esp. Clinica': 'Maestría y Esp. Clínica', 'Extension profesionales': 'Extensión profesionales', 'Extension tecnicos': 'Extensión técnicos',
+  'Magister - Especialista Clinico': 'Magíster - Especialista Clínico', 'Tecnologo': 'Tecnólogo', 'Tecnico': 'Técnico',
+  'doctorado': 'Doctorado', 'magister': 'Magíster - Esp. Clínico', 'esp_admin': 'Esp. Administrativo', 'profesional': 'Profesional', 'tecnologo': 'Tecnólogo', 'tecnico': 'Técnico'
+};
+const ft = (x) => FA_ETQ[x] || x;
+const CAT_KEY = { 'Doctorado': 'doctorado', 'Magister - Especialista Clinico': 'magister', 'Especialista Administrativo': 'esp_admin', 'Profesional': 'profesional', 'Tecnologo': 'tecnologo', 'Tecnico': 'tecnico' };
+const COP = (n) => (n === null || n === undefined || n === '' || isNaN(Number(n))) ? '—' : '$' + Math.round(Number(n)).toLocaleString('es-CO');
+const nrm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+S.fa = { borrador: null, datos: null, sub: 'docente', q: '', sel: '', edit: '', nuevoDoc: false, elim: '', fx: { q: '', estado: '', tc: '', mes: '' }, ofq: '' };
+
+function faTarifa(tf, cat) {
+  const k = CAT_KEY[cat]; if (!k || !S.fa.datos) return 0;
+  const f = S.fa.datos.tarifas.filter((x) => nrm(x.tipo_formacion) === nrm(tf))[0];
+  return f ? (Number(f[k]) || 0) : 0;
+}
+const faDoc = (id) => (S.fa.datos.docentes.filter((d) => d.id === id)[0]) || null;
+function faAlertas(c) {
+  const a = [];
+  if (!c.orden_interna) a.push('Sin OI');
+  if (!c.fecha_inicio) a.push('Sin fecha de inicio');
+  if (c.fecha_inicio && c.fecha_fin && c.fecha_fin < c.fecha_inicio) a.push('La fecha de fin es anterior a la de inicio');
+  if (c.vigencia_desde && ((c.fecha_inicio && c.fecha_inicio < c.vigencia_desde) || (c.fecha_fin && c.fecha_fin < c.vigencia_desde))) a.push('Fechas antes de la vigencia del contrato');
+  if (c.vigencia_hasta && ((c.fecha_inicio && c.fecha_inicio > c.vigencia_hasta) || (c.fecha_fin && c.fecha_fin > c.vigencia_hasta))) a.push('Fechas después de la vigencia del contrato');
+  if (c.orden_interna && S.inicio && !S.inicio.ofertas.some((o) => o.orden_interna === c.orden_interna)) a.push('Esa OI no está en las ofertas del sistema');
+  return a;
+}
+function faEstadoPill(e) {
+  if (!e) return pill('pd', 'Sin estado');
+  const cls = e === 'Contrato realizado' || e === 'Factura electronica' ? 'v' : (e === 'No responde' ? 'sr' : 'p');
+  return pill(cls, ft(e));
+}
+const faRango = (c) => (c.fecha_inicio ? fecha(c.fecha_inicio) : '—') + (c.fecha_fin && c.fecha_fin !== c.fecha_inicio ? ' → ' + fecha(c.fecha_fin) : '');
+function faCalc(c) {
+  const doc = faDoc(c.id_docente);
+  const tarifa = faTarifa(c.tipo_formacion, doc ? doc.categoria : '');
+  const vh = c.valor_hora !== null && c.valor_hora !== '' && c.valor_hora !== undefined ? Number(c.valor_hora) : tarifa;
+  const h = c.horas !== null && c.horas !== '' && c.horas !== undefined ? Number(c.horas) : null;
+  const total = (h !== null && vh) ? Math.round(h * vh) : (c.valor_contrato !== null && c.valor_contrato !== '' && c.valor_contrato !== undefined ? Number(c.valor_contrato) : null);
+  const nomina = (c.tipo_contrato === 'Intermitentes' && h !== null && vh && tarifa > 0) ? Math.round((h * vh / tarifa) * 100) / 100 : null;
+  return { tarifa, vh, total, nomina };
+}
+
+function vistaFacturacion() {
+  const F = S.fa; const sub = F.sub;
+  const subs = [['docente', 'Por docente'], ['todos', 'Todos los contratos'], ['tarifas', 'Tarifas']];
+  const nav = '<div class="tabs" role="tablist">' + subs.map((x) => '<button class="t' + (sub === x[0] ? ' on' : '') + '" role="tab" data-fa="sub" data-v="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>';
+  const cuerpo = sub === 'docente' ? faPorDocente() : sub === 'todos' ? faTodos() : faTarifas();
+  app.innerHTML = shell('facturacion', '<h1>Facturación</h1><p class="sub">Docentes y contratos en un solo lugar. Busca por cédula o nombre, elige la OI y el evento se completa solo; las fechas deben quedar dentro del contrato.</p>' + nav + cuerpo);
+}
+
+function faBuscarDocentes() {
+  const q = nrm(F_q()); const ds = S.fa.datos.docentes;
+  if (!q) return ds.slice().sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')).slice(0, 60);
+  const qd = q.replace(/\D/g, '');
+  return ds.filter((d) => nrm(d.nombre).indexOf(q) >= 0 || (qd.length >= 3 && d.cc.indexOf(qd) >= 0)).slice(0, 60);
+}
+const F_q = () => S.fa.q;
+
+function faPorDocente() {
+  const F = S.fa; const lista = faBuscarDocentes();
+  const filas = lista.map((d) => {
+    const n = F.datos.contratos.filter((c) => c.id_docente === d.id).length;
+    return '<button class="aten' + (F.sel === d.id ? '" style="border-color:var(--acc);background:var(--accsoft)' : '') + '" data-fa="doc" data-id="' + esc(d.id) + '"><span><b>' + esc(d.nombre) + '</b><small>CC ' + esc(d.cc || 'sin cédula') + ' · ' + n + ' contrato' + (n === 1 ? '' : 's') + (d.activo ? '' : ' · inactivo') + '</small></span></button>';
+  }).join('') || '<p class="note">No hay docentes con esa búsqueda. Puedes crearlo con «Nuevo docente».</p>';
+  const izq = '<div class="card"><h2>Buscar docente</h2><div class="f"><label for="fa_q">Cédula o nombre</label><input id="fa_q" data-fa="q" value="' + esc(F.q) + '" placeholder="Ej: 71580033 o Guzmán" autocomplete="off"></div>' +
+    '<button class="btn sec" data-fa="nuevodoc" style="margin-bottom:10px">+ Nuevo docente</button><div class="lim" id="fa_lista">' + filas + '</div></div>';
+  let der = '';
+  if (F.nuevoDoc) der = '<div class="card">' + faFormDocente(null) + '</div>';
+  else if (F.sel && faDoc(F.sel)) der = faFichaDocente(faDoc(F.sel));
+  else der = '<div class="card"><p class="note">Elige un docente de la lista para ver y editar sus contratos.</p></div>';
+  return '<div class="two"><div style="flex:0 1 380px">' + izq + '</div><div style="flex:2 1 560px" class="stack">' + der + '</div></div>';
+}
+function faFormDocente(d) {
+  const v = d || { nombre: '', cc: '', correo: '', celular: '', tipo_contrato: '', titulo: '', categoria: '', ciudad_residencia: '', activo: true };
+  const L = S.fa.datos.listas;
+  const sel = (id, etq, arr, cur) => '<div class="f"><label for="' + id + '">' + etq + '</label><select id="' + id + '"><option value="">—</option>' + arr.map((x) => opcion(x, ft(x), x === cur)).join('') + '</select></div>';
+  return '<form id="faDoc"><h2>' + (d ? 'Datos del docente' : 'Nuevo docente') + '</h2><div class="fgrid">' +
+    campo('dd_nombre', 'Nombre y apellidos', v.nombre, 'text', 'required maxlength="200"') + campo('dd_cc', 'Cédula', v.cc, 'text', 'inputmode="numeric" maxlength="14"') +
+    campo('dd_correo', 'Correo', v.correo) + campo('dd_cel', 'Celular', v.celular) +
+    sel('dd_tc', 'Tipo de contratación', L.tipos_contrato, v.tipo_contrato) + sel('dd_cat', 'Categoría para tarifa', L.categorias, v.categoria) +
+    campo('dd_tit', 'Título profesional', v.titulo) + campo('dd_ciu', 'Ciudad de residencia', v.ciudad_residencia) +
+    '</div><div class="checks2"><label><input type="checkbox" id="dd_act"' + (v.activo ? ' checked' : '') + '> Docente activo</label></div>' +
+    '<button class="btn" type="submit">Guardar docente</button> <button class="btn sec" type="button" data-fa="cancelardoc">Cancelar</button></form>';
+}
+function faFichaDocente(d) {
+  const F = S.fa;
+  const cs = F.datos.contratos.filter((c) => c.id_docente === d.id).sort((a, b) => (b.fecha_inicio || '9999').localeCompare(a.fecha_inicio || '9999'));
+  const total = cs.reduce((s, c) => s + (faCalc(c).total || 0), 0);
+  const filas = cs.map((c) => faFilaContrato(c, false)).join('');
+  const tabla = cs.length ? '<div class="scroll"><table><thead><tr><th>OI</th><th>Evento / módulo</th><th>Fechas</th><th class="num">Horas</th><th class="num">Valor</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table></div>' : '<p class="note">Este docente aún no tiene contratos.</p>';
+  const cab = '<div class="card"><div style="display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:baseline"><h2 style="margin:0">' + esc(d.nombre) + '</h2><span class="note" style="margin:0">CC ' + esc(d.cc || 'sin cédula') + ' · ' + esc(ft(d.tipo_contrato) || 'sin tipo de contratación') + ' · ' + esc(ft(d.categoria) || 'sin categoría') + '</span></div>' +
+    '<p class="note" style="margin-top:6px">' + esc([d.correo, d.celular, d.ciudad_residencia, d.titulo].filter(Boolean).join(' · ')) + '</p>' +
+    '<details><summary>Editar datos del docente</summary><div style="margin-top:10px">' + faFormDocente(d) + '</div></details></div>';
+  const form = (F.edit) ? faFormContrato(F.edit === 'nuevo' ? null : F.datos.contratos.filter((c) => c.id === F.edit)[0], d) : '<div><button class="btn" data-fa="nuevoc">+ Agregar contrato</button></div>';
+  return cab + form + '<div class="card"><h2>Contratos (' + cs.length + ') · Total ' + COP(total) + '</h2>' + tabla + '</div>';
+}
+function faFilaContrato(c, conDocente) {
+  const calc = faCalc(c); const al = faAlertas(c);
+  const alerta = al.length ? ' <span class="pill o" title="' + esc(al.join('. ')) + '">Revisar</span>' : '';
+  const doc = conDocente ? faDoc(c.id_docente) : null;
+  const elim = S.fa.elim === c.id ? '<tr><td colspan="7"><div class="fgrid" style="align-items:end"><div class="f" style="margin:0"><label for="el_m">Motivo para eliminar este contrato (queda en el historial)</label><input id="el_m" maxlength="300"></div><div><button class="btn" data-fa="elimok" data-id="' + esc(c.id) + '">Eliminar</button> <button class="btn sec" data-fa="elimno">No eliminar</button></div></div></td></tr>' : '';
+  return '<tr><td>' + (conDocente ? '<a href="#/facturacion" data-fa="doc" data-id="' + esc(c.id_docente) + '"><b>' + esc(doc ? doc.nombre : c.id_docente) + '</b></a><br>' : '') + esc(c.orden_interna || '—') + '</td><td>' + esc(c.programa || '') + (c.modulo && c.modulo !== c.programa ? '<small>' + esc(c.modulo) + '</small>' : '') + '</td><td>' + esc(faRango(c)) + alerta + '</td>' +
+    '<td class="num">' + (c.horas !== null ? esc(c.horas) : '—') + (calc.nomina !== null ? '<small>nómina ' + esc(calc.nomina) + '</small>' : '') + '</td><td class="num">' + COP(calc.total) + '</td><td>' + faEstadoPill(c.estado) + '<small>' + esc(ft(c.tipo_contrato)) + '</small></td>' +
+    '<td style="white-space:nowrap"><button class="btn sec" style="min-height:36px" data-fa="editc" data-id="' + esc(c.id) + '">Editar</button> <button class="btn sec" style="min-height:36px" data-fa="elim" data-id="' + esc(c.id) + '">Quitar</button></td></tr>' + elim;
+}
+
+function faFormContrato(c, doc) {
+  const L = S.fa.datos.listas;
+  const base = { id_docente: doc.id, orden_interna: '', programa: '', modulo: '', tipo_formacion: '', tipo_contrato: doc.tipo_contrato || '', estado: '', responsable: '', area: 'Facultad de Medicina', centro_costos: '', vigencia_desde: '', vigencia_hasta: '', fecha_inicio: '', fecha_fin: '', horas: '', valor_hora: '', valor_contrato: '', ciudad_dicta: '', aeropuerto: '', horas_fuera: '', viaticos_transporte: '', viaticos_manutencion: '', centro_costos_viaticos: '', pct_distribucion: '', observacion: '' };
+  const v = Object.assign({}, base, c || {}, S.fa.borrador || {});
+  const z = (x) => (x === null || x === undefined ? '' : x);
+  const sel = (id, etq, arr, cur) => '<div class="f"><label for="' + id + '">' + etq + '</label><select id="' + id + '"><option value="">—</option>' + arr.map((x) => opcion(x, ft(x), x === cur)).join('') + '</select></div>';
+  const ois = S.inicio ? S.inicio.ofertas.filter((o) => o.orden_interna) : [];
+  const dl = '<datalist id="fc_ois">' + ois.map((o) => '<option value="' + esc(o.orden_interna) + '">' + esc(o.nombre) + '</option>').join('') + '</datalist>';
+  const q = nrm(S.fa.ofq);
+  const of = (S.inicio ? S.inicio.ofertas : []).filter((o) => o.estado !== 'Cancelado' && (!q || nrm(o.nombre).indexOf(q) >= 0 || nrm(o.orden_interna).indexOf(q) >= 0)).slice(0, 40);
+  const panel = '<div class="card pin" style="flex:1 1 260px;max-width:340px"><h3>Ofertas del sistema</h3><p class="note">Arrastra una al contrato, o pulsa «Usar».</p><input id="fa_ofq" data-fa="ofq" placeholder="Buscar oferta u OI" value="' + esc(S.fa.ofq) + '" autocomplete="off"><div class="lim" id="fa_ofs" style="margin-top:8px">' + faListaOfertas(of) + '</div></div>';
+  const form = '<form id="faCon" class="card" data-drop="1" style="flex:3 1 520px"><h2>' + (c ? 'Editar contrato' : 'Nuevo contrato') + ' · ' + esc(doc.nombre) + '</h2>' + dl +
+    '<div class="fgrid"><div class="f"><label for="fc_oi">Orden interna (OI)</label><input id="fc_oi" data-fa="oi" list="fc_ois" value="' + esc(v.orden_interna) + '" autocomplete="off"><small class="sm" id="fc_oiinfo"></small></div>' +
+    campo('fc_prog', 'Evento / programa', v.programa, 'text', 'maxlength="250"') + campo('fc_mod', 'Módulo o tema', v.modulo, 'text', 'maxlength="250"') +
+    sel('fc_tf', 'Tipo de formación (define la tarifa)', L.tipos_formacion, v.tipo_formacion) + sel('fc_tc', 'Tipo de contratación', L.tipos_contrato, v.tipo_contrato) + sel('fc_est', 'Estado', L.estados, v.estado) + '</div>' +
+    '<h3 style="margin-top:8px">Fechas</h3><p class="note">La vigencia es el periodo del contrato; las fechas de dictado deben quedar dentro de ella.</p>' +
+    '<div class="fgrid">' + campo('fc_vd', 'Vigencia desde', v.vigencia_desde, 'date') + campo('fc_vh', 'Vigencia hasta', v.vigencia_hasta, 'date') + campo('fc_fi', 'Fecha de inicio del dictado', v.fecha_inicio, 'date') + campo('fc_ff', 'Fecha de fin del dictado', v.fecha_fin, 'date') + '</div><p class="note" id="fc_msg" role="status"></p>' +
+    '<h3>Horas y valor</h3><div class="fgrid">' + campo('fc_h', 'Horas', z(v.horas), 'text', 'inputmode="decimal"') + campo('fc_vh2', 'Valor hora pactado (vacío = tarifa)', z(v.valor_hora), 'text', 'inputmode="numeric"') + campo('fc_vc', 'Valor del contrato (si no hay horas)', z(v.valor_contrato), 'text', 'inputmode="numeric"') + '</div><p class="note" id="fc_calc" role="status"></p>' +
+    '<details><summary>Viáticos, centro de costos y observaciones</summary><div class="fgrid" style="margin-top:10px">' + campo('fc_resp', 'Responsable', v.responsable) + campo('fc_area', 'Área de contratación', v.area) + campo('fc_cc', 'Centro de costos', v.centro_costos) +
+    campo('fc_ciu', 'Ciudad donde dicta', v.ciudad_dicta) + campo('fc_aer', 'Aeropuerto de salida', v.aeropuerto) + campo('fc_hf', 'Horas fuera del departamento', z(v.horas_fuera)) + campo('fc_vt', 'Viáticos transporte ($)', z(v.viaticos_transporte)) + campo('fc_vm', 'Viáticos manutención ($)', z(v.viaticos_manutencion)) +
+    campo('fc_ccv', 'Centro de costos viáticos', v.centro_costos_viaticos) + campo('fc_pct', '% distribución', z(v.pct_distribucion)) + '</div><div class="f"><label for="fc_obs">Observaciones</label><textarea id="fc_obs" maxlength="1500">' + esc(v.observacion) + '</textarea></div></details>' +
+    '<div style="margin-top:14px"><button class="btn" type="submit">Guardar contrato</button> <button class="btn sec" type="button" data-fa="cancelarc">Cancelar</button></div></form>';
+  return '<div class="two" id="fa_contrato" style="align-items:flex-start">' + form + panel + '</div>';
+}
+function faListaOfertas(of) {
+  return of.map((o) => '<div class="orow" draggable="true" data-oid="' + esc(o.id) + '" data-oi="' + esc(o.orden_interna) + '" style="cursor:grab"><div class="otxt"><b style="font-weight:500">' + esc(o.nombre) + '</b><small>' + esc(o.orden_interna || 'sin OI') + ' · ' + esc(fecha(o.fecha_inicio)) + '</small></div>' +
+    (o.orden_interna ? '<button type="button" class="btn sec" style="min-height:36px" data-fa="usar" data-oi="' + esc(o.orden_interna) + '">Usar</button>' : '<span class="pill pd">Sin OI</span>') + '</div>').join('') || '<p class="note">Sin resultados.</p>';
+}
+/** Al elegir la OI se completa el evento y las fechas (sin pisar lo que ya se escribió). */
+function faAplicarOI(oi, forzar) {
+  const info = document.getElementById('fc_oiinfo'); if (!info) return;
+  const o = S.inicio && oi ? S.inicio.ofertas.filter((x) => x.orden_interna === oi.trim())[0] : null;
+  if (!oi.trim()) { info.textContent = ''; return; }
+  if (!o) { info.textContent = '⚠ Esa OI no está en las ofertas del sistema. Escribe el nombre del evento.'; return; }
+  info.textContent = '✓ ' + o.nombre + ' · ' + fecha(o.fecha_inicio) + (o.fecha_fin ? ' → ' + fecha(o.fecha_fin) : '');
+  const p = document.getElementById('fc_prog'); if (p && (forzar || !p.value.trim())) p.value = o.nombre;
+  const fi = document.getElementById('fc_fi'); if (fi && (forzar || !fi.value) && o.fecha_inicio) fi.value = o.fecha_inicio.slice(0, 10);
+  const ff = document.getElementById('fc_ff'); if (ff && (forzar || !ff.value) && o.fecha_fin) ff.value = o.fecha_fin.slice(0, 10);
+  faVivo();
+}
+/** Mensajes en vivo: fechas contra la vigencia, y cálculo del valor. */
+function faVivo() {
+  const g = (id) => { const e = document.getElementById(id); return e ? e.value : ''; };
+  const vd = g('fc_vd'); const vh = g('fc_vh'); const fi = g('fc_fi'); const ff = g('fc_ff');
+  ['fc_fi', 'fc_ff'].forEach((id) => { const e = document.getElementById(id); if (e) { e.min = vd || ''; e.max = vh || ''; } });
+  const m = [];
+  if (vd && vh && vh < vd) m.push('La vigencia termina antes de empezar.');
+  if (fi && ff && ff < fi) m.push('La fecha de fin es anterior a la de inicio.');
+  [['inicio', fi], ['fin', ff]].forEach((p) => { if (!p[1]) return; if (vd && p[1] < vd) m.push('La fecha de ' + p[0] + ' queda antes del contrato.'); if (vh && p[1] > vh) m.push('La fecha de ' + p[0] + ' queda después del contrato.'); });
+  const me = document.getElementById('fc_msg'); if (me) { me.textContent = m.length ? '⚠ ' + m.join(' ') : ''; me.style.color = m.length ? '#A3201A' : ''; }
+  const tmp = { id_docente: S.fa.sel, tipo_formacion: g('fc_tf'), tipo_contrato: g('fc_tc'), horas: g('fc_h').replace(',', '.'), valor_hora: g('fc_vh2').replace(',', '.'), valor_contrato: g('fc_vc').replace(',', '.') };
+  const k = faCalc(tmp); const e = document.getElementById('fc_calc');
+  if (e) e.textContent = (k.vh ? 'Valor hora: ' + COP(k.vh) + (tmp.valor_hora === '' ? ' (tarifa)' : '') : 'Sin valor hora: define el tipo de formación o escríbelo.') + ' · Total: ' + COP(k.total) + (k.nomina !== null ? ' · Horas para nómina: ' + k.nomina : '');
+}
+function faLeerContrato() {
+  const g = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+  return { id_docente: S.fa.sel, orden_interna: g('fc_oi'), programa: g('fc_prog'), modulo: g('fc_mod'), tipo_formacion: g('fc_tf'), tipo_contrato: g('fc_tc'), estado: g('fc_est'),
+    vigencia_desde: g('fc_vd'), vigencia_hasta: g('fc_vh'), fecha_inicio: g('fc_fi'), fecha_fin: g('fc_ff'), horas: g('fc_h'), valor_hora: g('fc_vh2'), valor_contrato: g('fc_vc'),
+    responsable: g('fc_resp'), area: g('fc_area'), centro_costos: g('fc_cc'), ciudad_dicta: g('fc_ciu'), aeropuerto: g('fc_aer'), horas_fuera: g('fc_hf'),
+    viaticos_transporte: g('fc_vt'), viaticos_manutencion: g('fc_vm'), centro_costos_viaticos: g('fc_ccv'), pct_distribucion: g('fc_pct'), observacion: g('fc_obs') };
+}
+
+function faTodos() {
+  const F = S.fa; const x = F.fx; const D = F.datos;
+  const meses = Array.from(new Set(D.contratos.map((c) => (c.fecha_inicio || '').slice(0, 7)).filter(Boolean))).sort().reverse();
+  const lista = faFiltrados();
+  const total = lista.reduce((s, c) => s + (faCalc(c).total || 0), 0);
+  const L = D.listas;
+  const sel = (id, k, etq, arr, cur, f) => '<div class="f"><label for="' + id + '">' + etq + '</label><select id="' + id + '" data-fa="fx" data-k="' + k + '"><option value="">Todos</option>' + arr.map((a) => opcion(a, f ? f(a) : ft(a), a === cur)).join('') + '</select></div>';
+  const filtros = '<div class="filtros"><div class="f"><label for="fx_q">Buscar (docente, OI, evento, cédula)</label><input id="fx_q" data-fa="fxq" value="' + esc(x.q) + '" autocomplete="off"></div>' +
+    sel('fx_e', 'estado', 'Estado', L.estados, x.estado) + sel('fx_t', 'tc', 'Contratación', L.tipos_contrato, x.tc) + sel('fx_m', 'mes', 'Mes de inicio', meses, x.mes, (m) => MESES[Number(m.slice(5, 7)) - 1] + ' ' + m.slice(0, 4)) + '</div>';
+  const filas = lista.slice(0, 400).map((c) => faFilaContrato(c, true)).join('');
+  return '<div class="card"><div style="display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:baseline"><h2 style="margin:0">Todos los contratos</h2><button class="btn sec" data-fa="csv">Descargar Excel (CSV)</button></div>' + filtros +
+    '<p class="note" id="fx_tot">' + faTotalTxt(lista, total) + '</p><div class="scroll" id="fx_tabla">' + faTablaTodos(filas, lista.length) + '</div></div>';
+}
+const faTotalTxt = (lista, total) => lista.length + ' contrato' + (lista.length === 1 ? '' : 's') + ' · Total ' + COP(total) + (lista.length > 400 ? ' · se muestran los primeros 400; la descarga trae todos' : '');
+const faTablaTodos = (filas, n) => n ? '<table><thead><tr><th>Docente / OI</th><th>Evento / módulo</th><th>Fechas</th><th class="num">Horas</th><th class="num">Valor</th><th>Estado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table>' : '<p class="note">No hay contratos con estos filtros.</p>';
+function faFiltrados() {
+  const x = S.fa.fx; const q = nrm(x.q); const qd = q.replace(/\D/g, '');
+  return S.fa.datos.contratos.filter((c) => {
+    if (x.estado && c.estado !== x.estado) return false;
+    if (x.tc && c.tipo_contrato !== x.tc) return false;
+    if (x.mes && (c.fecha_inicio || '').slice(0, 7) !== x.mes) return false;
+    if (q) {
+      const d = faDoc(c.id_docente);
+      const t = nrm([d ? d.nombre : '', c.orden_interna, c.programa, c.modulo].join(' '));
+      if (t.indexOf(q) < 0 && !(qd.length >= 3 && d && d.cc.indexOf(qd) >= 0)) return false;
+    }
+    return true;
+  }).sort((a, b) => (b.fecha_inicio || '').localeCompare(a.fecha_inicio || ''));
+}
+function faRepintarTodos() {
+  const lista = faFiltrados(); const total = lista.reduce((s, c) => s + (faCalc(c).total || 0), 0);
+  const t = document.getElementById('fx_tot'); if (t) t.textContent = faTotalTxt(lista, total);
+  const e = document.getElementById('fx_tabla'); if (e) e.innerHTML = faTablaTodos(lista.slice(0, 400).map((c) => faFilaContrato(c, true)).join(''), lista.length);
+}
+function faTarifas() {
+  const T = S.fa.datos.tarifas; const cols = ['doctorado', 'magister', 'esp_admin', 'profesional', 'tecnologo', 'tecnico'];
+  const filas = T.map((r) => '<tr><td>' + esc(ft(r.tipo_formacion)) + '</td>' + cols.map((k) => '<td class="num">' + (r[k] ? COP(r[k]) : '—') + '</td>').join('') + '</tr>').join('') || '<tr><td colspan="7">Sin tarifas cargadas.</td></tr>';
+  return '<div class="card"><h2>Tarifas de hora</h2><p class="note">Fila: tipo de formación. Columna: categoría del docente. Se editan en la pestaña Tarifas_Docentes de la hoja de Google cuando cambien las del año.</p><div class="scroll"><table><thead><tr><th>Tipo de formación</th>' + cols.map((k) => '<th class="num">' + esc(ft(k)) + '</th>').join('') + '</tr></thead><tbody>' + filas + '</tbody></table></div></div>';
+}
+function faCSV() {
+  const D = S.fa.datos; const c0 = ['Docente', 'Cédula', 'OI', 'Evento', 'Módulo', 'Tipo de formación', 'Contratación', 'Estado', 'Vigencia desde', 'Vigencia hasta', 'Inicio', 'Fin', 'Horas', 'Valor hora', 'Valor contrato', 'Horas nómina', 'Responsable', 'Centro de costos', 'Ciudad', 'Viáticos transporte', 'Viáticos manutención', 'Observaciones'];
+  const q = (v) => { let s = String(v === null || v === undefined ? '' : v); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  const rows = faFiltrados().map((c) => { const d = faDoc(c.id_docente) || {}; const k = faCalc(c);
+    return [d.nombre, d.cc, c.orden_interna, c.programa, c.modulo, ft(c.tipo_formacion), ft(c.tipo_contrato), ft(c.estado), c.vigencia_desde, c.vigencia_hasta, c.fecha_inicio, c.fecha_fin, c.horas, k.vh || '', k.total === null ? '' : k.total, k.nomina === null ? '' : k.nomina, c.responsable, c.centro_costos, c.ciudad_dicta, c.viaticos_transporte, c.viaticos_manutencion, c.observacion].map(q).join(';'); });
+  const blob = new Blob(['﻿' + [c0.map(q).join(';')].concat(rows).join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'contratos_docentes_' + S.inicio.hoy + '.csv'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function faAplicar(coleccion, r) {
+  const arr = S.fa.datos[coleccion]; const i = arr.findIndex((x) => x.id === r.id);
+  if (i >= 0) arr[i] = r; else arr.push(r);
+}
+async function faGuardar(fn, okMsg, despues) {
+  try { const r = await fn(); flash('ok', okMsg); if (despues) despues(r); }
+  catch (e) { if (!S.token) { vistaLogin(e.message); return; } flash('err', e.message); }
+  if (S.token) { vistaFacturacion(); S.flash = null; if (document.getElementById('faCon')) { faAplicarOI(val('fc_oi'), false); faVivo(); } }
+}
+
+/* eventos de facturación (usan data-fa para no cruzarse con el resto del portal) */
+app.addEventListener('click', async (ev) => {
+  const b = ev.target.closest('[data-fa]'); if (!b || !S.fa.datos) return;
+  const a = b.dataset.fa; const F = S.fa;
+  if (a === 'sub') { F.sub = b.dataset.v; F.elim = ''; vistaFacturacion(); }
+  else if (a === 'doc') { ev.preventDefault(); F.sub = 'docente'; F.sel = b.dataset.id; F.nuevoDoc = false; F.edit = ''; F.elim = ''; vistaFacturacion(); }
+  else if (a === 'nuevodoc') { F.nuevoDoc = true; F.sel = ''; F.edit = ''; vistaFacturacion(); }
+  else if (a === 'cancelardoc') { F.nuevoDoc = false; vistaFacturacion(); }
+  else if (a === 'nuevoc') { F.borrador = null; F.edit = 'nuevo'; vistaFacturacion(); faVivo(); }
+  else if (a === 'editc') { F.borrador = null; F.edit = b.dataset.id; const c = F.datos.contratos.filter((x) => x.id === b.dataset.id)[0]; if (c) { F.sel = c.id_docente; F.sub = 'docente'; } vistaFacturacion(); faAplicarOI(val('fc_oi'), false); faVivo(); const f = document.getElementById('fa_contrato'); if (f && f.scrollIntoView) f.scrollIntoView({ block: 'start' }); }
+  else if (a === 'cancelarc') { F.edit = ''; F.borrador = null; vistaFacturacion(); }
+  else if (a === 'elim') { F.elim = b.dataset.id; const y = window.scrollY; vistaFacturacion(); window.scrollTo(0, y); }
+  else if (a === 'elimno') { F.elim = ''; const y = window.scrollY; vistaFacturacion(); window.scrollTo(0, y); }
+  else if (a === 'elimok') { const id = b.dataset.id; F.elim = ''; await faGuardar(() => api('eliminarContrato', { id, motivo: val('el_m') }), 'Contrato eliminado.', () => { F.datos.contratos = F.datos.contratos.filter((x) => x.id !== id); }); }
+  else if (a === 'usar') { const e = document.getElementById('fc_oi'); if (e) { e.value = b.dataset.oi; faAplicarOI(b.dataset.oi, true); } }
+  else if (a === 'csv') faCSV();
+});
+app.addEventListener('submit', async (ev) => {
+  const id = ev.target.id; const F = S.fa;
+  if (id === 'faDoc') {
+    const actual = F.nuevoDoc ? null : faDoc(F.sel);
+    const datos = { nombre: val('dd_nombre'), cc: val('dd_cc'), correo: val('dd_correo'), celular: val('dd_cel'), tipo_contrato: val('dd_tc'), categoria: val('dd_cat'), titulo: val('dd_tit'), ciudad_residencia: val('dd_ciu'), activo: document.getElementById('dd_act').checked };
+    await faGuardar(() => api('guardarDocente', { id: actual ? actual.id : '', datos }), 'Docente guardado.', (r) => { faAplicar('docentes', r.docente); F.sel = r.docente.id; F.nuevoDoc = false; });
+  } else if (id === 'faCon') {
+    const datos = faLeerContrato(); F.borrador = datos; const editando = F.edit && F.edit !== 'nuevo' ? F.edit : '';
+    await faGuardar(() => api('guardarContrato', { id: editando, datos }), 'Contrato guardado.', (r) => { faAplicar('contratos', r.contrato); F.edit = ''; F.borrador = null; });
+  }
+});
+app.addEventListener('input', (ev) => {
+  const e = ev.target; if (!e.dataset || !S.fa.datos) return; const F = S.fa;
+  if (e.dataset.fa === 'q') { F.q = e.value; const l = document.getElementById('fa_lista'); if (l) { const lista = faBuscarDocentes(); l.innerHTML = lista.map((d) => { const n = F.datos.contratos.filter((c) => c.id_docente === d.id).length; return '<button class="aten" data-fa="doc" data-id="' + esc(d.id) + '"><span><b>' + esc(d.nombre) + '</b><small>CC ' + esc(d.cc || 'sin cédula') + ' · ' + n + ' contrato' + (n === 1 ? '' : 's') + (d.activo ? '' : ' · inactivo') + '</small></span></button>'; }).join('') || '<p class="note">No hay docentes con esa búsqueda.</p>'; } }
+  else if (e.dataset.fa === 'ofq') { F.ofq = e.value; const l = document.getElementById('fa_ofs'); if (l) { const q = nrm(F.ofq); l.innerHTML = faListaOfertas(S.inicio.ofertas.filter((o) => o.estado !== 'Cancelado' && (!q || nrm(o.nombre).indexOf(q) >= 0 || nrm(o.orden_interna).indexOf(q) >= 0)).slice(0, 40)); } }
+  else if (e.dataset.fa === 'fxq') { F.fx.q = e.value; faRepintarTodos(); }
+  else if (e.dataset.fa === 'oi') { faAplicarOI(e.value, false); }
+  else if (e.closest && e.closest('#faCon')) faVivo();
+});
+app.addEventListener('change', (ev) => {
+  const e = ev.target; if (!S.fa.datos) return;
+  if (e.dataset && e.dataset.fa === 'fx') { S.fa.fx[e.dataset.k] = e.value; faRepintarTodos(); }
+  else if (e.closest && e.closest('#faCon')) { if (e.id === 'fc_oi') faAplicarOI(e.value, e.value !== '' && !val('fc_prog')); faVivo(); }
+});
+/* arrastrar una oferta al contrato */
+app.addEventListener('dragstart', (ev) => { const r = ev.target.closest && ev.target.closest('[data-oi]'); if (r && ev.dataTransfer) { ev.dataTransfer.setData('text/plain', r.dataset.oi); ev.dataTransfer.effectAllowed = 'copy'; } });
+app.addEventListener('dragover', (ev) => { if (ev.target.closest && ev.target.closest('#faCon')) { ev.preventDefault(); const f = document.getElementById('faCon'); if (f) f.style.outline = '2px dashed var(--acc)'; } });
+app.addEventListener('dragleave', (ev) => { const f = document.getElementById('faCon'); if (f && !f.contains(ev.relatedTarget)) f.style.outline = ''; });
+app.addEventListener('drop', (ev) => {
+  const f = ev.target.closest && ev.target.closest('#faCon'); if (!f) return;
+  ev.preventDefault(); f.style.outline = '';
+  const oi = ev.dataTransfer ? ev.dataTransfer.getData('text/plain') : '';
+  const e = document.getElementById('fc_oi'); if (e && oi) { e.value = oi; faAplicarOI(oi, true); }
+});
+
 /* ---------- enrutador ---------- */
 async function ruta() {
   if (!S.token) { vistaLogin(); return; }
   const h = (location.hash || '#/inicio').replace(/^#\/?/, '').split('/');
   const que = h[0] || 'inicio';
   if (que === 'oferta' && !h[1]) { location.hash = '#/inicio'; return; }
-  if (['inicio', 'mis', 'calendario', 'nueva', 'oferta'].indexOf(que) < 0) { location.hash = '#/inicio'; return; }
+  if (['inicio', 'mis', 'calendario', 'nueva', 'oferta', 'facturacion'].indexOf(que) < 0) { location.hash = '#/inicio'; return; }
   cargando('Cargando…');
   try {
     const tareas = [];
@@ -607,11 +889,15 @@ async function ruta() {
       S.fichaId = h[1];
       tareas.push(api('ficha', { id: h[1] }).then((r) => { S.ficha = r; }));
     }
+    if (que === 'facturacion') {
+      tareas.push(api('facturacion').then((r) => { S.fa.datos = r; }));
+      if (!S.inicio) tareas.push(api('inicio').then((r) => { S.inicio = r; S.inicioT = Date.now(); }));
+    }
     await Promise.all(tareas);
     guardarCache();
     S.precargado = false;
     if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else if (que === 'calendario') vistaCalendario();
-    else if (que === 'nueva') vistaNueva(); else vistaFicha();
+    else if (que === 'nueva') vistaNueva(); else if (que === 'facturacion') { S.fa.edit = ''; S.fa.elim = ''; S.fa.borrador = null; vistaFacturacion(); } else vistaFicha();
     S.flash = null;
     if (refrescar) refrescarInicio(que);
   } catch (e) {
