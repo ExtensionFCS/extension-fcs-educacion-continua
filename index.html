@@ -86,7 +86,7 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 .obad{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
 .prox{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid #EEECF6;font-size:14px}.prox small{display:block;color:var(--ink2);font-size:13px}
 .lim{max-height:340px;overflow-y:auto}
-.cal{min-width:760px}.calh,.calw{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.calh{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px}.calw{margin-bottom:6px}
+.cal{min-width:900px}.calh,.calw{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.calh{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px}.calw{margin-bottom:6px}
 .cell{min-height:110px;border:1px solid #E3E0F2;border-radius:8px;padding:6px;background:#fff;font-size:12px}.cell.vacia{background:var(--bg);border-style:dashed}.cell.hoy{border:2px solid var(--acc)}.cell.fest{background:#F3F2F8}
 .cell .n{font-weight:700;font-size:13px;margin-bottom:4px}
 .evc{display:block;border-radius:5px;padding:3px 5px;margin-top:3px;line-height:1.25;color:#fff;font-weight:500}.evc:hover{text-decoration:none;filter:brightness(1.12)}
@@ -137,6 +137,78 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 .aps{display:inline-flex;margin-left:4px;vertical-align:middle}
 .grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
 .ap{display:inline-flex;width:18px;height:18px;border-radius:50%;font-size:9px;font-weight:700;font-style:normal;align-items:center;justify-content:center;color:#fff;border:2px solid #fff;margin-left:2px;box-sizing:content-box;line-height:1}
+/* ===== Espectro limpio, anillos, vista de líder, liquidación y recorrido ===== */
+.btn.q{background:#fff;color:var(--acc);border:1.5px solid var(--acc)}
+.btn.q .bdg{background:#E5242F;color:#fff}
+.sp-r{--c:#E5242F;--t:#FDECEE;--tx:#B01822;--bd:#F4A9AE;--trk:#FBD5D8}
+.sp-o{--c:#FF8A00;--t:#FFF0DB;--tx:#8F4A00;--bd:#FFD099;--trk:#FFE3BF}
+.sp-a{--c:#FFC400;--t:#FFF6D1;--tx:#6B5000;--bd:#FFE27A;--trk:#FFF0B3}
+.sp-v{--c:#1DB46E;--t:#E3F6EC;--tx:#0E6B3F;--bd:#A8E3C4;--trk:#CDEFDD}
+.fchips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 12px}
+.fch{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:999px;border:1.5px solid var(--bd);background:var(--t);color:var(--tx);font-size:13px;font-weight:700;cursor:pointer}
+.fch i{width:10px;height:10px;border-radius:50%;background:var(--c);display:inline-block}
+.fch.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--c)}.fch.off{opacity:.5}
+.rrow{display:flex;gap:20px;align-items:center;padding:14px 16px;border-top:1px solid var(--line)}
+.rrow.crit{background:#FDECEE;border:1.5px solid #F4A9AE;border-radius:14px;margin-bottom:6px}
+.rrow .nm{font-size:16px;font-weight:500}.rrow.crit .nm{font-weight:700}
+.rrow svg{flex:none}
+.pc{flex:none;border:1px solid #CFCBE6;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--ink2);background:#fff;white-space:nowrap}
+.rrow.crit .pc{border-color:#E58A90;color:#B01822;font-weight:700}
+@media(max-width:600px){.rrow{gap:12px;padding:12px 8px}}
+.eqgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.eqc{border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;background:#fff}.eqc.tr{background:#FAFAFE}
+.eqh{display:flex;align-items:center;gap:12px}.eqh b{font-size:16px;display:block}.eqh small{display:block;font-size:12px;color:var(--ink2)}
+.eqa{width:42px;height:42px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:none}
+.eqbar{display:flex;height:8px;gap:3px}.eqbar i{display:block;border-radius:4px}
+.eqlg{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--ink2)}
+.eqf{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:700}.eqf a{display:inline-block;margin-right:12px;min-height:28px}
+.grid2b{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start;margin-bottom:16px}
+.rv{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}.rv .btn{min-height:44px}
+.rvd{width:12px;height:12px;border-radius:50%;flex:none}
+.mtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:14px 0}
+.mt{border:1px solid var(--line);border-radius:12px;padding:12px 14px}.mt small{display:block;font-size:12px;color:var(--ink2)}.mt b{display:block;font-size:22px;margin-top:4px;line-height:1.15}
+.mbar{display:flex;height:16px;border-radius:8px;background:var(--accsoft);overflow:hidden;gap:2px}.mbar i{display:block}
+.hatch{background:repeating-linear-gradient(135deg,#9A8FF0,#9A8FF0 4px,#CFCBE6 4px,#CFCBE6 8px)}
+.areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:16px}
+.area{border-top:5px solid var(--acc);display:flex;flex-direction:column;gap:14px}.area.pr{border-top-color:#0F9B8E}
+.st3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.st3>div{border-radius:12px;padding:12px;background:var(--bg)}.st3 b{display:block;font-size:26px;line-height:1.1}.st3 small{font-size:12px}
+.evc2{display:flex;flex-direction:column;gap:5px;border-radius:8px;padding:7px 7px 8px;margin-top:5px;color:#fff;font-weight:500}.evc2:hover{text-decoration:none;filter:brightness(1.1)}
+.evc2 .evt{font-size:12px;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.evc2 .evl{font-size:11px;opacity:.92}
+.evc2 .evh{font-size:10px;font-weight:700;letter-spacing:.05em;border-top:1px solid rgba(255,255,255,.35);padding-top:5px;opacity:.92}
+.evc2 .evp{display:flex;flex-direction:column;gap:4px}
+.evc2.ap{background:#fff;color:var(--ink)}.evc2.ap .evh{border-top-color:var(--line);color:var(--ink2)}
+.apn{display:flex;align-items:center;gap:5px;background:#fff;color:#1F1D2B;border:1px solid #DAD7EC;border-radius:999px;padding:2px 8px 2px 5px;font-size:11px;font-weight:600}.apn i{width:9px;height:9px;border-radius:50%;flex:none}
+.opts button.on{background:var(--acc);color:#fff;font-weight:700}
+.ag{display:flex;gap:16px;align-items:stretch;margin-bottom:10px}
+.agd{width:64px;flex:none;text-align:center;padding-top:6px}.agd b{display:block;font-size:28px;line-height:1.1}.agd span{display:block;font-size:12px;font-weight:700;color:var(--ink2)}
+.agc{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.agk{border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;background:#fff}
+.agk .tt{font-size:16px;font-weight:600}.agr{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:12px;color:var(--ink2)}
+.agr .lid{background:var(--c);color:#fff;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700}
+.agr .apy{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.agf{border-radius:10px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--ink2);background:repeating-linear-gradient(135deg,#F2F1F8,#F2F1F8 6px,#E8E6F2 6px,#E8E6F2 12px)}
+.lqi{width:150px;text-align:right;font-weight:600;border:1.5px solid var(--acc)}
+.lqs{display:flex;gap:12px;align-items:center;padding:8px 10px;border-radius:10px;font-size:14px}.lqs .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accsoft);color:var(--acc);font-weight:700;display:flex;align-items:center;justify-content:center}
+.lqs.cur{background:var(--accsoft)}.lqs.cur .n{background:var(--acc);color:#fff}
+.lqt td,.lqt th{padding:10px}.lqt tr.sec td{background:#F6F5FB;color:var(--acc);font-weight:700}.lqt tr.tot td{background:var(--accsoft);font-weight:700}
+.tmodal{position:fixed;inset:0;background:rgba(36,32,74,.62);display:flex;align-items:center;justify-content:center;padding:20px;z-index:110}
+.tbox{background:#fff;border-radius:16px;padding:28px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.tbox h2{font-size:22px;margin:0}.tbox p{margin:0;font-size:15px;line-height:1.5;color:var(--ink2)}
+.tem{width:48px;height:48px;border-radius:14px;background:var(--accsoft);display:flex;align-items:center;justify-content:center;font-size:22px}
+.tbtns{display:flex;flex-wrap:wrap;gap:10px}
+.tno{display:flex;align-items:center;gap:10px;margin:0;color:var(--ink);font-size:14px;min-height:44px;cursor:pointer}.tno input{width:20px;height:20px}
+#tour_spot{position:fixed;z-index:90;pointer-events:none;border-radius:14px;box-shadow:0 0 0 9999px rgba(36,32,74,.6);outline:3px solid #FFC400;transition:left .25s,top .25s,width .25s,height .25s}
+#tour_panel{position:fixed;z-index:100;right:20px;bottom:20px;width:min(420px,calc(100vw - 24px));background:#fff;border-radius:16px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px}
+#tour_panel h3{font-size:18px;margin:0}#tour_panel p{margin:0;font-size:14px;line-height:1.5;color:var(--ink2)}
+.tbar{display:flex;gap:3px}.tbar i{flex:1;height:6px;border-radius:3px;display:block}
+.tph{display:flex;justify-content:space-between;align-items:center;gap:10px}.tph b{font-size:12px;color:var(--acc)}
+.tph button{border:0;background:none;color:var(--ink2);font-size:13px;cursor:pointer;min-height:36px;padding:0 6px}
+.tpf{display:flex;justify-content:space-between;gap:10px}
+.tb{white-space:nowrap}
+.who{flex-wrap:wrap;gap:8px 12px}
+@media(max-width:700px){.top{padding:10px 14px}.wrap{padding:18px 14px 48px}}
+@media(max-width:700px){#tour_panel{right:12px;left:12px;bottom:12px;width:auto}}
 </style>
 </head>
 <body>
@@ -192,14 +264,14 @@ const flash = (tipo, msg) => { S.flash = { tipo, msg }; };
 
 /* ---------- servidor ---------- */
 let pendientes = 0; let avisoT = null; let msgRed = ''; let enVuelo = 0;
-const LECTURAS = ['usuarios', 'sesion', 'catalogo', 'inicio', 'ficha', 'login', 'facturacion', 'tareas'];
+const LECTURAS = ['usuarios', 'sesion', 'catalogo', 'inicio', 'ficha', 'login', 'facturacion', 'tareas', 'metaAnual', 'liquidacion'];
 const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 function mostrarRed() {
   const e = document.getElementById('red'); if (!e) return;
   if (pendientes > 0) { e.textContent = msgRed || 'Conectando con el servidor… puede tardar hasta un minuto. No cierres la página.'; e.style.display = 'block'; }
   else e.style.display = 'none';
 }
-const ESPERADO = { usuarios: 'usuarios', sesion: 'persona', catalogo: 'personas', inicio: 'ofertas', ficha: 'oferta', login: 'token', crearOferta: 'id', guardarOferta: null, cambiarEstado: 'ficha', confirmarEstado: 'ficha', aplazar: 'ficha', reactivar: 'ficha', guardarItem: 'checklist', agregarItem: 'checklist', moverItem: 'checklist', agregarNota: 'notas', archivarNota: 'notas', agregarOpinion: 'opiniones', facturacion: 'docentes', guardarDocente: 'docente', guardarContrato: 'contrato', eliminarContrato: 'eliminado', tareas: 'tareas', crearTarea: 'tarea', actualizarTarea: 'tarea', eliminarTarea: 'eliminado' };
+const ESPERADO = { usuarios: 'usuarios', sesion: 'persona', catalogo: 'personas', inicio: 'ofertas', ficha: 'oferta', login: 'token', crearOferta: 'id', guardarOferta: null, cambiarEstado: 'ficha', confirmarEstado: 'ficha', aplazar: 'ficha', reactivar: 'ficha', guardarItem: 'checklist', agregarItem: 'checklist', moverItem: 'checklist', agregarNota: 'notas', archivarNota: 'notas', agregarOpinion: 'opiniones', facturacion: 'docentes', guardarDocente: 'docente', guardarContrato: 'contrato', eliminarContrato: 'eliminado', tareas: 'tareas', crearTarea: 'tarea', actualizarTarea: 'tarea', eliminarTarea: 'eliminado', liquidacion: 'liquidacion', guardarLiquidacion: 'liquidacion', aprobarLiquidacion: 'liquidacion', devolverLiquidacion: 'liquidacion', metaAnual: 'meta', guardarMeta: 'meta' };
 async function enviar(accion, datos, limite) {
   const t0 = performance.now();
   const ctl = new AbortController();
@@ -250,8 +322,8 @@ async function api(accion, datos) {
   }
 }
 function cerrarLocal() {
-  S.token = ''; S.persona = null; S.cat = null; S.inicio = null; S.ficha = null; S.tareas = null; S.tareasError = ''; S.verAten = false; if (S.fa) S.fa.datos = null;
-  try { sessionStorage.removeItem('ec_token'); sessionStorage.removeItem('ec_cache'); } catch (e) { /* sin almacenamiento */ }
+  S.token = ''; S.persona = null; S.cat = null; S.inicio = null; S.ficha = null; S.tareas = null; S.tareasError = ''; S.verAten = false; S.meta = null; S.liq = null; if (S.fa) S.fa.datos = null; tourSalir();
+  try { sessionStorage.removeItem('ec_token'); sessionStorage.removeItem('ec_cache'); sessionStorage.removeItem('ec_tour_vis'); } catch (e) { /* sin almacenamiento */ }
 }
 /** Guarda lo ya cargado para que, al recargar la página, Inicio aparezca al instante y se actualice por detrás. */
 function guardarCache() {
@@ -267,10 +339,11 @@ function restaurarCache() {
 /* ---------- vistas ---------- */
 function shell(activo, cuerpo) {
   const tabs = [['inicio', 'Inicio'], ['mis', 'Mis ofertas'], ['tareas', 'Mis tareas'], ['calendario', 'Calendario'], ['nueva', 'Nueva oferta'], ['facturacion', 'Facturación']];
+  if (esLider()) tabs.unshift(['extension', 'Portal de Extensión']);
   const fl = S.flash ? '<div class="flash ' + S.flash.tipo + '" role="status">' + esc(S.flash.msg) + '</div>' : '';
   return '<header class="top"><div class="brand"><span class="dot"></span><span>Extensión FCS · <b>Educación continua</b></span></div><nav class="nav">' +
     tabs.map((x) => '<a class="tab' + (x[0] === activo ? ' on' : '') + '" href="#/' + x[0] + '">' + x[1] + (x[0] === 'tareas' ? badgeTareas() : '') + '</a>').join('') +
-    '</nav><div class="who"><span>' + esc(S.persona ? S.persona.nombre : '') + '</span><button class="btn sec" data-act="salir">Salir</button></div></header>' +
+    '</nav><div class="who"><button class="btn q tb" data-tour="boton">▶ Dame mi recorrido virtual</button><span>' + esc(S.persona ? S.persona.nombre : '') + '</span><button class="btn sec" data-act="salir">Salir</button></div></header>' +
     '<main class="wrap">' + fl + cuerpo + '</main>';
 }
 /** Lista inicial de nombres: la pantalla de ingreso aparece al instante y se actualiza después, sin esperar al servidor. */
@@ -320,7 +393,7 @@ const esActiva = (o) => ['fin', 'canc'].indexOf(catEstado(o)) < 0;
 const hayAlerta = (o) => o.semaforo === 'rojo' || o.semaforo === 'amarillo';
 function fxInicial(ctx) { return { q: '', tipo: '', cat: 'activas', resp: '', alerta: false, pend: false, agrupar: 'mes', alcance: ctx === 'mis' ? 'ambas' : 'todas' }; }
 S.fx = { inicio: fxInicial('inicio'), mis: fxInicial('mis') };
-S.cal = { persona: '', apoyos: true }; S.ft = ftInicial(); S.tareas = null; S.tareasError = ''; S.tareasP = null; S.proxFiltro = ''; S.verAten = false;
+S.cal = { persona: '', vista: 'grid', rol: 'todo' }; S.meta = null; S.metaP = null; S.metaError = ''; S.liq = null; S.liqP = null; S.liqError = ''; S.ft = ftInicial(); S.tareas = null; S.tareasError = ''; S.tareasP = null; S.proxFiltro = ''; S.verAten = false;
 const vista = (ctx) => (ctx === 'mis' ? vistaMis() : vistaInicio());
 function irExplorador(ctx) { vista(ctx); const e = document.getElementById('expl'); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
@@ -450,6 +523,10 @@ function panelAtencion() {
   return '<div class="grid3">' + secc('Con alerta', D.alertas.length, fA, 'alerta', 'Ninguna oferta con alerta.') + secc('Con información pendiente', D.pend.length, fP, 'pend', 'No hay información pendiente.') + cert + '</div>';
 }
 function pintarAtencion() { const e = document.getElementById('aten_panel'); if (e && S.verAten) e.innerHTML = panelAtencion(); }
+function anillo(d, k) {
+  const C = 2 * Math.PI * 24; const llen = C * Math.max(0, Math.min(30, 30 - d)) / 30;
+  return '<svg width="64" height="64" viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="24" fill="#fff" style="stroke:var(--trk)" stroke-width="6"></circle><circle cx="30" cy="30" r="24" fill="none" style="stroke:var(--c)" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + llen.toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 30 30)"></circle><text x="30" y="' + (d === 0 ? 36 : 37) + '" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="' + (d === 0 ? 15 : 20) + '" font-weight="700" style="fill:var(--tx)">' + (d === 0 ? 'Hoy' : d) + '</text></svg>';
+}
 function vistaInicio() {
   const of = S.inicio.ofertas;
   const prox = of.filter((o) => esActiva(o) && catEstado(o) !== 'apl' && o.dias !== null && o.dias >= 0 && o.dias <= 30).sort((a, b) => a.dias - b.dias);
@@ -457,21 +534,21 @@ function vistaInicio() {
   const lista = S.proxFiltro ? prox.filter((o) => clsProx(o.dias) === S.proxFiltro) : prox;
   const verTodo = S.verProx; const mostradas = verTodo ? lista : lista.slice(0, 6);
   const D = atencionDatos();
-  const tiles = PROX_K.map((k) => '<button class="stile t-' + k + (S.proxFiltro === k ? ' on' : (S.proxFiltro ? ' off' : '')) + '" data-act="prox_f" data-v="' + k + '" aria-pressed="' + (S.proxFiltro === k) + '"><span class="n">' + cnt[k] + '</span><small>' + PROX[k] + '</small></button>').join('');
-  const sbar = prox.length ? '<div class="sbar" role="img" aria-label="Reparto de los próximos inicios por urgencia">' + PROX_K.filter((k) => cnt[k]).map((k) => '<i class="t-' + k + '" style="flex:' + cnt[k] + '"></i>').join('') + '</div>' : '';
+  const chips = PROX_K.map((k) => '<button class="fch sp-' + k + (S.proxFiltro === k ? ' on' : (S.proxFiltro ? ' off' : '')) + '" data-act="prox_f" data-v="' + k + '" aria-pressed="' + (S.proxFiltro === k) + '"><i></i>' + cnt[k] + ' · ' + PROX[k] + '</button>').join('');
   const filas = mostradas.map((o) => {
-    const k = clsProx(o.dias); const pct = Math.max(4, Math.round(100 * (30 - o.dias) / 30));
-    return '<div class="prow p-' + k + '"><div class="pdias"><b>' + (o.dias === 0 ? 'Hoy' : o.dias) + '</b>' + (o.dias === 0 ? '' : '<span>' + (o.dias === 1 ? 'día' : 'días') + '</span>') + '</div>' +
-      '<div class="otxt"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>' + fecha(o.fecha_inicio) + (o.responsable ? ' · ' + esc(primerNombre(o.responsable)) : '') + (o.estado ? ' · ' + esc(t(o.estado)) : '') + '</small><div class="pbar" aria-hidden="true"><i style="width:' + pct + '%"></i></div></div>' +
-      '<div class="obad">' + (hayAlerta(o) ? semPill(o.semaforo, o.semaforo_motivo) : '') + (o.pendientes.length ? '<span class="pill pd" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + ' pend.</span>' : '') + '</div></div>';
+    const k = clsProx(o.dias); const crit = o.dias <= 3;
+    return '<div class="rrow sp-' + k + (crit ? ' crit' : '') + '">' + anillo(o.dias, k) +
+      '<div class="otxt"><a class="nm" href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>' + fecha(o.fecha_inicio) + (o.estado ? ' · ' + esc(t(o.estado)) : '') + ' · ' + (o.dias === 0 ? 'hoy' : 'en ' + o.dias + (o.dias === 1 ? ' día' : ' días')) + (o.responsable ? ' · ' + esc(primerNombre(o.responsable)) : '') + '</small></div>' +
+      '<div class="obad">' + (hayAlerta(o) ? semPill(o.semaforo, o.semaforo_motivo) : '') + (o.pendientes.length ? '<span class="pc" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + ' pend.</span>' : '') + '</div></div>';
   }).join('');
-  const c1 = '<section class="card"><div class="chead"><div><h2 style="margin-bottom:2px">Próximos inicios · 30 días</h2><p class="note" style="margin:0">Toca un color para filtrar la lista.</p></div>' +
-    '<button class="btn" data-act="aten" aria-expanded="' + S.verAten + '" aria-controls="aten_panel">Requieren atención <span class="bdg r">' + D.n + '</span> ' + (S.verAten ? '▴' : '▾') + '</button></div>' +
-    '<div class="sem4">' + tiles + '</div>' + sbar +
+  const c1 = '<section class="card" id="sec_prox"><div class="chead"><div><h2 style="margin-bottom:2px">Próximos inicios · 30 días</h2><p class="note" style="margin:0">Cada anillo se llena a medida que se acerca la fecha</p></div>' +
+    '<button class="btn q" data-act="aten" aria-expanded="' + S.verAten + '" aria-controls="aten_panel">Requieren atención <span class="bdg r">' + D.n + '</span> ' + (S.verAten ? '▴' : '▾') + '</button></div>' +
+    '<div class="fchips" id="prox_chips">' + chips + '</div>' +
     '<div class="' + (verTodo ? 'lim' : '') + '">' + (filas || '<p class="sub" style="margin:10px 0 0">No hay inicios en este rango de los próximos 30 días.</p>') + '</div>' +
-    (lista.length > 6 ? '<button class="btn sec" style="margin-top:10px" data-act="prox">' + (verTodo ? 'Ver solo las primeras 6' : 'Ver las ' + lista.length) + '</button>' : '') + '</section>';
-  const c2 = '<section class="card"><h2>Ofertas por estado</h2>' + dona(of) + '</section>';
-  const cuerpo = '<h1>Inicio</h1><p class="sub">Todo el equipo ve aquí todas las ofertas de Educación continua. Hoy es ' + fecha(S.inicio.hoy) + '.</p><div class="grid2">' + c1 + c2 + '</div>' +
+    (lista.length > 6 ? '<button class="btn q" style="margin-top:12px" data-act="prox">' + (verTodo ? 'Ver solo las primeras 6' : 'Ver las ' + lista.length) + '</button>' : '') + '</section>';
+  const c2 = '<section class="card" id="sec_estado"><h2>Ofertas por estado</h2>' + dona(of) + '</section>';
+  const cuerpo = '<h1>Inicio</h1><p class="sub">' + (esLider() ? 'Vista de líder: todo el equipo de Educación continua. ' : 'Todo el equipo ve aquí todas las ofertas de Educación continua. ') + 'Hoy es ' + fecha(S.inicio.hoy) + '.</p><div class="grid2">' + c1 + c2 + '</div>' +
+    (esLider() ? '<div id="elisa_zona">' + htmlElisa() + '</div>' : '') +
     '<div id="aten_panel" style="margin-bottom:16px">' + (S.verAten ? panelAtencion() : '') + '</div>' +
     explorador('inicio', 'Ofertas') +
     '<p class="note" style="margin-top:12px">El semáforo usa reglas provisionales que se definirán con Elisa: amarillo si faltan 15 días o menos y hay menos inscritos que el mínimo; rojo a 5 días o menos, o si la fecha de inicio ya pasó y la oferta no está en ejecución. Las ofertas sin estado no se evalúan hasta confirmarlo.</p>';
@@ -502,30 +579,29 @@ function vistaCalendario() {
   const anio = Number(S.mesCal.slice(0, 4)); const mes = Number(S.mesCal.slice(5, 7));
   const dias = new Date(Date.UTC(anio, mes, 0)).getUTCDate();
   const offset = (new Date(Date.UTC(anio, mes - 1, 1)).getUTCDay() + 6) % 7;
-  const ev = {}; const lista = [];
-  S.inicio.ofertas.filter((o) => o.estado !== 'Cancelado' && calVisible(o)).forEach((o) => {
-    [['Inicio', o.fecha_inicio], ['Fin', o.fecha_fin]].forEach((p) => {
-      if (p[1] && p[1].slice(0, 7) === S.mesCal) { const d = Number(p[1].slice(8, 10)); (ev[d] = ev[d] || []).push({ tipo: p[0], o }); lista.push({ d, tipo: p[0], o }); }
-    });
-  });
+  const items = calItems(true); const ev = {};
+  items.forEach((e) => { (ev[e.d] = ev[e.d] || []).push(e); });
   const fest = {}; (S.inicio.festivos || []).forEach((f) => { if (f.fecha && f.fecha.slice(0, 7) === S.mesCal) fest[Number(f.fecha.slice(8, 10))] = t(f.nombre); });
-  const celdas = [];
-  for (let i = 0; i < offset; i++) celdas.push('<div class="cell vacia"></div>');
-  for (let d = 1; d <= dias; d++) {
-    const iso = S.mesCal + '-' + (d < 10 ? '0' : '') + d;
-    const evs = (ev[d] || []).map(chipCal).join('');
-    celdas.push('<div class="cell' + (iso === hoy ? ' hoy' : '') + (fest[d] ? ' fest' : '') + '"><div class="n">' + d + (iso === hoy ? ' · Hoy' : '') + '</div>' + (fest[d] ? '<span class="evf">' + esc(fest[d]) + '</span>' : '') + evs + '</div>');
+  let vistaHtml;
+  if (S.cal.vista === 'agenda') vistaHtml = agendaCal(items, fest, mes, anio);
+  else {
+    const celdas = [];
+    for (let i = 0; i < offset; i++) celdas.push('<div class="cell vacia"></div>');
+    for (let d = 1; d <= dias; d++) {
+      const iso = S.mesCal + '-' + (d < 10 ? '0' : '') + d;
+      celdas.push('<div class="cell' + (iso === hoy ? ' hoy' : '') + (fest[d] ? ' fest' : '') + '"><div class="n">' + d + (iso === hoy ? ' · Hoy' : '') + '</div>' + (fest[d] ? '<span class="evf">' + esc(fest[d]) + '</span>' : '') + (ev[d] || []).map(chipCal).join('') + '</div>');
+    }
+    while (celdas.length % 7) celdas.push('<div class="cell vacia"></div>');
+    let semanas = ''; for (let i = 0; i < celdas.length; i += 7) semanas += '<div class="calw">' + celdas.slice(i, i + 7).join('') + '</div>';
+    vistaHtml = '<div class="scroll"><div class="cal"><div class="calh"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>' + semanas + '</div></div>';
   }
-  while (celdas.length % 7) celdas.push('<div class="cell vacia"></div>');
-  let semanas = ''; for (let i = 0; i < celdas.length; i += 7) semanas += '<div class="calw">' + celdas.slice(i, i + 7).join('') + '</div>';
-  const quienes = leyendaCal();
-  lista.sort((a, b) => a.d - b.d);
+  const lista = items.slice().sort((a, b) => a.d - b.d);
   const sinFecha = S.inicio.ofertas.filter((o) => !o.fecha_inicio && o.estado !== 'Cancelado');
-  const cuerpo = '<h1>Calendario</h1><p class="sub">Inicios y finales de todas las ofertas. El color indica quién es el responsable y los círculos de color, quién apoya. Elige a una persona en «Ver a» para ver lo que lidera (relleno) y lo que solo apoya (borde punteado). Toca una marca para abrir la oferta.</p>' +
+  const cuerpo = '<h1>Calendario</h1><p class="sub">Inicios y finales de todas las ofertas. Cada tarjeta lleva el color de quien lidera y, debajo, el nombre de quienes apoyan. Elige a una persona en «Ver a» para ver lo que lidera y lo que solo apoya; cambia a «Agenda» para verlo día por día. Maribel participa en todas las ofertas, por eso no aparece como apoyo.</p>' +
     '<section class="card"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px"><button class="btn sec" data-act="mes" data-d="-1" aria-label="Mes anterior">←</button><h2 style="margin:0 8px;min-width:190px;text-align:center">' + MESES_L[mes - 1] + ' ' + anio + '</h2><button class="btn sec" data-act="mes" data-d="1" aria-label="Mes siguiente">→</button><button class="btn sec" data-act="mes" data-d="0">Hoy</button></div>' +
-    controlesCal() + '<div class="leyenda">' + quienes + '</div><div class="scroll"><div class="cal"><div class="calh"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>' + semanas + '</div></div></section>' +
-    '<div class="two" style="margin-top:16px"><section class="card"><h2>Este mes</h2>' + (lista.length ? lista.map((e) => '<div class="row"><b>' + e.d + ' de ' + MESES_L[mes - 1] + '</b> · ' + e.tipo + ' · <a href="#/oferta/' + esc(e.o.id) + '">' + esc(e.o.nombre) + '</a><small>Responsable: ' + esc(nombrePersona(e.o.responsable)) + apoyoTxt(e.o) + '</small></div>').join('') : '<div class="row"><small>No hay inicios ni finales este mes.</small></div>') + '</section>' +
-    '<section class="card"><h2>Ofertas sin fecha de inicio</h2>' + (sinFecha.length ? sinFecha.map((o) => '<div class="row"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>No aparecen en el calendario hasta que tengan fecha.</small></div>').join('') : '<div class="row"><small>Todas las ofertas tienen fecha.</small></div>') + '</section></div>';
+    controlesCal() + '<div class="leyenda">' + leyendaCal() + '</div>' + vistaHtml + '</section>' +
+    (S.cal.vista === 'agenda' ? '' : '<div class="two" style="margin-top:16px"><section class="card"><h2>Este mes</h2>' + (lista.length ? lista.map((e) => '<div class="row"><b>' + e.d + ' de ' + MESES_L[mes - 1] + '</b> · ' + e.tipo + ' · <a href="#/oferta/' + esc(e.o.id) + '">' + esc(e.o.nombre) + '</a><small>Lidera: ' + esc(nombrePersona(e.o.responsable)) + apoyoTxt(e.o) + '</small></div>').join('') : '<div class="row"><small>No hay inicios ni finales este mes.</small></div>') + '</section>' +
+    '<section class="card"><h2>Ofertas sin fecha de inicio</h2>' + (sinFecha.length ? sinFecha.map((o) => '<div class="row"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>No aparecen en el calendario hasta que tengan fecha.</small></div>').join('') : '<div class="row"><small>Todas las ofertas tienen fecha.</small></div>') + '</section></div>');
   app.innerHTML = shell('calendario', cuerpo);
 }
 
@@ -550,7 +626,7 @@ function vistaNueva() {
 /* ----- Ficha ----- */
 function vistaFicha() {
   const F = S.ficha; const o = F.oferta;
-  const tabs = [['datos', 'Datos y estado'], ['check', 'Checklist'], ['tareas', 'Tareas' + tkCuenta(S.fichaId)], ['fin', 'Finanzas'], ['pat', 'Patrocinadores'], ['notas', 'Notas (' + F.notas.filter((n) => n.vigente).length + ')'], ['hist', 'Opiniones e historial']];
+  const tabs = [['datos', 'Datos y estado'], ['check', 'Checklist'], ['tareas', 'Tareas' + tkCuenta(S.fichaId)], ['liq', 'Liquidación'], ['pat', 'Patrocinadores'], ['notas', 'Notas (' + F.notas.filter((n) => n.vigente).length + ')'], ['hist', 'Opiniones e historial']];
   const chips = [o.tipo ? pill('p', t(o.tipo)) : pill('pd', 'Sin tipo'), o.publico ? pill('p', o.publico) : pill('pd', 'Sin público'), o.estado ? pill(o.estado_por_confirmar === 'Si' ? 'pd' : 'p', t(o.estado) + (o.estado_por_confirmar === 'Si' ? ' (por confirmar)' : '')) : pill('pd', 'Sin estado')].join(' ') + ' ' + semPill(F.semaforo, F.semaforo_motivo);
   const banner = F.pendientes.length ? '<section class="card pin" style="margin-top:16px"><h2 style="margin-bottom:6px">Pendiente de información</h2><p class="sub" style="margin:0">Es obligatorio completar: <b>' + esc(pendTxt(F.pendientes)) + '</b>. Hazlo en «Datos y estado». Mientras tanto la oferta no puede avanzar de estado.</p></section>' : '';
   const cab = '<p class="note"><a href="#/inicio">← Volver a Inicio</a></p><section class="card"><h1>' + esc(o.nombre) + '</h1><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">' + chips +
@@ -561,10 +637,12 @@ function vistaFicha() {
   if (S.tab === 'datos') c = fichaDatos(F);
   else if (S.tab === 'check') c = fichaChecklist(F);
   else if (S.tab === 'tareas') c = fichaTareas(F);
+  else if (S.tab === 'liq') c = fichaLiquidacion();
   else if (S.tab === 'notas') c = fichaNotas(F);
   else if (S.tab === 'hist') c = fichaHistorial(F);
-  else c = '<section class="card"><h2>' + (S.tab === 'fin' ? 'Finanzas' : 'Patrocinadores') + '</h2><p class="sub" style="margin:0">Esta parte llega en el siguiente tramo de la construcción. Por ahora los datos de inscritos y el mínimo se registran en «Datos y estado».</p></section>';
+  else c = '<section class="card"><h2>Patrocinadores</h2><p class="sub" style="margin:0">Esta parte llega en el siguiente tramo de la construcción. Por ahora los datos de inscritos y el mínimo se registran en «Datos y estado».</p></section>';
   app.innerHTML = shell('', cab + c);
+  if (S.tab === 'liq') recalcLiq();
 }
 const esPend = (F, k) => F.pendientes.indexOf(k) >= 0;
 const PEND_ESTILO = 'style="border:2px solid #FFB020"';
@@ -997,6 +1075,7 @@ function trasTareas() {
   const b = document.getElementById('bdgT');
   if (b && S.tareas) { const n = misTareas().length; b.textContent = n; b.style.display = n ? '' : 'none'; b.className = 'bdg' + (misVencidas() ? ' r' : ''); }
   if ((location.hash || '#/inicio').indexOf('#/inicio') === 0) pintarAtencion();
+  pintarElisa();
 }
 function repintarTareas() {
   const y = window.scrollY; const h = location.hash || '';
@@ -1008,6 +1087,7 @@ function tareasFiltradas() {
   return S.tareas.lista.filter((tk) => {
     if (f.ver === 'mias' && tk.asignada_a !== yo) return false;
     if (f.ver === 'asigne' && tk.asignada_por !== yo) return false;
+    if (f.ver.indexOf('p:') === 0 && tk.asignada_a !== f.ver.slice(2)) return false;
     const hecha = tk.estado === 'Hecha';
     if (f.estado === 'pend' && hecha) return false;
     if (f.estado === 'hechas' && !hecha) return false;
@@ -1100,7 +1180,7 @@ function vistaTareas() {
   const stat = (n, txt, v) => '<button class="aten" style="margin:0' + (S.ft.foco === v ? ';border-color:var(--acc);background:var(--accsoft)' : '') + '" data-act="tkfoco" data-v="' + v + '"><span class="n"' + (v === 'venc' && n ? ' style="color:#D32F2F"' : '') + '>' + n + '</span><span>' + txt + '</span></button>';
   const selF = (k, etq, ops) => '<div class="f"><label for="ft_' + k + '">' + etq + '</label><select id="ft_' + k + '" data-ft="' + k + '">' + ops.map((x) => opcion(x[0], x[1], S.ft[k] === x[0])).join('') + '</select></div>';
   const filtros = '<div class="filtros"><div class="f"><label for="ft_q">Buscar</label><input id="ft_q" type="search" data-ft="q" placeholder="Tarea u oferta" value="' + esc(S.ft.q) + '"></div>' +
-    selF('ver', 'Mostrar', [['mias', 'Asignadas a mí'], ['asigne', 'Asignadas por mí'], ['todas', 'Todas las que puedo ver']]) + selF('estado', 'Estado', [['pend', 'Pendientes'], ['hechas', 'Hechas'], ['todas', 'Todas']]) + '</div>';
+    selF('ver', 'Mostrar', [['mias', 'Asignadas a mí'], ['asigne', 'Asignadas por mí'], ['todas', 'Todas las que puedo ver']].concat(yo === LIDER || yo === TRANSVERSAL ? S.cat.personas.filter((p) => p.id !== yo).map((p) => ['p:' + p.id, 'Tareas de ' + p.nombre.split(' ')[0]]) : [])) + selF('estado', 'Estado', [['pend', 'Pendientes'], ['hechas', 'Hechas'], ['todas', 'Todas']]) + '</div>';
   const cuerpo = '<h1>Mis tareas · ' + esc(primerNombre(yo)) + '</h1><p class="sub">Lo que se espera de ti en cada oferta, en orden de fecha. Te llega un correo al asignártelas y antes de cada fecha límite. Los certificados se envían máximo 5 días hábiles después de finalizar el evento.</p>' +
     '<div class="grid4" style="margin-bottom:16px">' + stat(nV, 'vencidas', 'venc') + stat(nS, 'vencen en los próximos 7 días', 'sem') + stat(nP, 'prioritarias', 'prior') + stat(nC, 'certificados por enviar', 'cert') + '</div>' +
     '<div class="two"><section class="card" style="flex:2 1 560px"><h2>Mi lista</h2>' + filtros + '<div id="tk_res">' + htmlTareas() + '</div></section><div style="flex:1 1 340px">' + formTarea('') + '</div></div>';
@@ -1120,26 +1200,356 @@ function fichaTareas(F) {
 const tkCuenta = (id) => (S.tareas ? ' (' + S.tareas.lista.filter((tk) => tk.id_oferta === id && tk.estado !== 'Hecha').length + ')' : '');
 
 /* ---------- calendario: quién lidera y quién apoya ---------- */
-function calVisible(o) { const p = S.cal.persona; return !p || o.responsable === p || (o.apoyos || []).indexOf(p) >= 0; }
-function apoyoTxt(o) { return o.apoyos && o.apoyos.length ? ' · Apoyo: ' + o.apoyos.map((a) => esc(nombrePersona(a))).join(', ') : ''; }
+/** Maribel participa en todas las ofertas: no se muestra como apoyo y, al elegirla, se ve todo sin separar. */
+function calPer() { const p = S.cal.persona; return p && p !== TRANSVERSAL ? p : ''; }
+function calRol(o, per) { return o.responsable === per ? 'lidera' : (o.apoyos || []).indexOf(per) >= 0 ? 'apoyo' : ''; }
+function calVisible(o) { const per = calPer(); if (!per) return true; const r = calRol(o, per); return !!r && (S.cal.rol === 'todo' || S.cal.rol === r); }
+function apoyosVis(o) { return (o.apoyos || []).filter((a) => a !== TRANSVERSAL); }
+function apoyoTxt(o) { const a = apoyosVis(o); return a.length ? ' · Apoyan: ' + a.map((x) => esc(nombrePersona(x))).join(', ') : ''; }
+function calItems(filtrar) {
+  const res = [];
+  S.inicio.ofertas.filter((o) => o.estado !== 'Cancelado' && (!filtrar || calVisible(o))).forEach((o) => {
+    const mismo = o.fecha_inicio && o.fecha_fin && o.fecha_inicio.slice(0, 10) === o.fecha_fin.slice(0, 10);
+    (mismo ? [['Inicio y fin', o.fecha_inicio]] : [['Inicio', o.fecha_inicio], ['Fin', o.fecha_fin]]).forEach((p) => {
+      if (p[1] && p[1].slice(0, 7) === S.mesCal) res.push({ d: Number(p[1].slice(8, 10)), tipo: p[0], o });
+    });
+  });
+  return res;
+}
+const pillApoyo = (a) => '<span class="apn"><i style="background:' + colorDe(a) + '"></i>' + esc(primerNombre(a)) + '</span>';
 function chipCal(e) {
-  const o = e.o; const per = S.cal.persona; const soloApoyo = !!per && o.responsable !== per;
-  const col = per ? colorDe(per) : colorDe(o.responsable);
-  const estilo = soloApoyo ? 'background:#fff;color:' + col + ';border:2px dashed ' + col : 'background:' + col;
-  const etq = per ? (soloApoyo ? 'Apoyo' : 'Lidera') : primerNombre(o.responsable).slice(0, 2);
-  const pts = (!per && S.cal.apoyos && o.apoyos && o.apoyos.length) ? '<span class="aps">' + o.apoyos.map((a) => '<i class="ap" style="background:' + colorDe(a) + '" title="Apoyo: ' + esc(nombrePersona(a)) + '">' + esc(nombrePersona(a).slice(0, 2)) + '</i>').join('') + '</span>' : '';
-  return '<a class="evc" style="' + estilo + '" href="#/oferta/' + esc(o.id) + '" title="' + esc(o.nombre) + ' · ' + esc(primerNombre(o.responsable)) + (soloApoyo ? ' (tú apoyas)' : '') + '">' + esc(etq) + ' · ' + e.tipo + ' · ' + esc(o.nombre) + pts + '</a>';
+  const o = e.o; const per = calPer(); const rol = per ? calRol(o, per) : ''; const soloApoyo = rol === 'apoyo';
+  const col = soloApoyo ? colorDe(per) : colorDe(o.responsable);
+  const estilo = soloApoyo ? 'border:2px dashed ' + col : 'background:' + col;
+  const ap = apoyosVis(o);
+  return '<a class="evc2' + (soloApoyo ? ' ap' : '') + '" style="' + estilo + '" href="#/oferta/' + esc(o.id) + '" title="' + esc(o.nombre) + '"><span class="evt">' + esc(o.nombre) + '</span><span class="evl">' + e.tipo + ' · ' + (soloApoyo ? 'Solo apoyo · ' : '') + 'Lidera ' + esc(primerNombre(o.responsable)) + '</span>' +
+    (ap.length ? '<span class="evh">APOYAN</span><span class="evp">' + ap.map(pillApoyo).join('') + '</span>' : '') + '</a>';
+}
+function agendaCal(items, fest, mes, anio) {
+  const dias = {}; items.forEach((e) => { (dias[e.d] = dias[e.d] || []).push(e); }); Object.keys(fest).forEach((d) => { dias[d] = dias[d] || []; });
+  const ks = Object.keys(dias).map(Number).sort((a, b) => a - b);
+  if (!ks.length) return '<p class="sub" style="margin:8px 0">No hay inicios ni finales este mes con este filtro.</p>';
+  const per = calPer(); const DOW = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+  return ks.map((d) => {
+    const dow = DOW[new Date(Date.UTC(anio, mes - 1, d)).getUTCDay()];
+    const tarjetas = dias[d].map((e) => {
+      const o = e.o; const soloApoyo = !!per && calRol(o, per) === 'apoyo'; const ap = apoyosVis(o);
+      return '<div class="agk"><div class="tt"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a></div><div class="agr"><span class="pill pd">' + e.tipo + '</span>' +
+        '<span style="display:flex;align-items:center;gap:8px">' + (soloApoyo ? 'Solo apoyo · lidera' : 'Lidera') + '<span class="lid" style="--c:' + colorDe(o.responsable) + '">' + esc(primerNombre(o.responsable)) + '</span></span>' +
+        (ap.length ? '<span class="apy">Apoyan ' + ap.map(pillApoyo).join('') + '</span>' : '') + '</div></div>';
+    }).join('');
+    return '<div class="ag"><div class="agd"><span>' + dow + '</span><b>' + d + '</b><span>' + MESES[mes - 1] + '</span></div><div class="agc">' + (fest[d] ? '<div class="agf">Festivo · ' + esc(fest[d]) + ' · no se envían avisos</div>' : '') + tarjetas + '</div></div>';
+  }).join('');
 }
 function controlesCal() {
-  const sel = '<div class="f" style="margin:0;min-width:230px"><label for="cal_p">Ver a</label><select id="cal_p" data-cal="persona">' + opcion('', 'Todo el equipo', !S.cal.persona) + S.cat.personas.map((p) => opcion(p.id, p.nombre + (p.id === S.persona.id ? ' (yo)' : ''), S.cal.persona === p.id)).join('') + '</select></div>';
-  const chk = S.cal.persona ? '' : '<label style="display:flex;align-items:center;gap:8px;margin:0;color:var(--ink);font-size:14px;min-height:44px"><input type="checkbox" data-cal="apoyos"' + (S.cal.apoyos ? ' checked' : '') + '> Mostrar quién apoya (círculos de color)</label>';
-  return '<div style="display:flex;flex-wrap:wrap;gap:8px 24px;align-items:end;margin-bottom:12px">' + sel + chk + '</div>';
+  const per = calPer();
+  const sel = '<div class="f" style="margin:0;min-width:230px"><label for="cal_p">Ver a</label><select id="cal_p" data-cal="persona">' + opcion('', 'Todo el equipo', !S.cal.persona) + S.cat.personas.map((p) => opcion(p.id, p.nombre + (p.id === S.persona.id ? ' (yo)' : '') + (p.id === TRANSVERSAL ? ' · participa en todas' : ''), S.cal.persona === p.id)).join('') + '</select></div>';
+  const vis = '<div><label>Vista</label><div class="opts" role="group" aria-label="Tipo de vista"><button class="' + (S.cal.vista !== 'agenda' ? 'on' : '') + '" data-act="calv" data-v="grid" aria-pressed="' + (S.cal.vista !== 'agenda') + '">Cuadrícula</button><button class="' + (S.cal.vista === 'agenda' ? 'on' : '') + '" data-act="calv" data-v="agenda" aria-pressed="' + (S.cal.vista === 'agenda') + '">Agenda</button></div></div>';
+  let roles = '';
+  if (per) {
+    const todas = calItems(false).filter((e) => calRol(e.o, per)); const ids = (r) => { const s = {}; todas.filter((e) => !r || calRol(e.o, per) === r).forEach((e) => { s[e.o.id] = 1; }); return Object.keys(s).length; };
+    const chip = (v, txt, n) => '<button class="chip' + (S.cal.rol === v ? ' on' : '') + '" data-act="calrol" data-v="' + v + '" aria-pressed="' + (S.cal.rol === v) + '">' + txt + ' · ' + n + '</button>';
+    roles = '<div class="chips" style="margin:12px 0 0">' + chip('todo', 'Todo', ids('')) + chip('lidera', 'Lidera', ids('lidera')) + chip('apoyo', 'Solo apoyo', ids('apoyo')) + '</div>';
+  }
+  return '<div id="cal_ctrl"><div style="display:flex;flex-wrap:wrap;gap:8px 24px;align-items:end;margin-bottom:12px">' + sel + vis + '</div>' + roles + '</div>';
 }
 function leyendaCal() {
-  const per = S.cal.persona;
+  const per = calPer();
   if (per) { const col = colorDe(per); return '<span style="background:' + col + '">' + esc(primerNombre(per)) + ' lidera</span><span style="background:#fff;color:' + col + ';border:2px dashed ' + col + '">' + esc(primerNombre(per)) + ' solo apoya</span><span style="background:#ECEBF2;color:#3A3752;font-style:italic">Festivo</span>'; }
-  return S.cat.personas.map((p) => '<span style="background:' + colorDe(p.id) + '">' + esc(p.nombre.split(' ')[0]) + '</span>').join('') + (S.cal.apoyos ? '<span style="background:#fff;color:#3A3752;border:1px solid #DAD7EC">● Círculo = persona de apoyo</span>' : '') + '<span style="background:#ECEBF2;color:#3A3752;font-style:italic">Festivo</span>';
+  return '<span style="background:none;color:#3A3752;padding-left:0;font-weight:700">Lidera (color de la tarjeta):</span>' + S.cat.personas.map((p) => '<span style="background:' + colorDe(p.id) + '">' + esc(p.nombre.split(' ')[0]) + '</span>').join('') + '<span style="background:none;color:#3A3752">· Apoyan: pastillas blancas con su color</span><span style="background:#ECEBF2;color:#3A3752;font-style:italic">Festivo</span>';
 }
+
+/* ---------- vista de la líder (Elisa): equipo, para revisar, meta anual ---------- */
+const esLider = () => !!S.persona && S.persona.id === LIDER;
+const plural = (n, uno, varios) => n + ' ' + (n === 1 ? uno : varios);
+function cargarMeta() {
+  if (!esLider()) return Promise.resolve();
+  if (S.metaP) return S.metaP;
+  if (S.meta) return Promise.resolve();
+  S.metaError = '';
+  S.metaP = api('metaAnual').then((r) => { S.meta = r; }).catch((e) => { if (S.token) S.metaError = e.message; }).finally(() => { S.metaP = null; pintarElisa(); });
+  return S.metaP;
+}
+function pintarElisa() {
+  if (!esLider() || !S.inicio || !S.cat) return;
+  const z = document.getElementById('elisa_zona'); if (z) z.innerHTML = htmlElisa();
+  const x = document.getElementById('ext_zona'); if (x) x.innerHTML = htmlExtension();
+}
+function htmlEquipo() {
+  const act = S.inicio.ofertas.filter(esActiva);
+  const pend = S.tareas ? S.tareas.lista.filter((tk) => tk.estado !== 'Hecha') : null;
+  const tarjetas = S.cat.personas.filter((p) => p.id !== LIDER).map((p) => {
+    const lid = act.filter((o) => o.responsable === p.id).length;
+    const apo = act.filter((o) => (o.apoyos || []).indexOf(p.id) >= 0).length;
+    const sub = p.id === TRANSVERSAL ? 'Asistente · participa en todas' : 'Lidera ' + lid + ' · Apoya ' + apo;
+    let barra = '<p class="note" style="margin:0">' + (S.tareasError ? 'No se pudieron cargar las tareas.' : 'Cargando tareas…') + '</p>'; let cert = '';
+    if (pend) {
+      const mias = pend.filter((tk) => tk.asignada_a === p.id); const n = { v: 0, s: 0, d: 0 };
+      mias.forEach((tk) => { const k = tkVence(tk).k; if (k === 'venc') n.v++; else if (k === 'hoy' || k === 'p3' || k === 'sem') n.s++; else n.d++; });
+      const seg = (c, x) => (x ? '<i style="flex:' + x + ';background:' + c + '"></i>' : '');
+      barra = '<div><div class="eqbar">' + (mias.length ? seg('#E5242F', n.v) + seg('#FF8A00', n.s) + seg('#CFCBE6', n.d) : '<i style="flex:1;background:#CDEFDD"></i>') + '</div>' +
+        '<div class="eqlg"><span><b style="color:#B01822">' + n.v + '</b> vencida' + (n.v === 1 ? '' : 's') + '</span><span><b style="color:#8F4A00">' + n.s + '</b> esta semana</span><span><b style="color:#1F1D2B">' + n.d + '</b> después</span></div></div>';
+      if (p.id === TRANSVERSAL) { const c = mias.filter((tk) => tk.tipo === 'Certificado').length; if (c) cert = '<span class="pill cert">' + plural(c, 'certificado', 'certificados') + '</span>'; }
+    }
+    return '<div class="eqc' + (p.id === TRANSVERSAL ? ' tr' : '') + '"><div class="eqh"><span class="eqa" style="background:' + colorDe(p.id) + '">' + esc(p.nombre.slice(0, 2)) + '</span><div><b>' + esc(p.nombre.split(' ')[0]) + '</b><small>' + sub + '</small></div></div>' + barra +
+      '<div class="eqf"><span><a href="#/tareas" data-act="eq_tareas" data-v="' + esc(p.id) + '">Sus tareas →</a><a href="#/calendario" data-act="eq_cal" data-v="' + esc(p.id) + '">Calendario →</a></span>' + cert + '</div></div>';
+  }).join('');
+  return '<section class="card" id="sec_equipo" style="margin-bottom:16px"><h2 style="margin-bottom:2px">Equipo</h2><p class="note">Quién lidera, quién apoya y cómo va cada persona con sus tareas</p><div class="eqgrid">' + tarjetas + '</div></section>';
+}
+function htmlRevisar() {
+  const D = atencionDatos(); const tk = S.tareas ? S.tareas.lista.filter((x) => x.estado !== 'Hecha') : null;
+  const fila = (color, tit, det, btn) => '<div class="rv"><span class="rvd" style="background:' + color + '"></span><div class="otxt"><b>' + tit + '</b><small>' + det + '</small></div>' + (btn || '') + '</div>';
+  const boton = (attrs) => '<button class="btn q" ' + attrs + '>Revisar</button>';
+  const rows = [];
+  if (tk) {
+    const v = tk.filter((x) => tkVence(x).k === 'venc'); const pers = {}; v.forEach((x) => { pers[x.asignada_a] = 1; }); const np = Object.keys(pers).length;
+    rows.push(fila(v.length ? '#E5242F' : '#1DB46E', 'Tareas vencidas del equipo', v.length ? plural(v.length, 'tarea', 'tareas') + ' · ' + plural(np, 'persona', 'personas') : 'Todo al día', v.length ? boton('data-act="eq_venc"') : ''));
+    const c = tk.filter((x) => x.tipo === 'Certificado').sort(cmpTarea);
+    rows.push(fila(c.length ? '#FF8A00' : '#1DB46E', 'Certificados por enviar', c.length ? plural(c.length, 'evento', 'eventos') + ' · el más próximo vence el ' + fecha(c[0].fecha_limite) : 'Ninguno pendiente', c.length ? boton('data-act="eq_cert"') : ''));
+  } else rows.push(fila('#9A97B5', 'Tareas del equipo', S.tareasError ? 'No se pudieron cargar.' : 'Cargando…', ''));
+  const rojo = D.alertas.filter((o) => o.semaforo === 'rojo').length;
+  rows.push(fila(D.alertas.length ? '#E5242F' : '#1DB46E', 'Ofertas con alerta', D.alertas.length ? D.alertas.length + ' · ' + rojo + ' en rojo, ' + (D.alertas.length - rojo) + ' en amarillo' : 'Ninguna', D.alertas.length ? boton('data-act="verfiltro" data-ctx="inicio" data-v="alerta"') : ''));
+  rows.push(fila(D.pend.length ? '#7A7699' : '#1DB46E', 'Ofertas con información pendiente', D.pend.length ? D.pend.length + ' · es obligatorio completarla' : 'Ninguna', D.pend.length ? boton('data-act="verfiltro" data-ctx="inicio" data-v="pend"') : ''));
+  if (S.meta) {
+    const nr = S.meta.n_en_revision; const np = S.meta.n_por_liquidar;
+    rows.push(fila(nr ? '#FF8A00' : '#1DB46E', 'Liquidaciones por aprobar', nr ? nr + ' en revisión' : 'Ninguna', nr ? boton('data-act="eq_liq" data-id="' + esc(S.meta.en_revision[0].id) + '"') : ''));
+    rows.push(fila(np ? '#FF8A00' : '#1DB46E', 'Ofertas por liquidar', np ? np + ' · ya terminaron y aún no suman a la meta' : 'Ninguna', np ? boton('data-act="eq_liq" data-id="' + esc(S.meta.por_liquidar[0].id) + '"') : ''));
+  }
+  return '<section class="card" id="sec_rev"><h2 style="margin-bottom:4px">Para revisar hoy</h2>' + rows.join('') + '</section>';
+}
+function htmlMeta() {
+  let cuerpo;
+  if (!S.meta) cuerpo = '<p class="note" style="margin:0">' + (S.metaError ? esc(S.metaError) + ' <button class="btn q" data-act="meta_reint" style="margin-left:6px">Reintentar</button>' : 'Cargando…') + '</p>';
+  else {
+    const m = S.meta.meta; const pe = m.meta > 0 ? Math.min(100, 100 * m.ejecutado / m.meta) : 0; const pp = m.meta > 0 ? Math.max(0, Math.min(100 - pe, 100 * m.proyectado / m.meta)) : 0;
+    cuerpo = '<div class="mtiles"><div class="mt"><small>Ejecutado (liquidado)</small><b style="color:var(--acc)">' + COP(m.ejecutado) + '</b><small>Con ingresos y gastos reales</small></div>' +
+      '<div class="mt"><small>Proyectado (sin liquidar)</small><b>' + COP(m.proyectado) + '</b><small>Según presupuesto; puede variar</small></div>' +
+      '<div class="mt"><small>Falta para la meta</small><b>' + (m.meta > 0 ? COP(m.faltante) : '—') + '</b><small>' + (m.meta > 0 ? m.avance + ' % de avance' : 'Define la meta de ' + m.anio) + '</small></div>' +
+      '<div class="mt" style="' + (S.meta.n_por_liquidar ? 'background:#FFF0DB;border-color:#FFD099' : '') + '"><small style="' + (S.meta.n_por_liquidar ? 'color:#8F4A00' : '') + '">Por liquidar</small><b style="' + (S.meta.n_por_liquidar ? 'color:#8F4A00' : '') + '">' + plural(S.meta.n_por_liquidar, 'oferta', 'ofertas') + '</b><small style="' + (S.meta.n_por_liquidar ? 'color:#8F4A00' : '') + '">Ya terminaron y no suman aún</small></div></div>' +
+      (m.meta > 0 ? '<div class="mbar" role="img" aria-label="Avance de la meta: ' + m.avance + ' % ejecutado"><i style="width:' + pe + '%;background:var(--acc)"></i><i class="hatch" style="width:' + pp + '%"></i></div><p class="note" style="margin:8px 0 0">Meta ' + m.anio + ': ' + COP(m.meta) + '</p>' : '') +
+      '<details style="margin-top:12px"><summary>Definir o cambiar la meta de ' + m.anio + '</summary><div class="f" style="margin-top:10px"><label for="meta_v">Meta anual (en pesos)</label><input id="meta_v" inputmode="numeric" autocomplete="off" value="' + (m.meta > 0 ? Math.round(m.meta).toLocaleString('es-CO') : '') + '"></div><p id="meta_err" class="note" role="alert" style="color:#A3201A;font-weight:700"></p><button class="btn" data-act="meta_guardar">Guardar meta</button></details>';
+  }
+  return '<section class="card" id="sec_meta"><div class="chead"><h2 style="margin:0">Aporte a la meta anual</h2><span class="pill p">Solo la ve Elisa</span></div><p class="note">Solo suma lo liquidado con ingresos y gastos reales; lo presupuestado se muestra aparte.</p>' + cuerpo + '</section>';
+}
+function htmlElisa() { return htmlEquipo() + '<div class="grid2b">' + htmlRevisar() + htmlMeta() + '</div>'; }
+function htmlExtension() {
+  const of = S.inicio.ofertas; const act = of.filter(esActiva);
+  const crit = act.filter((o) => catEstado(o) !== 'apl' && o.dias !== null && o.dias >= 0 && o.dias <= 3).length;
+  const venc = S.tareas ? S.tareas.lista.filter((tk) => tk.estado !== 'Hecha' && tkVence(tk).k === 'venc').length : '…';
+  const ec = '<section class="card area"><div><h2 style="font-size:22px;margin-bottom:4px">Educación continua</h2><p class="note" style="margin:0">Cursos, simposios, talleres y diplomados</p></div>' +
+    '<div class="st3"><div><b style="color:var(--acc)">' + of.length + '</b><small>ofertas</small></div><div style="background:#FDECEE"><b style="color:#B01822">' + crit + '</b><small style="color:#B01822">inician en 3 días o menos</small></div><div style="background:#FFF0DB"><b style="color:#8F4A00">' + venc + '</b><small style="color:#8F4A00">tareas vencidas</small></div></div>' +
+    '<p class="note" style="margin:0">Equipo: ' + S.cat.personas.filter((p) => p.id !== LIDER).map((p) => esc(p.nombre.split(' ')[0])).join(', ') + '</p><div><a class="btn" href="#/inicio">Entrar a Educación continua</a></div></section>';
+  const pr = '<section class="card area pr"><div><h2 style="font-size:22px;margin-bottom:4px">Proyectos</h2><p class="note" style="margin:0">Proyectos y convenios de Extensión</p></div>' +
+    '<p style="margin:0;font-size:14px;color:var(--ink2)">Esta área se organizará igual que Educación continua. Se define en un siguiente tramo de la construcción.</p><div><button class="btn sec" disabled>Próximamente</button></div></section>';
+  return htmlMeta() + '<div class="areas" style="margin-top:16px">' + ec + pr + '</div>' + htmlRevisar();
+}
+function vistaExtension() {
+  app.innerHTML = shell('extension', '<h1>Extensión · panorama general</h1><p class="sub">Aquí eliges el área y ves la meta anual de Extensión. Hoy es ' + fecha(S.inicio.hoy) + '.</p><div id="ext_zona">' + htmlExtension() + '</div>');
+}
+async function guardarMeta() {
+  const v = val('meta_v'); const err = document.getElementById('meta_err');
+  if (!/\d/.test(v)) { if (err) err.textContent = 'Escribe el valor de la meta.'; return; }
+  try { const r = await api('guardarMeta', { anio: S.meta.meta.anio, valor: v }); S.meta = r; flash('ok', 'Meta guardada.'); }
+  catch (e) { if (!S.token) { vistaLogin(e.message); return; } if (err) err.textContent = e.message; return; }
+  const h = (location.hash || '#/inicio').replace(/^#\/?/, '').split('/')[0];
+  if (h === 'extension') vistaExtension(); else vistaInicio();
+}
+
+/* ---------- liquidación con valores reales ---------- */
+const ESTADO_LIQ = { Presupuestada: ['pd', 'Presupuestada'], Pendiente: ['o', 'Pendiente de liquidar'], 'En revision': ['a', 'En revisión'], Liquidada: ['v', 'Liquidada'] };
+function cargarLiq(id) {
+  if (S.liqP) return S.liqP;
+  S.liqError = '';
+  S.liqP = api('liquidacion', { id }).then((r) => { S.liq = { id, d: r }; }).catch((e) => { if (S.token) S.liqError = e.message; }).finally(() => { S.liqP = null; });
+  return S.liqP;
+}
+const numLq = (s) => { const x = String(s === undefined || s === null ? '' : s).replace(/[^\d]/g, ''); return x === '' ? null : Number(x); };
+function leerLiq() {
+  const p = {}; const r = {};
+  document.querySelectorAll('input[data-lq]').forEach((i) => { const v = numLq(i.value); if (v !== null) (i.dataset.lq === 'p' ? p : r)[i.dataset.k] = v; });
+  return { p, r };
+}
+function fichaLiquidacion() {
+  const id = S.fichaId;
+  if (!S.liq || S.liq.id !== id) {
+    if (S.liqError) return '<section class="card" id="sec_liq"><h2>Liquidación</h2><p class="sub">' + esc(S.liqError) + '</p><button class="btn" data-act="liq_reint">Reintentar</button></section>';
+    cargarLiq(id).then(() => { if (S.tab === 'liq' && S.fichaId === id && (location.hash || '').indexOf('#/oferta/') === 0 && S.ficha) { const y = window.scrollY; vistaFicha(); window.scrollTo(0, y); } });
+    return '<section class="card" id="sec_liq"><h2>Liquidación</h2><p class="sub" style="margin:0">Cargando…</p></section>';
+  }
+  const D = S.liq.d; const L = D.liquidacion; const ed = D.puede.editar; const C = D.conceptos;
+  const inp = (tp, k, v, etq) => '<input class="lqi" inputmode="numeric" autocomplete="off" data-lq="' + tp + '" data-k="' + k + '" aria-label="' + esc(etq) + '" value="' + (v === undefined ? '' : Number(v).toLocaleString('es-CO')) + '">';
+  const fila = (c, ing) => {
+    const k = c[0]; const pv = L.presupuesto[k]; const rv = L.real[k];
+    return '<tr><td>' + esc(c[1]) + '</td><td class="num">' + (ed ? inp('p', k, pv, c[1] + ' presupuestado') : (pv === undefined ? '—' : COP(pv))) + '</td><td class="num">' + (ed ? inp('r', k, rv, c[1] + ' real') : (rv === undefined ? '—' : COP(rv))) + '</td><td class="num" id="lq_d_' + k + '" data-ing="' + (ing ? 1 : 0) + '">—</td></tr>';
+  };
+  const est = ESTADO_LIQ[L.estado] || ESTADO_LIQ.Presupuestada;
+  const pasos = [['Presupuestada', 'Presupuestada', 'cuenta como proyección, no como meta'], ['Pendiente', 'Pendiente de liquidar', 'el evento terminó; se piden los reales'], ['En revision', 'En revisión', 'Elisa verifica los valores'], ['Liquidada', 'Liquidada', 'el excedente real suma a la meta']];
+  const enviar = ed && (L.estado === 'Presupuestada' || L.estado === 'Pendiente');
+  const botones = (ed ? (enviar ? '<button class="btn" data-act="liq_e">Enviar liquidación a revisión</button><button class="btn sec" data-act="liq_g">Guardar borrador</button>' : '<button class="btn" data-act="liq_g">Guardar cambios</button>') : '');
+  const lider = (D.puede.aprobar || D.puede.devolver) ?
+    '<div style="border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px;margin-top:6px"><span class="pill p" style="align-self:flex-start">Vista de Elisa</span>' +
+    (D.puede.aprobar ? '<button class="btn" style="background:#0E6B3F;border-color:#0E6B3F" data-act="liq_ap">Aprobar y sumar a la meta</button>' : '') +
+    '<div class="f" style="margin:0"><label for="lq_com">Comentario (obligatorio para devolver)</label><textarea id="lq_com" maxlength="400"></textarea></div><button class="btn sec" data-act="liq_dv">Devolver con comentario</button></div>' : '';
+  const devuelta = L.comentario && (L.estado === 'Presupuestada' || L.estado === 'Pendiente') ? '<div class="card pin" style="margin-bottom:14px"><b>Elisa devolvió la liquidación:</b> «' + esc(L.comentario) + '»</div>' : '';
+  const nota = !ed ? '<p class="note">' + (L.estado === 'En revision' ? 'Está en revisión de Elisa.' : L.estado === 'Liquidada' ? 'Liquidada y aprobada' + (L.aprobada_en ? ' el ' + fecha(L.aprobada_en) : '') + '. Suma a la meta anual.' : 'Pueden registrar la liquidación Elisa, Maribel y quien lidera o apoya esta oferta.') + '</p>' : (!L.terminada ? '<p class="note">El evento aún no termina: por ahora puedes registrar el presupuesto. Los valores reales se llenan al finalizar.</p>' : '');
+  return '<div class="two"><section class="card" id="sec_liq" style="flex:2 1 560px">' + '<div class="chead"><h2 style="margin:0">Presupuesto vs. real</h2><span class="pill ' + est[0] + '">' + est[1] + '</span></div>' +
+    '<p class="note">Al liquidar se registran los ingresos y gastos reales (en pesos). Solo así el excedente suma a la meta anual.</p>' + devuelta + nota +
+    '<div class="scroll"><table class="lqt" style="min-width:560px"><thead><tr><th>Concepto</th><th class="num">Presupuestado</th><th class="num">Real</th><th class="num">Diferencia</th></tr></thead><tbody>' +
+    '<tr class="sec"><td colspan="4">Ingresos</td></tr>' + C.ingresos.map((c) => fila(c, true)).join('') + '<tr class="sec"><td colspan="4">Gastos</td></tr>' + C.gastos.map((c) => fila(c, false)).join('') +
+    '<tr class="tot"><td>Excedente</td><td class="num" id="lq_ep">—</td><td class="num" id="lq_er">—</td><td class="num" id="lq_ed">—</td></tr></tbody></table></div>' +
+    '<div id="lq_aviso" role="status" style="display:none;margin-top:14px;padding:12px 14px;border-radius:12px;font-size:14px"></div>' +
+    (botones ? '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px">' + botones + '</div>' : '') + '</section>' +
+    '<section class="card" style="flex:1 1 320px"><h2>Estados de la liquidación</h2>' + pasos.map((x, i) => '<div class="lqs' + (x[0] === L.estado ? ' cur' : '') + '"><span class="n">' + (i + 1) + '</span><span><b>' + x[1] + '</b> · ' + x[2] + '</span></div>').join('') + lider + '</section></div>';
+}
+function recalcLiq() {
+  if (!S.liq || !document.getElementById('lq_ep')) return;
+  const D = S.liq.d; const C = D.conceptos; let p; let r;
+  if (D.puede.editar) { const x = leerLiq(); p = x.p; r = x.r; } else { p = D.liquidacion.presupuesto; r = D.liquidacion.real; }
+  const todos = C.ingresos.concat(C.gastos);
+  const ex = (v) => C.ingresos.reduce((a, c) => a + (v[c[0]] || 0), 0) - C.gastos.reduce((a, c) => a + (v[c[0]] || 0), 0);
+  const signo = (d) => (d > 0 ? '+ ' : d < 0 ? '− ' : '') + Math.abs(d).toLocaleString('es-CO');
+  let peor = null;
+  todos.forEach((c) => {
+    const el = document.getElementById('lq_d_' + c[0]); if (!el) return; const ing = el.dataset.ing === '1';
+    if (p[c[0]] === undefined || r[c[0]] === undefined) { el.textContent = '—'; el.style.color = ''; el.style.fontWeight = ''; return; }
+    const d = r[c[0]] - p[c[0]]; const malo = ing ? d < 0 : d > 0;
+    el.textContent = signo(d); el.style.color = d === 0 ? '#4A4766' : malo ? '#B01822' : '#0E6B3F'; el.style.fontWeight = d === 0 ? '400' : '700';
+    if (malo && (!peor || Math.abs(d) > peor.v)) peor = { v: Math.abs(d), n: c[1] };
+  });
+  const completoR = todos.every((c) => r[c[0]] !== undefined); const hayP = todos.some((c) => p[c[0]] !== undefined);
+  const ep = ex(p); const er = ex(r);
+  const set = (id, txt) => { const e = document.getElementById(id); if (e) e.textContent = txt; };
+  set('lq_ep', hayP ? COP(ep) : '—'); set('lq_er', completoR ? COP(er) : '—');
+  const ed = document.getElementById('lq_ed'); const av = document.getElementById('lq_aviso');
+  if (completoR && hayP) {
+    const d = er - ep; if (ed) { ed.textContent = signo(d); ed.style.color = d < 0 ? '#B01822' : d > 0 ? '#0E6B3F' : ''; }
+    if (av) {
+      const pct = ep !== 0 ? Math.round(100 * Math.abs(d) / Math.abs(ep)) : null;
+      av.style.display = 'block';
+      if (d < 0) { av.style.background = '#FFF0DB'; av.style.color = '#8F4A00'; av.textContent = 'El excedente real quedó ' + (pct !== null ? pct + ' % ' : '') + 'por debajo del presupuestado' + (peor ? ', sobre todo por «' + peor.n.toLowerCase() + '»' : '') + '.'; }
+      else if (d > 0) { av.style.background = '#E3F6EC'; av.style.color = '#0E6B3F'; av.textContent = 'El excedente real superó al presupuestado' + (pct !== null ? ' en ' + pct + ' %' : '') + '.'; }
+      else { av.style.background = '#EDEBFA'; av.style.color = '#3F3890'; av.textContent = 'El excedente real coincide con el presupuestado.'; }
+    }
+  } else { if (ed) { ed.textContent = '—'; ed.style.color = ''; } if (av) av.style.display = 'none'; }
+}
+async function liqOp(accion, extra, okMsg) {
+  const guardo = S.liq && S.liq.id === S.fichaId;
+  try {
+    const r = await api(accion, Object.assign({ id: S.fichaId }, extra || {}));
+    S.liq = { id: S.fichaId, d: r }; S.meta = null; flash('ok', okMsg);
+  } catch (e) {
+    if (!S.token) { vistaLogin(e.message); return; }
+    if (guardo && document.querySelector('input[data-lq]')) { const x = leerLiq(); S.liq.d.liquidacion.presupuesto = x.p; S.liq.d.liquidacion.real = x.r; }
+    flash('err', e.message);
+  }
+  const y = window.scrollY; vistaFicha(); window.scrollTo(0, y);
+}
+const liqGuardar = (enviar) => { const x = leerLiq(); return liqOp('guardarLiquidacion', { presupuesto: x.p, real: x.r, enviar }, enviar ? 'Liquidación enviada a revisión de Elisa.' : 'Liquidación guardada.'); };
+
+/* ---------- recorrido virtual ---------- */
+const tourKey = () => 'ec_tour_off_' + (S.persona ? S.persona.id : '');
+function tourSilenciado() { try { return localStorage.getItem(tourKey()) === '1'; } catch (e) { return false; } }
+function tourSilenciar(v) { try { if (v) localStorage.setItem(tourKey(), '1'); else localStorage.removeItem(tourKey()); } catch (e) { /* sin almacenamiento */ } }
+function ofertaTour() {
+  const yo = S.persona.id; const of = S.inicio ? S.inicio.ofertas.filter(esActiva) : [];
+  const o = of.filter((x) => x.responsable === yo || (x.apoyos || []).indexOf(yo) >= 0)[0] || of[0];
+  return o ? o.id : '';
+}
+function tourPasos() {
+  const yo = S.persona.id; const id = ofertaTour(); const ficha = '#/oferta/' + id; const p = [];
+  if (yo === LIDER) p.push({ ruta: '#/extension', sel: '#ext_zona', t: 'El portal de Extensión', x: 'Es tu punto de partida: la meta anual (solo la ves tú), lo ejecutado frente a lo proyectado y el acceso a cada área. Educación continua está activa; Proyectos se sumará más adelante.' });
+  p.push({ ruta: '#/inicio', sel: '#sec_prox', t: 'Inicio: tu panorama', x: 'Aquí ves de un vistazo lo que viene: los próximos inicios de los siguientes 30 días y cuántas ofertas hay en cada estado.' });
+  p.push({ ruta: '#/inicio', sel: '#prox_chips', t: 'El semáforo de los anillos', x: 'Cada anillo se llena a medida que se acerca el inicio. Rojo: 3 días o menos. Naranja: 4 a 5. Amarillo: 6 a 10. Verde: más de 10. Toca un color para filtrar y usa «Requieren atención» para ver las alertas y la información pendiente.' });
+  if (yo === LIDER) {
+    p.push({ ruta: '#/inicio', sel: '#sec_equipo', t: 'Tu equipo', x: 'Cómo va cada persona: qué lidera, qué apoya y cuántas tareas tiene vencidas, de esta semana o posteriores. Desde cada tarjeta abres sus tareas o su calendario.' });
+    p.push({ ruta: '#/inicio', sel: '#sec_meta', t: 'Aporte a la meta anual', x: 'Solo suma lo ya liquidado con ingresos y gastos reales. Lo presupuestado y sin liquidar aparece aparte como proyectado. Aquí defines la meta del año.' });
+  }
+  p.push({ ruta: '#/mis', sel: '#expl', t: 'Mis ofertas', x: 'Aquí están las ofertas que lideras y las que apoyas, en orden de fecha. Toca el nombre de una para abrir su ficha.' });
+  if (id) p.push({ ruta: ficha, tab: 'check', espera: '.tabs', sel: '.tabs', t: 'La ficha y el checklist', x: 'Cada oferta tiene su ficha con los datos, el checklist, las tareas y la liquidación. En el checklist marcas cada ítem como Cumplido, Pendiente o No aplica; así todo el equipo sabe en qué va la oferta.' });
+  p.push({ ruta: '#/tareas', sel: '.grid4', t: 'Mis tareas', x: 'Lo que se espera de ti en cada oferta, por fecha límite y prioridad. Te llega un correo al asignártelas y antes de cada fecha límite, nunca en fines de semana ni festivos. ' + (yo === TRANSVERSAL || yo === LIDER ? 'Puedes asignar tareas en todas las ofertas.' : 'Puedes asignar tareas en las ofertas donde participas.') });
+  if (yo === TRANSVERSAL) p.push({ ruta: '#/tareas', sel: '.grid4', t: 'Certificados', x: 'Cuando termina un evento aparece sola una tarea prioritaria para ti: enviar los certificados máximo 5 días hábiles después de finalizar, y te llega el aviso por correo.' });
+  p.push({ ruta: '#/calendario', sel: '#cal_ctrl', t: 'Calendario', x: 'Inicios y finales de todas las ofertas. Cada tarjeta lleva el color de quien lidera y, debajo, quiénes apoyan. Cambia a «Agenda» para verlo día por día.' });
+  if (id) p.push({ ruta: ficha, tab: 'liq', espera: '.tabs', sel: '#sec_liq', t: 'Liquidación', x: yo === LIDER ? 'Cuando el evento termina, el equipo registra aquí los ingresos y gastos reales y lo envía a revisión. Tú lo apruebas o lo devuelves con un comentario; al aprobar, el excedente real suma a la meta anual.' : 'Cuando el evento termina, aquí se registran los ingresos y gastos reales y se envía a revisión de Elisa. Solo lo liquidado y aprobado suma a la meta anual.' });
+  p.push({ fin: true, t: 'Listo', x: 'Ya conoces lo esencial. Puedes repetir el recorrido cuando quieras desde «Dame mi recorrido virtual», en la parte superior.' });
+  return p;
+}
+const tourEsperar = (sel, ms) => new Promise((ok) => { const t0 = Date.now(); const f = () => { const e = document.querySelector(sel); if (e) ok(e); else if (Date.now() - t0 > ms) ok(null); else setTimeout(f, 120); }; f(); });
+function tourBienvenida() {
+  if (document.getElementById('tour_modal')) return;
+  const d = document.createElement('div'); d.id = 'tour_modal'; d.className = 'tmodal';
+  d.innerHTML = '<div class="tbox" role="dialog" aria-modal="true" aria-labelledby="tm_t"><div class="tem" aria-hidden="true">👋</div><h2 id="tm_t">Hola, ' + esc(S.persona.nombre.split(' ')[0]) + '</h2>' +
+    '<p>Te acompaño por el portal de Educación continua en unos 3 minutos: qué ves, qué se espera de ti y cómo se mantiene todo al día.</p>' +
+    '<div class="tbtns"><button class="btn" data-tour="ini" id="tm_ini">Empezar el recorrido</button><button class="btn sec" data-tour="ahora">Ahora no</button></div>' +
+    '<label class="tno"><input type="checkbox" id="tm_no"> No volver a mostrar este mensaje</label>' +
+    '<p style="font-size:12px">Puedes retomarlo cuando quieras desde «Dame mi recorrido virtual».</p></div>';
+  document.body.appendChild(d);
+  const b = document.getElementById('tm_ini'); if (b) b.focus();
+}
+function tourCerrarModal() { const m = document.getElementById('tour_modal'); if (m) m.remove(); }
+function tourAuto() {
+  if (!S.persona || S.tour || document.getElementById('tour_modal') || tourSilenciado()) return;
+  let visto = false; try { visto = sessionStorage.getItem('ec_tour_vis') === '1'; } catch (e) { visto = false; }
+  if (visto) return;
+  try { sessionStorage.setItem('ec_tour_vis', '1'); } catch (e) { /* sin almacenamiento */ }
+  tourBienvenida();
+}
+function tourEmpezar() {
+  tourCerrarModal(); if (S.tour) return;
+  if (!document.getElementById('tour_spot')) { const s = document.createElement('div'); s.id = 'tour_spot'; document.body.appendChild(s); }
+  if (!document.getElementById('tour_panel')) { const p = document.createElement('div'); p.id = 'tour_panel'; p.setAttribute('role', 'dialog'); p.setAttribute('aria-label', 'Recorrido virtual'); document.body.appendChild(p); }
+  S.tour = { i: 0, pasos: tourPasos(), n: 0 };
+  S.tourT = setInterval(tourPosicion, 200);
+  tourIr(0);
+}
+function tourSalir() {
+  clearInterval(S.tourT); S.tourT = null; S.tour = null;
+  ['tour_spot', 'tour_panel', 'tour_modal'].forEach((id) => { const e = document.getElementById(id); if (e) e.remove(); });
+}
+function tourPosicion() {
+  const T = S.tour; const s = document.getElementById('tour_spot'); if (!T || !s) return;
+  const p = T.pasos[T.i]; const el = p.sel && !T.cargando ? document.querySelector(p.sel) : null;
+  if (!el) { s.style.left = '50%'; s.style.top = '50%'; s.style.width = '0px'; s.style.height = '0px'; return; }
+  const r = el.getBoundingClientRect(); const m = 6;
+  s.style.left = (r.left - m) + 'px'; s.style.top = (r.top - m) + 'px'; s.style.width = (r.width + 2 * m) + 'px'; s.style.height = (r.height + 2 * m) + 'px';
+}
+function tourPanel() {
+  const T = S.tour; const pn = document.getElementById('tour_panel'); if (!T || !pn) return;
+  const p = T.pasos[T.i]; const n = T.pasos.length; const ult = T.i === n - 1;
+  pn.innerHTML = '<div class="tph"><b>Paso ' + (T.i + 1) + ' de ' + n + '</b><button data-tour="salir">Salir del recorrido</button></div>' +
+    '<div class="tbar" aria-hidden="true">' + T.pasos.map((_, k) => '<i style="background:' + (k <= T.i ? 'var(--acc)' : '#DAD7EC') + '"></i>').join('') + '</div>' +
+    '<div><h3>' + esc(p.t) + '</h3></div><p>' + esc(p.x) + '</p>' +
+    (ult ? '<label class="tno"><input type="checkbox" id="tp_no"' + (tourSilenciado() ? ' checked' : '') + '> No volver a mostrar el recorrido al entrar</label>' : '') +
+    '<div class="tpf">' + (T.i > 0 ? '<button class="btn sec" data-tour="atras">← Atrás</button>' : '<span></span>') + '<button class="btn" data-tour="' + (ult ? 'fin' : 'sig') + '" id="tp_sig">' + (ult ? 'Terminar' : 'Siguiente →') + '</button></div>';
+  const b = document.getElementById('tp_sig'); if (b && document.activeElement && document.activeElement.tagName !== 'INPUT') b.focus({ preventScroll: true });
+}
+async function tourIr(i) {
+  const T = S.tour; if (!T) return;
+  T.i = i; T.n += 1; const mi = T.n; const p = T.pasos[i]; T.cargando = true; tourPanel();
+  const vigente = () => S.tour === T && T.n === mi;
+  if (p.ruta && (location.hash || '') !== p.ruta) location.hash = p.ruta;
+  if (p.espera) {
+    await tourEsperar(p.espera, 9000); if (!vigente()) return;
+    if (p.tab && S.ficha && S.tab !== p.tab) { S.tab = p.tab; S.flash = null; vistaFicha(); }
+  }
+  if (p.sel) {
+    const el = await tourEsperar(p.sel, 9000); if (!vigente()) return;
+    T.cargando = false;
+    if (el) { const r = el.getBoundingClientRect(); if (r.top < 70 || r.top > window.innerHeight - 260) window.scrollTo({ top: Math.max(0, window.scrollY + r.top - 90), behavior: 'smooth' }); }
+  } else T.cargando = false;
+  tourPosicion();
+}
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest && ev.target.closest('[data-tour]'); if (!b) return;
+  const a = b.dataset.tour; const T = S.tour;
+  if (a === 'boton') { if (!T) tourEmpezar(); }
+  else if (a === 'ini') { const c = document.getElementById('tm_no'); if (c && c.checked) tourSilenciar(true); tourEmpezar(); }
+  else if (a === 'ahora') { const c = document.getElementById('tm_no'); if (c && c.checked) tourSilenciar(true); tourCerrarModal(); }
+  else if (a === 'sig' && T) tourIr(Math.min(T.i + 1, T.pasos.length - 1));
+  else if (a === 'atras' && T) tourIr(Math.max(0, T.i - 1));
+  else if (a === 'salir') tourSalir();
+  else if (a === 'fin') { const c = document.getElementById('tp_no'); if (c) tourSilenciar(c.checked); tourSalir(); }
+});
+document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && (S.tour || document.getElementById('tour_modal'))) tourSalir(); });
 
 /* ---------- enrutador ---------- */
 async function ruta() {
@@ -1147,20 +1557,20 @@ async function ruta() {
   const h = (location.hash || '#/inicio').replace(/^#\/?/, '').split('/');
   const que = h[0] || 'inicio';
   if (que === 'oferta' && !h[1]) { location.hash = '#/inicio'; return; }
-  if (['inicio', 'mis', 'tareas', 'calendario', 'nueva', 'oferta', 'facturacion'].indexOf(que) < 0) { location.hash = '#/inicio'; return; }
+  if (['inicio', 'mis', 'tareas', 'calendario', 'nueva', 'oferta', 'facturacion', 'extension'].indexOf(que) < 0) { location.hash = '#/inicio'; return; }
   cargando('Cargando…');
   try {
     const tareas = [];
     if (!S.persona) tareas.push(api('sesion').then((r) => { S.persona = r.persona; }));
     if (!S.cat) tareas.push(api('catalogo').then((r) => { S.cat = r; }));
     let refrescar = false;
-    if (que === 'inicio' || que === 'mis' || que === 'calendario') {
+    if (que === 'inicio' || que === 'mis' || que === 'calendario' || que === 'extension') {
       if (S.precargado && S.inicio) { S.precargado = false; S.inicioT = Date.now(); }
       else if (S.inicio && !S.inicioSucio && S.inicioT && Date.now() - S.inicioT < 600000) { refrescar = Date.now() - S.inicioT > 20000; }
       else tareas.push(api('inicio').then((r) => { S.inicio = r; S.inicioT = Date.now(); S.inicioSucio = false; }));
     }
     if (que === 'oferta') {
-      if (S.fichaId !== h[1]) { S.tab = 'datos'; const ya = S.inicio && S.inicio.ofertas.filter((o) => o.id === h[1])[0]; cargando(ya ? 'Abriendo «' + ya.nombre + '»…' : 'Abriendo la oferta…'); }
+      if (S.fichaId !== h[1]) { S.tab = S.tabIr || 'datos'; S.tabIr = ''; const ya = S.inicio && S.inicio.ofertas.filter((o) => o.id === h[1])[0]; cargando(ya ? 'Abriendo «' + ya.nombre + '»…' : 'Abriendo la oferta…'); }
       S.fichaId = h[1];
       tareas.push(api('ficha', { id: h[1] }).then((r) => { S.ficha = r; }));
     }
@@ -1173,13 +1583,16 @@ async function ruta() {
       if (!S.inicio) tareas.push(api('inicio').then((r) => { S.inicio = r; S.inicioT = Date.now(); }));
     }
     await Promise.all(tareas);
+    if (que === 'extension' && S.persona.id !== LIDER) { location.hash = '#/inicio'; return; }
     guardarCache();
     S.precargado = false;
-    if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else if (que === 'calendario') vistaCalendario();
+    if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else if (que === 'calendario') vistaCalendario(); else if (que === 'extension') vistaExtension();
     else if (que === 'tareas') vistaTareas(); else if (que === 'nueva') vistaNueva(); else if (que === 'facturacion') { S.fa.edit = ''; S.fa.elim = ''; S.fa.borrador = null; vistaFacturacion(); } else vistaFicha();
     S.flash = null;
     if (refrescar) refrescarInicio(que);
     if (que !== 'tareas' && !S.tareas && !S.tareasError) cargarTareas().then(trasTareas);
+    if (esLider() && (que === 'inicio' || que === 'extension')) cargarMeta();
+    tourAuto();
   } catch (e) {
     if (!S.token) { vistaLogin(e.codigo === 'SESION' ? e.message : ''); return; }
     vistaError(e.message, ruta);
@@ -1206,7 +1619,7 @@ async function refrescarInicio(que) {
     S.inicio = r; S.inicioT = Date.now(); guardarCache();
     const ocupado = document.activeElement && ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(document.activeElement.tagName) >= 0;
     const aun = (location.hash || '#/inicio').replace(/^#\/?/, '').split('/')[0] === que;
-    if (!igual && aun && !ocupado) { const y = window.scrollY; if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else vistaCalendario(); window.scrollTo(0, y); }
+    if (!igual && aun && !ocupado) { const y = window.scrollY; if (que === 'inicio') vistaInicio(); else if (que === 'mis') vistaMis(); else if (que === 'extension') vistaExtension(); else vistaCalendario(); window.scrollTo(0, y); }
   } catch (e) {
     if (!S.token) { vistaLogin('Tu sesión terminó. Ingresa de nuevo.'); return; }
     /* si falla el refresco en segundo plano, se sigue con lo que ya hay */
@@ -1236,7 +1649,7 @@ app.addEventListener('submit', async (ev) => {
       const r = await api('login', { usuario: S.ultimoUsuario, clave: val('lc') });
       S.token = r.token; S.persona = r.persona; S.cat = r.catalogo; S.inicio = r.inicio; S.precargado = true; guardarCache();
       try { sessionStorage.setItem('ec_token', S.token); } catch (e) { /* sin almacenamiento */ }
-      if (location.hash !== '#/inicio') location.hash = '#/inicio'; else ruta();
+      const dest = S.persona.id === LIDER ? '#/extension' : '#/inicio'; if (location.hash !== dest) location.hash = dest; else ruta();
     } catch (e) { vistaLogin(e.message); }
   } else if (id === 'fNueva') {
     const apoyos = Array.from(document.querySelectorAll('input[name=n_apoyo]:checked')).map((x) => x.value);
@@ -1288,6 +1701,19 @@ app.addEventListener('click', async (ev) => {
   else if (a === 'prox') { S.verProx = !S.verProx; vistaInicio(); }
   else if (a === 'prox_f') { S.proxFiltro = S.proxFiltro === b.dataset.v ? '' : b.dataset.v; S.verProx = false; vistaInicio(); }
   else if (a === 'aten') { S.verAten = !S.verAten; vistaInicio(); if (S.verAten) { const p = document.getElementById('aten_panel'); if (p && p.scrollIntoView) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
+  else if (a === 'calv') { S.cal.vista = b.dataset.v; vistaCalendario(); }
+  else if (a === 'calrol') { S.cal.rol = b.dataset.v; vistaCalendario(); }
+  else if (a === 'eq_tareas') { S.ft = Object.assign(ftInicial(), { ver: 'p:' + b.dataset.v, estado: 'pend' }); }
+  else if (a === 'eq_cal') { S.cal.persona = b.dataset.v; S.cal.rol = 'todo'; }
+  else if (a === 'eq_venc') { S.ft = Object.assign(ftInicial(), { ver: 'todas', foco: 'venc' }); location.hash = '#/tareas'; }
+  else if (a === 'eq_cert') { S.ft = Object.assign(ftInicial(), { ver: 'todas', foco: 'cert' }); location.hash = '#/tareas'; }
+  else if (a === 'eq_liq') { const id = b.dataset.id; S.liq = null; if (S.fichaId === id && S.ficha) { S.tab = 'liq'; S.flash = null; vistaFicha(); location.hash = '#/oferta/' + id; } else { S.tabIr = 'liq'; location.hash = '#/oferta/' + id; } }
+  else if (a === 'meta_guardar') { await guardarMeta(); }
+  else if (a === 'meta_reint') { S.metaError = ''; cargarMeta(); pintarElisa(); }
+  else if (a === 'liq_g' || a === 'liq_e') { await liqGuardar(a === 'liq_e'); }
+  else if (a === 'liq_ap') { await liqOp('aprobarLiquidacion', {}, 'Liquidación aprobada: el excedente real ya suma a la meta anual.'); }
+  else if (a === 'liq_dv') { const c = val('lq_com').trim(); if (!c) { flash('err', 'Escribe un comentario para devolver la liquidación.'); const y = window.scrollY; vistaFicha(); window.scrollTo(0, y); return; } await liqOp('devolverLiquidacion', { comentario: c }, 'Liquidación devuelta con tu comentario.'); }
+  else if (a === 'liq_reint') { S.liqError = ''; vistaFicha(); }
   else if (a === 'tkfoco') { S.ft = Object.assign(ftInicial(), { foco: b.dataset.v }); vistaTareas(); }
   else if (a === 'tkgrupo') { S.abiertos[b.dataset.key] = b.getAttribute('aria-expanded') !== 'true'; pintarTareas(); }
   else if (a === 'tklimpiar') { S.ft = ftInicial(); vistaTareas(); }
@@ -1323,7 +1749,8 @@ app.addEventListener('click', async (ev) => {
 app.addEventListener('change', async (ev) => {
   const e = ev.target;
   if (e.id === 'lver') { const c = document.getElementById('lc'); if (c) c.type = e.checked ? 'text' : 'password'; return; }
-  if (e.dataset && e.dataset.cal) { S.cal[e.dataset.cal] = e.type === 'checkbox' ? e.checked : e.value; vistaCalendario(); return; }
+  if (e.dataset && e.dataset.lq) { const v = numLq(e.value); e.value = v === null ? '' : v.toLocaleString('es-CO'); recalcLiq(); return; }
+  if (e.dataset && e.dataset.cal) { S.cal[e.dataset.cal] = e.value; if (e.dataset.cal === 'persona') S.cal.rol = 'todo'; vistaCalendario(); return; }
   if (e.dataset && e.dataset.ft && e.dataset.ft !== 'q') { S.ft[e.dataset.ft] = e.value; S.ft.foco = ''; vistaTareas(); return; }
   if (e.dataset && e.dataset.tk === 'fecha') { const tk = S.tareas.lista.filter((x) => x.id === e.dataset.id)[0]; if (tk && e.value && e.value !== (tk.fecha_limite || '').slice(0, 10)) tkGuardar(tk, { fecha_limite: e.value }); return; }
   if (e.id === 'tk_of' && e.tagName === 'SELECT') { const o = ofertaInfo(e.value); const a = document.getElementById('tk_a'); if (a) a.innerHTML = o ? opcionesAsignables(o, '') : '<option value="">Primero elige la oferta</option>'; return; }
@@ -1336,6 +1763,7 @@ app.addEventListener('change', async (ev) => {
 });
 app.addEventListener('input', (ev) => {
   const e = ev.target;
+  if (e.dataset && e.dataset.lq) { recalcLiq(); return; }
   if (e.dataset && e.dataset.ft === 'q') { S.ft.q = e.value; S.ft.foco = ''; pintarTareas(); return; }
   if (e.dataset && e.dataset.fx === 'q') { S.fx[e.dataset.ctx].q = e.value; pintarResultados(e.dataset.ctx); }
 });
