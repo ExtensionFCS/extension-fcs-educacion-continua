@@ -250,6 +250,33 @@ details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;backgr
 .oc .nm{font-weight:700;font-size:15px;display:block;color:var(--ink)}.oc small{display:block;color:var(--ink2);font-size:12px;margin-top:2px}.oc .bd{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .alerta-g{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:#FDECEE;border:1px solid #F4A9AE;border-radius:12px;padding:10px 14px;margin:0 0 14px;font-size:14px}.alerta-g.ok{background:#E3F4EC;border-color:#A8DBC2}
 .alerta-g .btn{min-height:36px}
+.oc{border-left:5px solid transparent}
+.oc.oc-r,.oc.oc-a,.oc.oc-n{background:#fff}
+.oc .dt em{display:block;font-style:normal;font-size:10px;color:var(--ink2)}
+.oc small .pd{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.oc .bd{align-items:center;gap:4px 12px}
+.oc .st{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600}.oc .st i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.oc .apy2{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--ink2)}.oc .apy2>span{margin-right:3px}
+.oc .av{width:20px;height:20px;border-radius:50%;color:#fff;font-style:normal;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.oc{border-left:5px solid transparent}
+.oc.oc-r,.oc.oc-a,.oc.oc-n{background:#fff}
+.oc .dt em{display:block;font-style:normal;font-size:10px;color:var(--ink2)}
+.oc small .pd{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.oc .bd{align-items:center;gap:4px 12px}
+.oc .st{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600}.oc .st i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.oc .apy2{display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--ink2)}.oc .apy2>span{margin-right:3px}
+.oc .av{width:20px;height:20px;border-radius:50%;color:#fff;font-style:normal;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.oc .nmr{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}.oc .nmr .nm{display:inline}
+.tpi{font-size:11px;font-weight:700;color:#3F3890;background:var(--accsoft);border-radius:6px;padding:1px 6px}.tpi.fin{background:#ECEBF2;color:#3A3752}
+.dl-wk{font-size:12px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 4px;padding-bottom:4px;border-bottom:2px solid var(--accsoft)}
+.dl-day{display:flex;gap:14px;border-top:1px solid #EEECF6;padding:6px 4px;align-items:flex-start;flex-wrap:wrap}
+.dl-d{flex:none;width:60px;display:flex;align-items:baseline;gap:6px;color:var(--ink2)}.dl-d b{font-size:18px;color:var(--ink);min-width:24px;text-align:right}.dl-d span{font-size:12px;text-transform:uppercase}
+.dl-empty{padding-top:2px;padding-bottom:2px}.dl-empty .dl-d b{font-size:14px;color:#9A97B5;font-weight:500}.dl-empty .dl-d span{color:#B5B2CB}
+.dl-we{background:#FAF9FD}.dl-we .dl-d b{color:#9A97B5}
+.dl-hoy .dl-d b{background:var(--acc);color:#fff;border-radius:8px;padding:0 6px;min-width:0}
+.dl-fest{font-size:12px;color:#6B5E9B;font-style:italic;padding-top:3px}
+.dl-evs{flex:1;min-width:260px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.rgb{display:inline-flex;gap:4px}.rgb button{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #B9B4E4;background:#fff;color:#3F3890;font-size:13px;cursor:pointer}.rgb button.on{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700}
 </style>
 </head>
 <body>
@@ -439,7 +466,7 @@ const esActiva = (o) => ['fin', 'canc'].indexOf(catEstado(o)) < 0;
 const hayAlerta = (o) => o.semaforo === 'rojo' || o.semaforo === 'amarillo';
 function fxInicial(ctx) { return { q: '', tipo: '', cat: ctx === 'arch' ? 'todas' : 'activas', resp: '', alerta: false, pend: false, agrupar: 'mes', mes: 'auto', alcance: ctx === 'mis' ? 'ambas' : 'todas' }; }
 S.fx = { inicio: fxInicial('inicio'), mis: fxInicial('mis'), arch: fxInicial('arch') }; S.modoLista = false; S.cfgAnio = 0; S.planAnio = 0; S.verArch = false; S.anioConf = 0; S.arch = null;
-S.cal = { persona: '', vista: 'tarjetas', rol: 'todo' }; S.meta = null; S.metaP = null; S.metaError = ''; S.liq = null; S.liqP = null; S.liqError = ''; S.ft = ftInicial(); S.tareas = null; S.tareasError = ''; S.tareasP = null; S.proxFiltro = ''; S.verAten = false;
+S.cal = { persona: '', vista: 'tarjetas', rol: 'todo', rango: 'mes' }; S.semCal = ''; S.meta = null; S.metaP = null; S.metaError = ''; S.liq = null; S.liqP = null; S.liqError = ''; S.ft = ftInicial(); S.tareas = null; S.tareasError = ''; S.tareasP = null; S.proxFiltro = ''; S.verAten = false;
 const vista = (ctx) => (ctx === 'mis' ? vistaMis() : ctx === 'arch' ? vistaArchivo() : hashActual() === 'calendario' ? vistaCalendario() : vistaInicio());
 function irExplorador(ctx) { if (ctx === 'inicio') { S.cal.vista = 'tarjetas'; S.modoLista = false; if (hashActual() === 'calendario') vistaCalendario(); else location.hash = '#/calendario'; return; } vista(ctx); const e = document.getElementById('expl'); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
@@ -626,37 +653,37 @@ const COLORES = { miguel: '#4B44A3', andres: '#B0286A', jacobo: '#0F766E', marib
 const colorDe = (id) => COLORES[id] || '#5A5870';
 function vistaCalendario() {
   const hoy = S.inicio.hoy;
+  if (!/^\d{4}-\d{2}$/.test(S.mesCal)) S.mesCal = hoy.slice(0, 7);
+  if (S.cal.vista === 'agenda') S.cal.vista = 'tarjetas';
   if (S.cal.vista === 'tarjetas') {
-    app.innerHTML = shell('calendario', '<h1>Calendario</h1><p class="sub">Todas las ofertas del equipo, mes por mes. Busca por nombre, código o responsable y la búsqueda recorre todos los meses. Cambia a «Cuadrícula» o «Agenda» para ver inicios y finales sobre el calendario, con festivos y colores por responsable.</p><div style="margin-bottom:14px"><label>Vista</label>' + htmlVistaCal() + '</div>' + (S.modoLista ? explorador('inicio', 'Ofertas') : exploradorMeses()));
+    app.innerHTML = shell('calendario', '<h1>Calendario</h1><p class="sub">Todas las ofertas del equipo. Cada mes se ve día por día, completo, y puedes pasar a ver solo una semana. Busca por nombre, código o responsable y la búsqueda recorre todos los meses. «Cuadrícula» muestra el calendario clásico.</p><div style="margin-bottom:14px"><label>Vista</label>' + htmlVistaCal() + '</div>' + (S.modoLista ? explorador('inicio', 'Ofertas') : exploradorMeses()));
     return;
   }
-  if (!/^\d{4}-\d{2}$/.test(S.mesCal)) S.mesCal = hoy.slice(0, 7);
   const anio = Number(S.mesCal.slice(0, 4)); const mes = Number(S.mesCal.slice(5, 7));
-  const dias = new Date(Date.UTC(anio, mes, 0)).getUTCDate();
-  const offset = (new Date(Date.UTC(anio, mes - 1, 1)).getUTCDay() + 6) % 7;
-  const items = calItems(true); const ev = {};
-  items.forEach((e) => { (ev[e.d] = ev[e.d] || []).push(e); });
-  const fest = {}; (S.inicio.festivos || []).forEach((f) => { if (f.fecha && f.fecha.slice(0, 7) === S.mesCal) fest[Number(f.fecha.slice(8, 10))] = t(f.nombre); });
-  let vistaHtml;
-  if (S.cal.vista === 'agenda') vistaHtml = agendaCal(items, fest, mes, anio);
-  else {
-    const celdas = [];
-    for (let i = 0; i < offset; i++) celdas.push('<div class="cell vacia"></div>');
-    for (let d = 1; d <= dias; d++) {
-      const iso = S.mesCal + '-' + (d < 10 ? '0' : '') + d;
-      celdas.push('<div class="cell' + (iso === hoy ? ' hoy' : '') + (fest[d] ? ' fest' : '') + '"><div class="n">' + d + (iso === hoy ? ' · Hoy' : '') + '</div>' + (fest[d] ? '<span class="evf">' + esc(fest[d]) + '</span>' : '') + (ev[d] || []).map(chipCal).join('') + '</div>');
-    }
-    while (celdas.length % 7) celdas.push('<div class="cell vacia"></div>');
-    let semanas = ''; for (let i = 0; i < celdas.length; i += 7) semanas += '<div class="calw">' + celdas.slice(i, i + 7).join('') + '</div>';
-    vistaHtml = '<div class="scroll"><div class="cal"><div class="calh"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>' + semanas + '</div></div>';
+  const sem = S.cal.rango === 'semana';
+  const dMes = new Date(Date.UTC(anio, mes, 0)).getUTCDate(); const finMes = S.mesCal + '-' + (dMes < 10 ? '0' : '') + dMes;
+  const ini = sem ? semanaBase(S.mesCal) : lunesDe(S.mesCal + '-01'); const fin = sem ? sumaDias(ini, 6) : sumaDias(lunesDe(finMes), 6);
+  const ofs = S.inicio.ofertas.filter((o) => o.estado !== 'Cancelado' && calVisible(o));
+  const ev = eventosPorDia(ofs, ini, fin);
+  const fest = {}; (S.inicio.festivos || []).forEach((f) => { fest[String(f.fecha).slice(0, 10)] = t(f.nombre); });
+  const celdas = [];
+  for (let iso = ini; iso <= fin; iso = sumaDias(iso, 1)) {
+    const fuera = !sem && iso.slice(0, 7) !== S.mesCal;
+    if (fuera) { celdas.push('<div class="cell vacia"></div>'); continue; }
+    const dn = Number(iso.slice(8)); const etq = sem ? dn + ' ' + MESES[Number(iso.slice(5, 7)) - 1] : String(dn);
+    celdas.push('<div class="cell' + (iso === hoy.slice(0, 10) ? ' hoy' : '') + (fest[iso] ? ' fest' : '') + '"' + (sem ? ' style="min-height:220px"' : '') + '><div class="n">' + etq + (iso === hoy.slice(0, 10) ? ' · Hoy' : '') + '</div>' + (fest[iso] ? '<span class="evf">' + esc(fest[iso]) + '</span>' : '') + (ev[iso] || []).map(chipCal).join('') + '</div>');
   }
-  const lista = items.slice().sort((a, b) => a.d - b.d);
+  let semanas = ''; for (let i = 0; i < celdas.length; i += 7) semanas += '<div class="calw">' + celdas.slice(i, i + 7).join('') + '</div>';
+  const vistaHtml = '<div class="scroll"><div class="cal"><div class="calh"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div>' + semanas + '</div></div>';
+  const lista = []; Object.keys(ev).sort().forEach((d) => { if (sem || d.slice(0, 7) === S.mesCal) ev[d].forEach((e) => lista.push({ d, tipo: e.tipo, o: e.o })); });
   const sinFecha = S.inicio.ofertas.filter((o) => !o.fecha_inicio && o.estado !== 'Cancelado');
-  const cuerpo = '<h1>Calendario</h1><p class="sub">Inicios y finales de todas las ofertas. Cada tarjeta lleva el color de quien lidera y, debajo, el nombre de quienes apoyan. Elige a una persona en «Ver a» para ver lo que lidera y lo que solo apoya; cambia a «Agenda» para verlo día por día. Maribel participa en todas las ofertas, por eso no aparece como apoyo.</p>' +
-    '<section class="card"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px"><button class="btn sec" data-act="mes" data-d="-1" aria-label="Mes anterior">←</button><h2 style="margin:0 8px;min-width:190px;text-align:center">' + MESES_L[mes - 1] + ' ' + anio + '</h2><button class="btn sec" data-act="mes" data-d="1" aria-label="Mes siguiente">→</button><button class="btn sec" data-act="mes" data-d="0">Hoy</button></div>' +
+  const titulo = sem ? rangoTxt(ini, fin) : MESES_L[mes - 1] + ' ' + anio;
+  const navA = sem ? ['sem', 'Semana anterior', 'Semana siguiente', 'Esta semana'] : ['mes', 'Mes anterior', 'Mes siguiente', 'Hoy'];
+  const cuerpo = '<h1>Calendario</h1><p class="sub">Inicios y finales de todas las ofertas. Cada tarjeta lleva el color de quien lidera y, debajo, el nombre de quienes apoyan. Elige a una persona en «Ver a» para ver lo que lidera y lo que solo apoya. Maribel participa en todas las ofertas, por eso no aparece como apoyo.</p>' +
+    '<section class="card"><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px"><button class="btn sec" data-act="' + navA[0] + '" data-d="-1" aria-label="' + navA[1] + '">←</button><h2 style="margin:0 8px;min-width:190px;text-align:center">' + titulo + '</h2><button class="btn sec" data-act="' + navA[0] + '" data-d="1" aria-label="' + navA[2] + '">→</button><button class="btn sec" data-act="' + navA[0] + '" data-d="0">' + navA[3] + '</button><span style="flex:1"></span>' + htmlRango() + '</div>' +
     controlesCal() + '<div class="leyenda">' + leyendaCal() + '</div>' + vistaHtml + '</section>' +
-    (S.cal.vista === 'agenda' ? '' : '<div class="two" style="margin-top:16px"><section class="card"><h2>Este mes</h2>' + (lista.length ? lista.map((e) => '<div class="row"><b>' + e.d + ' de ' + MESES_L[mes - 1] + '</b> · ' + e.tipo + ' · <a href="#/oferta/' + esc(e.o.id) + '">' + esc(e.o.nombre) + '</a><small>Lidera: ' + esc(nombrePersona(e.o.responsable)) + apoyoTxt(e.o) + '</small></div>').join('') : '<div class="row"><small>No hay inicios ni finales este mes.</small></div>') + '</section>' +
-    '<section class="card"><h2>Ofertas sin fecha de inicio</h2>' + (sinFecha.length ? sinFecha.map((o) => '<div class="row"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>No aparecen en el calendario hasta que tengan fecha.</small></div>').join('') : '<div class="row"><small>Todas las ofertas tienen fecha.</small></div>') + '</section></div>');
+    '<div class="two" style="margin-top:16px"><section class="card"><h2>' + (sem ? 'Esta semana' : 'Este mes') + '</h2>' + (lista.length ? lista.map((e) => '<div class="row"><b>' + Number(e.d.slice(8)) + ' de ' + MESES_L[Number(e.d.slice(5, 7)) - 1] + '</b> · ' + e.tipo + ' · <a href="#/oferta/' + esc(e.o.id) + '">' + esc(e.o.nombre) + '</a><small>Lidera: ' + esc(nombrePersona(e.o.responsable)) + apoyoTxt(e.o) + '</small></div>').join('') : '<div class="row"><small>No hay inicios ni finales ' + (sem ? 'esta semana' : 'este mes') + '.</small></div>') + '</section>' +
+    '<section class="card"><h2>Ofertas sin fecha de inicio</h2>' + (sinFecha.length ? sinFecha.map((o) => '<div class="row"><a href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>No aparecen en el calendario hasta que tengan fecha.</small></div>').join('') : '<div class="row"><small>Todas las ofertas tienen fecha.</small></div>') + '</section></div>';
   app.innerHTML = shell('calendario', cuerpo);
 }
 
@@ -1298,7 +1325,7 @@ function agendaCal(items, fest, mes, anio) {
 }
 function htmlVistaCal() {
   const v = S.cal.vista; const b = (k, t) => '<button class="' + (v === k ? 'on' : '') + '" data-act="calv" data-v="' + k + '" aria-pressed="' + (v === k) + '">' + t + '</button>';
-  return '<div class="opts" role="group" aria-label="Tipo de vista">' + b('tarjetas', 'Tarjetas') + b('grid', 'Cuadrícula') + b('agenda', 'Agenda') + '</div>';
+  return '<div class="opts" role="group" aria-label="Tipo de vista">' + b('tarjetas', 'Tarjetas por día') + b('grid', 'Cuadrícula') + '</div>';
 }
 function controlesCal() {
   const per = calPer();
@@ -1532,7 +1559,7 @@ function tourPasos() {
   p.push({ ruta: '#/tareas', sel: '.grid4', t: 'Mis tareas', x: 'Lo que se espera de ti en cada oferta, por fecha límite y prioridad. Te llega un correo al asignártelas y antes de cada fecha límite, nunca en fines de semana ni festivos. ' + (yo === TRANSVERSAL || yo === LIDER ? 'Puedes asignar tareas en todas las ofertas.' : 'Puedes asignar tareas en las ofertas donde participas.') });
   if (yo === TRANSVERSAL) p.push({ ruta: '#/tareas', sel: '.grid4', t: 'Certificados', x: 'Cuando termina un evento aparece sola una tarea prioritaria para ti: enviar los certificados máximo ' + PLZ().dias_certificado + ' días hábiles después de finalizar, y te llega el aviso por correo.' });
   p.push({ ruta: '#/calendario', pre: () => { S.cal.vista = 'tarjetas'; S.modoLista = false; }, espera: '#mes_chips', sel: '#mes_chips', t: 'Todas las ofertas, mes por mes', x: 'En Calendario están todas las ofertas. Cada mes es una pestaña con su cantidad de ofertas; el número rojo indica las que piden atención, y «Antes de hoy» y «Sin fecha» guardan lo que no debe pasarse por alto. Busca por nombre, código o responsable y la búsqueda recorre todos los meses.' });
-  p.push({ ruta: '#/calendario', pre: () => { S.cal.vista = 'grid'; }, sel: '#cal_ctrl', t: 'Cuadrícula y agenda', x: 'Con «Cuadrícula» ves inicios y finales sobre el calendario, con festivos; cada tarjeta lleva el color de quien lidera y, debajo, quiénes apoyan. «Agenda» lo muestra día por día. Elige a una persona en «Ver a» para ver lo que lidera y lo que apoya.' });
+  p.push({ ruta: '#/calendario', pre: () => { S.cal.vista = 'grid'; }, sel: '#cal_ctrl', t: 'Cuadrícula, mes y semana', x: 'Con «Cuadrícula» ves inicios y finales sobre el calendario, con festivos; cada tarjeta lleva el color de quien lidera y, debajo, quiénes apoyan. Con «Ver semana» o «Ver mes» eliges cuánto mostrar. Elige a una persona en «Ver a» para ver lo que lidera y lo que apoya.' });
   if (id) p.push({ ruta: ficha, tab: 'liq', espera: '.tabs', sel: '#sec_liq', t: 'Liquidación', x: yo === LIDER ? 'Cuando el evento termina, el equipo registra aquí los ingresos y gastos reales y lo envía a revisión. Tú lo apruebas o lo devuelves con un comentario; al aprobar, el excedente real suma a la meta anual.' : 'Cuando el evento termina, aquí se registran los ingresos y gastos reales y se envía a revisión de Elisa. Solo lo liquidado y aprobado suma a la meta anual.' });
   if (puedeCfg()) p.push({ ruta: '#/configuracion', sel: '#cfg_anios', t: 'Configuración y años', x: 'Aquí Miguel y Elisa ajustan las reglas del semáforo, los plazos de tareas y certificados, los rubros de la liquidación y los días no hábiles (los festivos de Colombia ya vienen cargados). Cada sección muestra quién la editó por última vez. También se habilita el año siguiente y se archivan los años que ya pasaron.' });
   p.push({ fin: true, t: 'Listo', x: 'Ya conoces lo esencial. Puedes repetir el recorrido cuando quieras desde «Dame mi recorrido virtual», en la parte superior.' });
@@ -1853,36 +1880,76 @@ function htmlMesChips() {
   out.push(chip('todos', 'Todos', D.buscando ? nOf(D.base.length, 'resultado', 'resultados') : nOf(D.base.length, 'oferta', 'ofertas'), 0, 'dash'));
   return out.join('');
 }
-function tarjetaOf(o, conMes, hoyM) {
-  const cls = o.semaforo === 'rojo' ? 'oc-r' : o.semaforo === 'amarillo' ? 'oc-a' : (o.por_liquidar ? 'oc-n' : '');
-  const dt = o.fecha_inicio ? '<div class="dt"><b>' + Number(o.fecha_inicio.slice(8, 10)) + '</b><span>' + MESES[Number(o.fecha_inicio.slice(5, 7)) - 1].toUpperCase() + '</span></div>' : '<div class="dt"><b>—</b><span>SIN FECHA</span></div>';
-  let bd = '';
-  if (conMes) bd += '<span class="pill p">' + esc(o.fecha_inicio ? etqMes(o.fecha_inicio.slice(0, 7), hoyM) : 'Sin fecha') + '</span>';
-  if (hayAlerta(o)) bd += semPill(o.semaforo, o.semaforo_motivo);
-  if (o.por_liquidar) bd += '<span class="pill" style="background:#FFF0DB;color:#8F4A00" title="El evento terminó y la liquidación con valores reales aún no está aprobada">Por liquidar</span>';
-  if (o.pendientes.length) bd += '<span class="pill pd" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + (o.pendientes.length > 1 ? ' pendientes' : ' pendiente') + '</span>';
-  const resp = o.responsable ? '<i style="width:8px;height:8px;border-radius:50%;background:' + colorDe(o.responsable) + ';display:inline-block"></i>' + esc(primerNombre(o.responsable)) : 'Sin responsable';
-  return '<div class="oc ' + cls + '">' + dt + '<div style="flex:1;min-width:0"><a class="nm" href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a><small>' + resp + ' · ' + esc(o.estado ? t(o.estado) : 'Sin estado') + '</small>' + (bd ? '<div class="bd">' + bd + '</div>' : '') + '</div></div>';
+function tarjetaOf(o, conMes, hoyM, tipo) {
+  const col = o.semaforo === 'rojo' ? '#E5242F' : o.semaforo === 'amarillo' ? '#F2B600' : (o.por_liquidar ? '#FF8A00' : '');
+  let dt = '';
+  if (!tipo) { const an = o.fecha_inicio && o.fecha_inicio.slice(0, 4) !== S.inicio.hoy.slice(0, 4) ? '<em>' + o.fecha_inicio.slice(0, 4) + '</em>' : ''; dt = o.fecha_inicio ? '<div class="dt"><b>' + Number(o.fecha_inicio.slice(8, 10)) + '</b><span>' + MESES[Number(o.fecha_inicio.slice(5, 7)) - 1].toUpperCase() + '</span>' + an + '</div>' : '<div class="dt"><b>—</b><span>SIN FECHA</span></div>'; }
+  const tp = tipo ? '<span class="tpi' + (tipo === 'Fin' ? ' fin' : '') + '">' + tipo + '</span>' : '';
+  const resp = o.responsable ? '<i class="pd" style="background:' + colorDe(o.responsable) + '"></i>' + esc(primerNombre(o.responsable)) : 'Sin responsable';
+  const ap = apoyosVis(o);
+  const apoyan = ap.length ? '<span class="apy2" title="Apoyan: ' + esc(ap.map(nombrePersona).join(', ')) + '"><span>Apoyan</span>' + ap.map((x) => '<i class="av" style="background:' + colorDe(x) + '" title="' + esc(nombrePersona(x)) + '">' + esc(primerNombre(x).charAt(0)) + '</i>').join('') + '</span>' : '';
+  const est = [];
+  if (hayAlerta(o)) est.push('<span class="st" style="color:' + (o.semaforo === 'rojo' ? '#B01822' : '#7A5C00') + '" title="' + esc(o.semaforo_motivo || '') + '"><i style="background:' + col + '"></i>' + (o.semaforo === 'rojo' ? 'Alerta roja' : 'Alerta amarilla') + '</span>');
+  if (o.por_liquidar) est.push('<span class="st" style="color:#8F4A00" title="El evento terminó y la liquidación con valores reales aún no está aprobada"><i style="background:#FF8A00"></i>Por liquidar</span>');
+  if (o.pendientes.length) est.push('<span class="st" style="color:var(--ink2)" title="' + esc(pendTxt(o.pendientes)) + '">' + o.pendientes.length + (o.pendientes.length > 1 ? ' pendientes' : ' pendiente') + '</span>');
+  return '<div class="oc"' + (col ? ' style="border-left-color:' + col + '"' : '') + '>' + dt + '<div style="flex:1;min-width:0"><div class="nmr">' + tp + '<a class="nm" href="#/oferta/' + esc(o.id) + '">' + esc(o.nombre) + '</a></div><small>' + resp + ' · ' + esc(o.estado ? t(o.estado) : 'Sin estado') + '</small>' +
+    (apoyan || est.length ? '<div class="bd">' + apoyan + est.join('') + '</div>' : '') + '</div></div>';
 }
+/* ----- fechas y días ----- */
+const isoD = (d) => d.toISOString().slice(0, 10);
+const sumaDias = (iso, n) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return isoD(d); };
+const lunesDe = (iso) => sumaDias(iso, -((new Date(iso + 'T00:00:00Z').getUTCDay() + 6) % 7));
+const semanaBase = (mesKey) => S.semCal || lunesDe(S.inicio.hoy.slice(0, 7) === mesKey ? S.inicio.hoy.slice(0, 10) : mesKey + '-01');
+const rangoTxt = (a, b) => Number(a.slice(8)) + (a.slice(5, 7) !== b.slice(5, 7) ? ' ' + MESES[Number(a.slice(5, 7)) - 1] : '') + ' – ' + Number(b.slice(8)) + ' ' + MESES_L[Number(b.slice(5, 7)) - 1] + ' ' + b.slice(0, 4);
+function eventosPorDia(ofs, desde, hasta) {
+  const ev = {};
+  ofs.forEach((o) => {
+    const i = (o.fecha_inicio || '').slice(0, 10); const f = (o.fecha_fin || '').slice(0, 10); const mismo = i && f && i === f;
+    (mismo ? [['Inicio y fin', i]] : [['Inicio', i], ['Fin', f]]).forEach((p) => { if (p[1] && p[1] >= desde && p[1] <= hasta) (ev[p[1]] = ev[p[1]] || []).push({ tipo: p[0], o }); });
+  });
+  return ev;
+}
+function htmlDiasRango(desde, hasta, ev) {
+  const hoy = S.inicio.hoy.slice(0, 10); const fest = {}; (S.inicio.festivos || []).forEach((f) => { fest[String(f.fecha).slice(0, 10)] = t(f.nombre); });
+  let out = ''; let iso = desde;
+  while (iso <= hasta) {
+    const dow = new Date(iso + 'T00:00:00Z').getUTCDay();
+    if (iso === desde || dow === 1) { const fin = sumaDias(lunesDe(iso), 6); const b = fin < hasta ? fin : hasta; out += '<div class="dl-wk">Semana · ' + rangoTxt(iso, b).replace(/ \d{4}$/, '').replace(/ (\w+)$/, ' $1') + '</div>'; }
+    const e = ev[iso] || [];
+    out += '<div class="dl-day' + (e.length ? '' : ' dl-empty') + (dow === 0 || dow === 6 ? ' dl-we' : '') + (iso === hoy ? ' dl-hoy' : '') + '"><div class="dl-d"><b>' + Number(iso.slice(8)) + '</b><span>' + DIAS_SEM[dow] + '</span></div>' +
+      (fest[iso] ? '<div class="dl-fest">' + esc(fest[iso]) + ' · festivo, no se envían avisos</div>' : '') +
+      (e.length ? '<div class="dl-evs">' + e.map((x) => tarjetaOf(x.o, false, '', x.tipo)).join('') + '</div>' : '') + '</div>';
+    iso = sumaDias(iso, 1);
+  }
+  return out;
+}
+const htmlRango = () => '<span class="rgb" role="group" aria-label="Rango">' + [['mes', 'Ver mes'], ['semana', 'Ver semana']].map((x) => '<button class="' + (S.cal.rango === x[0] ? 'on' : '') + '" data-act="cal_rango" data-v="' + x[0] + '" aria-pressed="' + (S.cal.rango === x[0]) + '">' + x[1] + '</button>').join('') + '</span>';
 function htmlMesRes() {
   const D = datosMeses(); const f = S.fx.inicio; const k = mesActivo(D);
   const orden = ['antes'].filter(() => D.antes.length).concat(D.keys).concat(D.sin.length ? ['sin'] : []);
-  let lista; let tit; let conMes = false;
+  let lista = []; let tit = ''; let conMes = false; const dias = /^\d{4}-\d{2}$/.test(k);
   if (k === 'atencion') { lista = S.inicio.ofertas.filter(atencionOf).sort(ordenFecha); tit = 'Ofertas que requieren atención · en todos los meses'; conMes = true; }
   else if (k === 'antes') { lista = D.antes; tit = 'Antes de hoy · ofertas de meses anteriores que siguen activas o sin liquidar'; conMes = true; }
   else if (k === 'sin') { lista = D.sin; tit = 'Sin fecha de inicio · por programar'; }
   else if (k === 'todos') { lista = D.base.slice().sort(ordenFecha); conMes = true; tit = D.buscando ? '<b>' + nOf(lista.length, 'resultado', 'resultados') + '</b>' + (f.q.trim() ? ' para «' + esc(f.q.trim()) + '»' : '') + (f.resp ? ' · responsable ' + esc(f.resp === 'sin' ? 'sin asignar' : nombrePersona(f.resp)) : '') + ' · en todos los meses' : 'Todos los meses · ordenadas por fecha'; }
-  else { lista = D.porMes[k] || []; tit = etqMes(k, D.hoyM) + ' ' + (k.slice(0, 4) === D.hoyM.slice(0, 4) ? k.slice(0, 4) : '') + ' · ordenadas por fecha, las de alerta resaltadas'; }
   const filtrado = f.q || f.tipo || f.resp || f.alerta || f.pend || f.cat !== 'activas';
-  const cab = '<div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin:12px 0 10px"><span class="note" style="margin:0">' + (k === 'todos' && D.buscando ? tit : '<b>' + nOf(lista.length, 'oferta', 'ofertas') + '</b> · ' + tit) + '</span>' +
-    ((D.buscando || filtrado || k === 'atencion') ? '<button class="btn q" style="min-height:36px" data-act="limpiar" data-ctx="inicio">' + (k === 'atencion' ? 'Ver por meses' : 'Quitar filtros y búsqueda ✕') + '</button>' : '') + '</span></div>';
+  const limpiar = (D.buscando || filtrado || k === 'atencion') ? '<button class="btn q" style="min-height:36px" data-act="limpiar" data-ctx="inicio">' + (k === 'atencion' ? 'Ver por meses' : 'Quitar filtros y búsqueda ✕') + '</button>' : '';
+  const i = orden.indexOf(k); const nm = (x) => (x === 'antes' ? 'Antes de hoy' : x === 'sin' ? 'Sin fecha' : etqMes(x, D.hoyM));
+  if (dias) {
+    const sem = S.cal.rango === 'semana'; const dMes = new Date(Date.UTC(Number(k.slice(0, 4)), Number(k.slice(5, 7)), 0)).getUTCDate();
+    const desde = sem ? semanaBase(k) : k + '-01'; const hasta = sem ? sumaDias(desde, 6) : k + '-' + (dMes < 10 ? '0' : '') + dMes;
+    const ev = eventosPorDia(D.base.filter((o) => o.estado !== 'Cancelado'), desde, hasta);
+    const ids = {}; Object.keys(ev).forEach((d) => ev[d].forEach((x) => { ids[x.o.id] = 1; }));
+    const cab = '<div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin:12px 0 4px"><span class="note" style="margin:0"><b>' + nOf(Object.keys(ids).length, 'oferta', 'ofertas') + '</b> con inicio o fin · ' + (sem ? rangoTxt(desde, hasta) : etqMes(k, D.hoyM) + (k.slice(0, 4) === D.hoyM.slice(0, 4) ? ' ' + k.slice(0, 4) : '')) + '</span><span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' + htmlRango() + limpiar + '</span></div>';
+    let nav;
+    if (sem) nav = '<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:13px;flex-wrap:wrap"><button class="btn sec" style="min-height:38px" data-act="sem" data-d="-1">‹ Semana anterior</button><button class="btn sec" style="min-height:38px" data-act="sem" data-d="0">Esta semana</button><button class="btn sec" style="min-height:38px" data-act="sem" data-d="1">Semana siguiente ›</button></div>';
+    else nav = '<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:13px;flex-wrap:wrap">' + (i > 0 ? '<button class="btn sec" style="min-height:38px" data-act="mes_ir" data-v="' + orden[i - 1] + '">‹ ' + esc(nm(orden[i - 1])) + '</button>' : '<span></span>') + (i < orden.length - 1 ? '<button class="btn sec" style="min-height:38px" data-act="mes_ir" data-v="' + orden[i + 1] + '">' + esc(nm(orden[i + 1])) + ' ›</button>' : '<span></span>') + '</div>';
+    return cab + htmlDiasRango(desde, hasta, ev) + nav;
+  }
+  const cab = '<div style="display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin:12px 0 10px"><span class="note" style="margin:0">' + (k === 'todos' && D.buscando ? tit : '<b>' + nOf(lista.length, 'oferta', 'ofertas') + '</b> · ' + tit) + '</span>' + limpiar + '</div>';
   if (!lista.length) return cab + '<p class="sub" style="margin:8px 0">' + (filtrado ? 'Ninguna oferta coincide con estos filtros en este grupo.' : 'No hay ofertas en este grupo.') + '</p>';
   let nav = '';
-  const i = orden.indexOf(k);
-  if (i >= 0 && (k !== 'todos') && orden.length > 1) {
-    const nm = (x) => (x === 'antes' ? 'Antes de hoy' : x === 'sin' ? 'Sin fecha' : etqMes(x, D.hoyM));
-    nav = '<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:13px;flex-wrap:wrap">' + (i > 0 ? '<button class="btn sec" style="min-height:38px" data-act="mes_ir" data-v="' + orden[i - 1] + '">‹ ' + esc(nm(orden[i - 1])) + '</button>' : '<span></span>') + (i < orden.length - 1 ? '<button class="btn sec" style="min-height:38px" data-act="mes_ir" data-v="' + orden[i + 1] + '">' + esc(nm(orden[i + 1])) + ' ›</button>' : '<span></span>') + '</div>';
-  }
+  if (i >= 0 && k !== 'todos' && orden.length > 1) nav = '<div style="display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:13px;flex-wrap:wrap">' + (i > 0 ? '<button class="btn sec" style="min-height:38px" data-act="mes_ir" data-v="' + orden[i - 1] + '">‹ ' + esc(nm(orden[i - 1])) + '</button>' : '<span></span>') + (i < orden.length - 1 ? '<button class="btn sec" style="min-height:38px" data-act="mes_ir" data-v="' + orden[i + 1] + '">' + esc(nm(orden[i + 1])) + ' ›</button>' : '<span></span>') + '</div>';
   return cab + '<div class="ocards">' + lista.map((o) => tarjetaOf(o, conMes, D.hoyM)).join('') + '</div>' + nav;
 }
 function htmlBannerAtencion() {
@@ -2056,7 +2123,7 @@ app.addEventListener('click', async (ev) => {
   if (a === 'salir') { try { await api('salir'); } catch (e) { /* ya sin sesión */ } cerrarLocal(); vistaLogin(); }
   else if (a === 'reintentar') { if (S.reintento) S.reintento(); }
   else if (a === 'mes') {
-    const d = Number(b.dataset.d);
+    const d = Number(b.dataset.d); S.semCal = '';
     if (d === 0) S.mesCal = S.inicio.hoy.slice(0, 7);
     else { let y = Number(S.mesCal.slice(0, 4)); let m = Number(S.mesCal.slice(5, 7)) + d; if (m < 1) { m = 12; y -= 1; } if (m > 12) { m = 1; y += 1; } S.mesCal = y + '-' + (m < 10 ? '0' : '') + m; }
     vistaCalendario();
@@ -2069,7 +2136,7 @@ app.addEventListener('click', async (ev) => {
     if (ctx === 'mis' && (v === 'semana' || v === 'mes')) f.agrupar = 'mes';
     S.fx[ctx] = f; irExplorador(ctx);
   }
-  else if (a === 'mes_ir') { if (!document.getElementById('mes_chips')) { irTarjetas(b.dataset.v); return; } S.fx.inicio.mes = b.dataset.v; pintarResultados('inicio'); const c = document.querySelector('.mchip.on'); if (c && c.scrollIntoView) c.scrollIntoView({ block: 'nearest', inline: 'center' }); }
+  else if (a === 'mes_ir') { if (!document.getElementById('mes_chips')) { irTarjetas(b.dataset.v); return; } S.fx.inicio.mes = b.dataset.v; S.semCal = ''; pintarResultados('inicio'); const c = document.querySelector('.mchip.on'); if (c && c.scrollIntoView) c.scrollIntoView({ block: 'nearest', inline: 'center' }); }
   else if (a === 'mes_aten') { if (!document.getElementById('mes_chips')) { irTarjetas('atencion'); return; } S.fx.inicio.mes = 'atencion'; pintarResultados('inicio'); const e = document.getElementById('mes_chips'); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   else if (a === 'modo_lista') { S.modoLista = !S.modoLista; vista('inicio'); }
   else if (a === 'cfg_anio') { const n = Number(b.dataset.v); if (b.dataset.k === 'plan') S.planAnio = n; else S.cfgAnio = n; S.anioConf = 0; await recargarCfg(b.dataset.k === 'plan' ? 'planeacion' : 'configuracion'); }
@@ -2106,7 +2173,22 @@ app.addEventListener('click', async (ev) => {
   else if (a === 'prox') { S.verProx = !S.verProx; vistaInicio(); }
   else if (a === 'prox_f') { S.proxFiltro = S.proxFiltro === b.dataset.v ? '' : b.dataset.v; S.verProx = false; vistaInicio(); }
   else if (a === 'aten') { S.verAten = !S.verAten; vistaInicio(); if (S.verAten) { const p = document.getElementById('aten_panel'); if (p && p.scrollIntoView) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
-  else if (a === 'calv') { const m = S.fx.inicio.mes; if (S.cal.vista === 'tarjetas' && /^\d{4}-\d{2}$/.test(m)) S.mesCal = m; S.cal.vista = b.dataset.v; vistaCalendario(); }
+  else if (a === 'calv') {
+    const m = S.fx.inicio.mes; const nv = b.dataset.v;
+    if (S.cal.vista === 'tarjetas' && /^\d{4}-\d{2}$/.test(m)) S.mesCal = m;
+    if (S.semCal) S.mesCal = sumaDias(S.semCal, 3).slice(0, 7);
+    S.cal.vista = nv;
+    if (nv === 'tarjetas' && datosMeses().keys.indexOf(S.mesCal) >= 0) S.fx.inicio.mes = S.mesCal;
+    vistaCalendario();
+  }
+  else if (a === 'cal_rango') { S.cal.rango = b.dataset.v; S.semCal = ''; if (S.cal.vista === 'tarjetas') pintarResultados('inicio'); else vistaCalendario(); }
+  else if (a === 'sem') {
+    const d = Number(b.dataset.d); const tarj = S.cal.vista === 'tarjetas'; const ref = tarj ? mesActivo(datosMeses()) : S.mesCal;
+    const base = semanaBase(/^\d{4}-\d{2}$/.test(ref) ? ref : S.inicio.hoy.slice(0, 7));
+    S.semCal = d === 0 ? lunesDe(S.inicio.hoy.slice(0, 10)) : sumaDias(base, 7 * d);
+    const mk = sumaDias(S.semCal, 3).slice(0, 7); S.mesCal = mk;
+    if (tarj) { if (datosMeses().keys.indexOf(mk) >= 0) S.fx.inicio.mes = mk; pintarResultados('inicio'); } else vistaCalendario();
+  }
   else if (a === 'calrol') { S.cal.rol = b.dataset.v; vistaCalendario(); }
   else if (a === 'eq_tareas') { S.ft = Object.assign(ftInicial(), { ver: 'p:' + b.dataset.v, estado: 'pend' }); }
   else if (a === 'eq_cal') { S.cal.persona = b.dataset.v; S.cal.rol = 'todo'; S.cal.vista = 'grid'; }
