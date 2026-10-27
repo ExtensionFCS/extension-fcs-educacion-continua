@@ -439,9 +439,9 @@ const esActiva = (o) => ['fin', 'canc'].indexOf(catEstado(o)) < 0;
 const hayAlerta = (o) => o.semaforo === 'rojo' || o.semaforo === 'amarillo';
 function fxInicial(ctx) { return { q: '', tipo: '', cat: ctx === 'arch' ? 'todas' : 'activas', resp: '', alerta: false, pend: false, agrupar: 'mes', mes: 'auto', alcance: ctx === 'mis' ? 'ambas' : 'todas' }; }
 S.fx = { inicio: fxInicial('inicio'), mis: fxInicial('mis'), arch: fxInicial('arch') }; S.modoLista = false; S.cfgAnio = 0; S.planAnio = 0; S.verArch = false; S.anioConf = 0; S.arch = null;
-S.cal = { persona: '', vista: 'grid', rol: 'todo' }; S.meta = null; S.metaP = null; S.metaError = ''; S.liq = null; S.liqP = null; S.liqError = ''; S.ft = ftInicial(); S.tareas = null; S.tareasError = ''; S.tareasP = null; S.proxFiltro = ''; S.verAten = false;
-const vista = (ctx) => (ctx === 'mis' ? vistaMis() : ctx === 'arch' ? vistaArchivo() : vistaInicio());
-function irExplorador(ctx) { vista(ctx); const e = document.getElementById('expl'); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+S.cal = { persona: '', vista: 'tarjetas', rol: 'todo' }; S.meta = null; S.metaP = null; S.metaError = ''; S.liq = null; S.liqP = null; S.liqError = ''; S.ft = ftInicial(); S.tareas = null; S.tareasError = ''; S.tareasP = null; S.proxFiltro = ''; S.verAten = false;
+const vista = (ctx) => (ctx === 'mis' ? vistaMis() : ctx === 'arch' ? vistaArchivo() : hashActual() === 'calendario' ? vistaCalendario() : vistaInicio());
+function irExplorador(ctx) { if (ctx === 'inicio') { S.cal.vista = 'tarjetas'; S.modoLista = false; if (hashActual() === 'calendario') vistaCalendario(); else location.hash = '#/calendario'; return; } vista(ctx); const e = document.getElementById('expl'); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 
 function listaBase(ctx) {
   const of = S.inicio.ofertas; const yo = S.persona.id; const al = S.fx[ctx].alcance;
@@ -601,7 +601,7 @@ function vistaInicio() {
   const cuerpo = '<h1>Inicio</h1><p class="sub">' + (esLider() ? 'Vista de líder: todo el equipo de Educación continua. ' : 'Todo el equipo ve aquí todas las ofertas de Educación continua. ') + 'Hoy es ' + fecha(S.inicio.hoy) + '.</p><div class="grid2">' + c1 + c2 + '</div>' +
     (esLider() ? '<div id="elisa_zona">' + htmlElisa() + '</div>' : '') +
     '<div id="aten_panel" style="margin-bottom:16px">' + (S.verAten ? panelAtencion() : '') + '</div>' +
-    (S.modoLista ? explorador('inicio', 'Ofertas') : exploradorMeses()) +
+    htmlTodasOfertas() +
     '<p class="note" style="margin-top:12px">Reglas del semáforo (se ajustan en Configuración): amarillo si faltan ' + REG().alerta_amarillo + ' días o menos y hay menos inscritos que el mínimo; rojo a ' + REG().alerta_rojo + ' días o menos, o si la fecha de inicio ya pasó y la oferta no está en ejecución. Las ofertas sin estado no se evalúan hasta confirmarlo.</p>';
   app.innerHTML = shell('inicio', cuerpo);
 }
@@ -626,6 +626,10 @@ const COLORES = { miguel: '#4B44A3', andres: '#B0286A', jacobo: '#0F766E', marib
 const colorDe = (id) => COLORES[id] || '#5A5870';
 function vistaCalendario() {
   const hoy = S.inicio.hoy;
+  if (S.cal.vista === 'tarjetas') {
+    app.innerHTML = shell('calendario', '<h1>Calendario</h1><p class="sub">Todas las ofertas del equipo, mes por mes. Busca por nombre, código o responsable y la búsqueda recorre todos los meses. Cambia a «Cuadrícula» o «Agenda» para ver inicios y finales sobre el calendario, con festivos y colores por responsable.</p><div style="margin-bottom:14px"><label>Vista</label>' + htmlVistaCal() + '</div>' + (S.modoLista ? explorador('inicio', 'Ofertas') : exploradorMeses()));
+    return;
+  }
   if (!/^\d{4}-\d{2}$/.test(S.mesCal)) S.mesCal = hoy.slice(0, 7);
   const anio = Number(S.mesCal.slice(0, 4)); const mes = Number(S.mesCal.slice(5, 7));
   const dias = new Date(Date.UTC(anio, mes, 0)).getUTCDate();
@@ -1292,10 +1296,14 @@ function agendaCal(items, fest, mes, anio) {
     return '<div class="ag"><div class="agd"><span>' + dow + '</span><b>' + d + '</b><span>' + MESES[mes - 1] + '</span></div><div class="agc">' + (fest[d] ? '<div class="agf">Festivo · ' + esc(fest[d]) + ' · no se envían avisos</div>' : '') + tarjetas + '</div></div>';
   }).join('');
 }
+function htmlVistaCal() {
+  const v = S.cal.vista; const b = (k, t) => '<button class="' + (v === k ? 'on' : '') + '" data-act="calv" data-v="' + k + '" aria-pressed="' + (v === k) + '">' + t + '</button>';
+  return '<div class="opts" role="group" aria-label="Tipo de vista">' + b('tarjetas', 'Tarjetas') + b('grid', 'Cuadrícula') + b('agenda', 'Agenda') + '</div>';
+}
 function controlesCal() {
   const per = calPer();
   const sel = '<div class="f" style="margin:0;min-width:230px"><label for="cal_p">Ver a</label><select id="cal_p" data-cal="persona">' + opcion('', 'Todo el equipo', !S.cal.persona) + S.cat.personas.map((p) => opcion(p.id, p.nombre + (p.id === S.persona.id ? ' (yo)' : '') + (p.id === TRANSVERSAL ? ' · participa en todas' : ''), S.cal.persona === p.id)).join('') + '</select></div>';
-  const vis = '<div><label>Vista</label><div class="opts" role="group" aria-label="Tipo de vista"><button class="' + (S.cal.vista !== 'agenda' ? 'on' : '') + '" data-act="calv" data-v="grid" aria-pressed="' + (S.cal.vista !== 'agenda') + '">Cuadrícula</button><button class="' + (S.cal.vista === 'agenda' ? 'on' : '') + '" data-act="calv" data-v="agenda" aria-pressed="' + (S.cal.vista === 'agenda') + '">Agenda</button></div></div>';
+  const vis = '<div><label>Vista</label>' + htmlVistaCal() + '</div>';
   let roles = '';
   if (per) {
     const todas = calItems(false).filter((e) => calRol(e.o, per)); const ids = (r) => { const s = {}; todas.filter((e) => !r || calRol(e.o, per) === r).forEach((e) => { s[e.o.id] = 1; }); return Object.keys(s).length; };
@@ -1515,7 +1523,6 @@ function tourPasos() {
   }
   p.push({ ruta: '#/inicio', sel: '#sec_prox', t: 'Inicio: tu panorama', x: 'Aquí ves de un vistazo lo que viene: los próximos inicios de los siguientes 30 días y cuántas ofertas hay en cada estado.' });
   p.push({ ruta: '#/inicio', sel: '#prox_chips', t: 'El semáforo de los anillos', x: 'Cada anillo se llena a medida que se acerca el inicio. Rojo: ' + proxTxt('r') + '. Naranja: ' + proxTxt('o') + '. Amarillo: ' + proxTxt('a') + '. Verde: más de ' + REG().anillo_amarillo + ' días. Toca un color para filtrar y usa «Requieren atención» para ver las alertas y la información pendiente.' });
-  p.push({ ruta: '#/inicio', espera: '#mes_chips', sel: '#mes_chips', modoMeses: true, t: 'Las ofertas, mes por mes', x: 'Cada mes es una pestaña con su cantidad de ofertas; el número rojo indica las que piden atención. Arriba, el aviso siempre recuerda cuántas ofertas requieren atención en todos los meses, y «Antes de hoy» y «Sin fecha» guardan lo que no debe pasarse por alto. Busca por nombre, código o responsable y la búsqueda recorre todos los meses.' });
   if (yo === LIDER) {
     p.push({ ruta: '#/inicio', sel: '#sec_equipo', t: 'Tu equipo', x: 'Cómo va cada persona: qué lidera, qué apoya y cuántas tareas tiene vencidas, de esta semana o posteriores. Desde cada tarjeta abres sus tareas o su calendario.' });
     p.push({ ruta: '#/inicio', sel: '#sec_meta', t: 'Aporte a la meta anual', x: 'Solo suma lo ya liquidado con ingresos y gastos reales. Lo presupuestado y sin liquidar aparece aparte como proyectado. Aquí defines la meta del año.' });
@@ -1524,7 +1531,8 @@ function tourPasos() {
   if (id) p.push({ ruta: ficha, tab: 'check', espera: '.tabs', sel: '.tabs', t: 'La ficha y el checklist', x: 'Cada oferta tiene su ficha con los datos, el checklist, las tareas y la liquidación. En el checklist marcas cada ítem como Cumplido, Pendiente o No aplica; así todo el equipo sabe en qué va la oferta.' });
   p.push({ ruta: '#/tareas', sel: '.grid4', t: 'Mis tareas', x: 'Lo que se espera de ti en cada oferta, por fecha límite y prioridad. Te llega un correo al asignártelas y antes de cada fecha límite, nunca en fines de semana ni festivos. ' + (yo === TRANSVERSAL || yo === LIDER ? 'Puedes asignar tareas en todas las ofertas.' : 'Puedes asignar tareas en las ofertas donde participas.') });
   if (yo === TRANSVERSAL) p.push({ ruta: '#/tareas', sel: '.grid4', t: 'Certificados', x: 'Cuando termina un evento aparece sola una tarea prioritaria para ti: enviar los certificados máximo ' + PLZ().dias_certificado + ' días hábiles después de finalizar, y te llega el aviso por correo.' });
-  p.push({ ruta: '#/calendario', sel: '#cal_ctrl', t: 'Calendario', x: 'Inicios y finales de todas las ofertas. Cada tarjeta lleva el color de quien lidera y, debajo, quiénes apoyan. Cambia a «Agenda» para verlo día por día.' });
+  p.push({ ruta: '#/calendario', pre: () => { S.cal.vista = 'tarjetas'; S.modoLista = false; }, espera: '#mes_chips', sel: '#mes_chips', t: 'Todas las ofertas, mes por mes', x: 'En Calendario están todas las ofertas. Cada mes es una pestaña con su cantidad de ofertas; el número rojo indica las que piden atención, y «Antes de hoy» y «Sin fecha» guardan lo que no debe pasarse por alto. Busca por nombre, código o responsable y la búsqueda recorre todos los meses.' });
+  p.push({ ruta: '#/calendario', pre: () => { S.cal.vista = 'grid'; }, sel: '#cal_ctrl', t: 'Cuadrícula y agenda', x: 'Con «Cuadrícula» ves inicios y finales sobre el calendario, con festivos; cada tarjeta lleva el color de quien lidera y, debajo, quiénes apoyan. «Agenda» lo muestra día por día. Elige a una persona en «Ver a» para ver lo que lidera y lo que apoya.' });
   if (id) p.push({ ruta: ficha, tab: 'liq', espera: '.tabs', sel: '#sec_liq', t: 'Liquidación', x: yo === LIDER ? 'Cuando el evento termina, el equipo registra aquí los ingresos y gastos reales y lo envía a revisión. Tú lo apruebas o lo devuelves con un comentario; al aprobar, el excedente real suma a la meta anual.' : 'Cuando el evento termina, aquí se registran los ingresos y gastos reales y se envía a revisión de Elisa. Solo lo liquidado y aprobado suma a la meta anual.' });
   if (puedeCfg()) p.push({ ruta: '#/configuracion', sel: '#cfg_anios', t: 'Configuración y años', x: 'Aquí Miguel y Elisa ajustan las reglas del semáforo, los plazos de tareas y certificados, los rubros de la liquidación y los días no hábiles (los festivos de Colombia ya vienen cargados). Cada sección muestra quién la editó por última vez. También se habilita el año siguiente y se archivan los años que ya pasaron.' });
   p.push({ fin: true, t: 'Listo', x: 'Ya conoces lo esencial. Puedes repetir el recorrido cuando quieras desde «Dame mi recorrido virtual», en la parte superior.' });
@@ -1583,7 +1591,9 @@ async function tourIr(i) {
   const T = S.tour; if (!T) return;
   T.i = i; T.n += 1; const mi = T.n; const p = T.pasos[i]; T.cargando = true; tourPanel();
   const vigente = () => S.tour === T && T.n === mi;
+  if (p.pre) p.pre();
   if (p.ruta && (location.hash || '') !== p.ruta) location.hash = p.ruta;
+  else if (p.pre && p.ruta === '#/calendario' && S.inicio) vistaCalendario();
   if (p.espera) {
     await tourEsperar(p.espera, 9000); if (!vigente()) return;
     if (p.tab && S.ficha && S.tab !== p.tab) { S.tab = p.tab; S.flash = null; vistaFicha(); }
@@ -1885,6 +1895,11 @@ function htmlBannerAtencion() {
   return '<div class="alerta-g"' + (att.length ? '' : ' style="background:#FFF6D1;border-color:#FFE27A"') + '><span style="width:10px;height:10px;border-radius:50%;background:' + (att.length ? '#E5242F' : '#FFC400') + '"></span>' +
     '<div style="flex:1;min-width:260px">' + (att.length ? '<b style="color:#B01822">' + nOf(att.length, 'oferta requiere atención', 'ofertas requieren atención') + '</b> <span style="color:var(--ink2)">en todos los meses: ' + partes.join(', ') + '. Siempre a la vista, aunque cambies de mes.' + sinTxt + '</span>' : '<b style="color:#6B5000">Revisa las fechas</b> <span style="color:var(--ink2)">' + sinTxt.trim() + '</span>') + '</div>' + (att.length ? '<button class="btn q" data-act="mes_aten">Verlas →</button>' : '<button class="btn q" data-act="mes_ir" data-v="sin">Verlas →</button>') + '</div>';
 }
+function htmlTodasOfertas() {
+  return '<section class="card" id="expl"><div class="chead"><h2 style="margin:0">Todas las ofertas</h2><a class="btn" href="#/calendario" data-act="ver_todas">Ver todas, mes por mes →</a></div>' + htmlBannerAtencion() +
+    '<p class="note" style="margin:0">En <b>Calendario</b> encuentras todas las ofertas organizadas por mes, con buscador por nombre, código o responsable, y las vistas de cuadrícula y agenda.</p></section>';
+}
+function irTarjetas(mes) { S.fx.inicio.mes = mes; S.cal.vista = 'tarjetas'; if (hashActual() === 'calendario') vistaCalendario(); else location.hash = '#/calendario'; }
 function exploradorMeses() {
   const f = S.fx.inicio;
   const tipos = [['', 'Todos los tipos']].concat((S.cat.tipos || []).map((x) => [x, t(x)])).concat([['sin', 'Sin tipo']]);
@@ -2054,9 +2069,9 @@ app.addEventListener('click', async (ev) => {
     if (ctx === 'mis' && (v === 'semana' || v === 'mes')) f.agrupar = 'mes';
     S.fx[ctx] = f; irExplorador(ctx);
   }
-  else if (a === 'mes_ir') { S.fx.inicio.mes = b.dataset.v; pintarResultados('inicio'); const c = document.querySelector('.mchip.on'); if (c && c.scrollIntoView) c.scrollIntoView({ block: 'nearest', inline: 'center' }); }
-  else if (a === 'mes_aten') { S.fx.inicio.mes = 'atencion'; pintarResultados('inicio'); const e = document.getElementById('mes_chips'); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-  else if (a === 'modo_lista') { S.modoLista = !S.modoLista; vistaInicio(); }
+  else if (a === 'mes_ir') { if (!document.getElementById('mes_chips')) { irTarjetas(b.dataset.v); return; } S.fx.inicio.mes = b.dataset.v; pintarResultados('inicio'); const c = document.querySelector('.mchip.on'); if (c && c.scrollIntoView) c.scrollIntoView({ block: 'nearest', inline: 'center' }); }
+  else if (a === 'mes_aten') { if (!document.getElementById('mes_chips')) { irTarjetas('atencion'); return; } S.fx.inicio.mes = 'atencion'; pintarResultados('inicio'); const e = document.getElementById('mes_chips'); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  else if (a === 'modo_lista') { S.modoLista = !S.modoLista; vista('inicio'); }
   else if (a === 'cfg_anio') { const n = Number(b.dataset.v); if (b.dataset.k === 'plan') S.planAnio = n; else S.cfgAnio = n; S.anioConf = 0; await recargarCfg(b.dataset.k === 'plan' ? 'planeacion' : 'configuracion'); }
   else if (a === 'anio_hab') { const n = Number(b.dataset.v); if (queActual() === 'planeacion') S.planAnio = n; else S.cfgAnio = n; await opAnios(() => api('habilitarAnio', { anio: n }), n + ' habilitado como proyección, con los valores del año anterior.'); }
   else if (a === 'anio_arch') { S.anioConf = Number(b.dataset.v) || 0; repintarCfg(); const c = document.getElementById('anio_conf'); if (c && c.scrollIntoView) c.scrollIntoView({ block: 'center' }); }
@@ -2091,10 +2106,10 @@ app.addEventListener('click', async (ev) => {
   else if (a === 'prox') { S.verProx = !S.verProx; vistaInicio(); }
   else if (a === 'prox_f') { S.proxFiltro = S.proxFiltro === b.dataset.v ? '' : b.dataset.v; S.verProx = false; vistaInicio(); }
   else if (a === 'aten') { S.verAten = !S.verAten; vistaInicio(); if (S.verAten) { const p = document.getElementById('aten_panel'); if (p && p.scrollIntoView) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
-  else if (a === 'calv') { S.cal.vista = b.dataset.v; vistaCalendario(); }
+  else if (a === 'calv') { const m = S.fx.inicio.mes; if (S.cal.vista === 'tarjetas' && /^\d{4}-\d{2}$/.test(m)) S.mesCal = m; S.cal.vista = b.dataset.v; vistaCalendario(); }
   else if (a === 'calrol') { S.cal.rol = b.dataset.v; vistaCalendario(); }
   else if (a === 'eq_tareas') { S.ft = Object.assign(ftInicial(), { ver: 'p:' + b.dataset.v, estado: 'pend' }); }
-  else if (a === 'eq_cal') { S.cal.persona = b.dataset.v; S.cal.rol = 'todo'; }
+  else if (a === 'eq_cal') { S.cal.persona = b.dataset.v; S.cal.rol = 'todo'; S.cal.vista = 'grid'; }
   else if (a === 'eq_venc') { S.ft = Object.assign(ftInicial(), { ver: 'todas', foco: 'venc' }); location.hash = '#/tareas'; }
   else if (a === 'eq_cert') { S.ft = Object.assign(ftInicial(), { ver: 'todas', foco: 'cert' }); location.hash = '#/tareas'; }
   else if (a === 'eq_liq') { const id = b.dataset.id; S.liq = null; if (S.fichaId === id && S.ficha) { S.tab = 'liq'; S.flash = null; vistaFicha(); location.hash = '#/oferta/' + id; } else { S.tabIr = 'liq'; location.hash = '#/oferta/' + id; } }
